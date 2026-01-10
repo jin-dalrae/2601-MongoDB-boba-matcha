@@ -76,6 +76,20 @@ const agentLogSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
+const contentSubmissionSchema = new mongoose.Schema({
+    contractId: { type: mongoose.Schema.Types.ObjectId, ref: 'Contract' },
+    content_url: String,
+    filename: String,
+    title: String,
+    tags: [String],
+    ai_audit: {
+        brand_safe: Boolean,
+        keywords_detected: [String],
+        sentiment: String
+    },
+    submitted_at: { type: Date, default: Date.now }
+});
+
 // --- Models (with caching to avoid recompilation) ---
 export const User = mongoose.models.User || mongoose.model('User', userSchema);
 export const Campaign = mongoose.models.Campaign || mongoose.model('Campaign', campaignSchema);
@@ -84,3 +98,4 @@ export const Contract = mongoose.models.Contract || mongoose.model('Contract', c
 export const AuditReport = mongoose.models.AuditReport || mongoose.model('AuditReport', auditReportSchema);
 export const X402Settlement = mongoose.models.X402Settlement || mongoose.model('X402Settlement', x402SettlementSchema);
 export const AgentLog = mongoose.models.AgentLog || mongoose.model('AgentLog', agentLogSchema);
+export const ContentSubmission = mongoose.models.Content_Submission || mongoose.model('Content_Submission', contentSubmissionSchema);

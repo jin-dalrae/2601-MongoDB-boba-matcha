@@ -110,6 +110,15 @@ const shipmentSchema = new mongoose.Schema({
 const contentSubmissionSchema = new mongoose.Schema({
   contractId: { type: mongoose.Schema.Types.ObjectId, ref: 'Contract', required: true },
   content_url: String,
+  // Added for Video Demo
+  filename: String,
+  title: String,
+  tags: [String], // e.g. ["fashion", "summer"]
+  ai_audit: {
+    brand_safe: Boolean,
+    keywords_detected: [String],
+    sentiment: String
+  },
   submitted_at: { type: Date, default: Date.now }
 });
 

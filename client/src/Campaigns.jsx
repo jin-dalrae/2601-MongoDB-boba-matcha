@@ -1,26 +1,35 @@
-import React, { useState } from 'react';
-import { mockData } from './mockData';
-import { CreditCard, CheckCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import React, { useState, useEffect } from 'react';
+import { CreditCard, CheckCircle, Loader } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Campaigns = () => {
-    // Use local state to simulate updates without refreshing
-    const [campaigns, setCampaigns] = useState(mockData.campaigns);
+    const [campaigns, setCampaigns] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState(null);
-    const navigate = useNavigate(); // Hook
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        fetch('http://localhost:3000/api/campaigns')
+            .then(res => res.json())
+            .then(data => {
+                setCampaigns(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
+    }, []);
 
     const handlePayment = (id) => {
         setProcessingId(id);
 
-        // Simulate API call to x402
-        setTimeout(() => {
-            setCampaigns(prev => prev.map(c =>
-                c.id === id ? { ...c, status: 'Settled', spent: c.spent + 1500 } : c
-            ));
-            setProcessingId(null);
-            alert("Payment released via x402 Protocol!\nTransaction Hash: 0x712...93a");
-        }, 2000);
+        // Let's use the simulation for consistent UI behavior for now, or redirect to Payments page.
+        // Redirecting is safer.
+        navigate('/payments');
     };
+
+    if (loading) return <div className="p-8 flex justify-center"><Loader className="animate-spin" /></div>;
 
     return (
         <div className="p-4">

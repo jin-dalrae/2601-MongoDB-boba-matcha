@@ -1,19 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockData } from './mockData';
-import { ChevronLeft, Info, FileText } from 'lucide-react';
-import Shortlist from './Shortlist'; // Reusing as "Matches" view
+import { ChevronLeft, Info, FileText, Loader } from 'lucide-react';
 
 const CampaignDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const campaign = mockData.campaigns.find(c => c.id === parseInt(id));
-    const [activeTab, setActiveTab] = useState('matches');
 
-    // Add useState for viewing contract details
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('matches');
     const [selectedContract, setSelectedContract] = useState(null);
 
-    if (!campaign) return <div className="p-4">Campaign not found</div>;
+    useEffect(() => {
+        fetch(`http://localhost:3000/api/campaigns/${id}`)
+            .then(res => res.json())
+            .then(d => {
+                setData(d);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
+    }, [id]);
+
+    if (loading) return <div className="p-8 flex justify-center"><Loader className="animate-spin" /></div>;
+    if (!data || !data.campaign) return <div className="p-4">Campaign not found</div>;
+
+    const { campaign, matches, contracts } = data;
 
     // Render Contract Detail Modal/Overlay
     const renderContractDetail = () => {
@@ -114,13 +128,8 @@ const CampaignDetail = () => {
             {/* Tab Content */}
             {activeTab === 'matches' && (
                 <div>
-                    {/* Filter mock creators to simulate "matches for this campaign" 
-                        In real app, we'd filter by campaignId. 
-                        For now, we just repurpose the Shortlist component or render simplified list.
-                        To keep it simple, let's render the list directly here filtering by mock logic.
-                    */}
                     <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                        {mockData.creators.filter(c => c.campaignId === campaign.id || !c.campaignId).map(creator => (
+                        {matches.length === 0 ? <div className="text-muted p-4">No matches yet.</div> : matches.map(creator => (
                             <div key={creator.id} className="card p-4">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex items-center gap-2">
@@ -146,7 +155,7 @@ const CampaignDetail = () => {
 
             {activeTab === 'contracts' && (
                 <div className="flex flex-col gap-4">
-                    {mockData.contracts && mockData.contracts.filter(c => c.campaignId === campaign.id).map(contract => (
+                    {contracts.length === 0 ? <div className="text-muted p-4">No contracts found.</div> : contracts.map(contract => (
                         <div key={contract.id} className="card p-4 flex gap-4 items-center">
                             <FileText size={24} className={contract.status === 'Active' ? 'text-accent' : 'text-muted'} />
                             <div style={{ flex: 1 }}>
@@ -156,9 +165,6 @@ const CampaignDetail = () => {
                             <button className="pill" onClick={() => setSelectedContract(contract)}>View</button>
                         </div>
                     ))}
-                    {(!mockData.contracts || mockData.contracts.filter(c => c.campaignId === campaign.id).length === 0) && (
-                        <div className="text-label text-center p-8 text-muted">No contracts found for this campaign.</div>
-                    )}
                 </div>
             )}
         </div>

@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 const {
-    Contract, AuditReport, X402Settlement, User, Wallet
+    Contract, AuditReport, X402Settlement, User, Wallet,
+    Campaign, AgentLog, AutoBid
 } = require('./models');
 
 const app = express();
@@ -48,40 +49,187 @@ const x402Service = {
 
 // --- API Endpoints ---
 
-// Get pending payments (Contracts with Audit Reports but no Settlement)
-app.get('/api/payments/pending', async (req, res) => {
+// --- API Endpoints ---
+
+// Helper: Get Primary Advertiser (for demo purposes)
+const getDemoAdvertiser = async () => {
+    return await User.findOne({ role: 'Advertiser' });
+};
+
+// 1. Dashboard Data
+app.get('/api/dashboard', async (req, res) => {
     try {
-        // Find contracts that are active
-        const pendingContracts = await Contract.find({ status: { $in: ['Active', 'Auditing'] } })
-            .populate('creatorId', 'name email role')
-            .populate('advertiserId', 'name')
-            .lean();
+        const advertiser = await getDemoAdvertiser();
+        if (!advertiser) return res.status(404).json({ error: 'No advertiser found' });
 
-        const results = [];
+        // Budget Stats (Mock calculation based on campaigns)
+        const campaigns = await Campaign.find({ advertiserId: advertiser._id });
+        const totalBudget = campaigns.reduce((sum, c) => sum + (c.budget_allocated || 0), 0);
+        const totalSpent = campaigns.reduce((sum, c) => sum + (c.budget_spent || 0), 0);
 
-        for (const contract of pendingContracts) {
-            // Check if there is an audit report
-            const audit = await AuditReport.findOne({ contractId: contract._id });
-            if (!audit) continue; // No audit yet, skip
+        // Agent Activity
+        const logs = await AgentLog.find().sort({ timestamp: -1 }).limit(5);
 
-            // Check if already settled
-            const settlement = await X402Settlement.findOne({ contractId: contract._id });
-            if (settlement && settlement.status === 'Settled') continue;
+        // Recent Campaigns
+        const recentCampaigns = campaigns.slice(0, 3).map(c => ({
+            id: c._id,
+            name: c.title,
+            status: c.status,
+            creators: 0, // In real app, count distinct AutoBids
+            spent: c.budget_spent
+        }));
 
-            results.push({
-                contract,
-                audit,
-                readyForPayment: true
-            });
-        }
+        res.json({
+            advertiser: {
+                budget: totalBudget,
+                spent: totalSpent,
+                remaining: totalBudget - totalSpent
+            },
+            campaigns: recentCampaigns,
+            agentActivity: logs.map(l => ({
+                id: l._id,
+                text: l.action,
+                time: l.timestamp // client can format this
+            }))
+        });
 
-        res.json(results);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Execute Payment (The "Agent" Logic)
+// 2. Campaigns List
+app.get('/api/campaigns', async (req, res) => {
+    try {
+        const advertiser = await getDemoAdvertiser();
+        const campaigns = await Campaign.find({ advertiserId: advertiser._id });
+
+        const result = await Promise.all(campaigns.map(async c => {
+            // Count creators involved (AutoBids accepted or Contracts)
+            const creatorCount = await AutoBid.countDocuments({ campaignId: c._id });
+            return {
+                id: c._id,
+                name: c.title,
+                status: c.status,
+                creators: creatorCount,
+                spent: c.budget_spent,
+                budget: c.budget_allocated
+            };
+        }));
+
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 3. Campaign Detail (Matches & Contracts)
+app.get('/api/campaigns/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const campaign = await Campaign.findById(id);
+        if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
+
+        // Matches (AutoBids)
+        const autoBids = await AutoBid.find({ campaignId: id }).populate('creatorId', 'name email');
+        const matches = autoBids.map(bid => ({
+            id: bid.creatorId._id,
+            name: bid.creatorId.name,
+            platform: 'TikTok', // Mock for now
+            fitScore: bid.match_score ? Math.round(bid.match_score * 100) : 0,
+            bid: bid.current_ask,
+            status: bid.status
+        }));
+
+        // Contracts
+        const contracts = await Contract.find({ campaignId: id }).populate('creatorId', 'name');
+        const contractList = contracts.map(c => ({
+            id: c._id,
+            title: 'Influencer Agreement', // Dynamic titles in real app
+            status: c.status,
+            version: '1.0',
+            lastUpdated: 'Recently',
+            parties: ['Matcha', c.creatorId?.name || 'Creator'],
+            clauses: [
+                { title: 'Payment', text: `Total payout of $${c.total_paid || c.base_payout} upon completion.` }
+            ]
+        }));
+
+        res.json({
+            campaign: {
+                id: campaign._id,
+                name: campaign.title,
+                status: campaign.status,
+                creators: matches.length,
+                spent: campaign.budget_spent
+            },
+            matches,
+            contracts: contractList
+        });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 4. Payments (Pending & History)
+app.get('/api/payments', async (req, res) => {
+    try {
+        // Pending: Contracts in 'active' or 'auditing' that have audit reports but NO settlement
+        // (Reusing logic from /pending but formatting for UI)
+        const pendingContracts = await Contract.find({ status: { $in: ['Audit Complete', 'Active'] } })
+            .populate('campaignId', 'title')
+            .populate('creatorId', 'name')
+            .lean();
+
+        const pending = [];
+        for (const contract of pendingContracts) {
+            const audit = await AuditReport.findOne({ contractId: contract._id });
+            const settlement = await X402Settlement.findOne({ contractId: contract._id });
+
+            // If we have an audit but NO settlement, it's pending payment
+            // Or if status is specifically 'Audit Complete'
+            if (contract.status === 'Audit Complete' && !settlement) {
+                pending.push({
+                    id: contract._id,
+                    campaignId: contract.campaignId._id,
+                    campaignName: contract.campaignId.title,
+                    creatorName: contract.creatorId.name,
+                    amount: contract.base_payout,
+                    status: 'Pending',
+                    auditScore: audit ? audit.content_score : 'N/A',
+                    auditId: audit ? audit._id : null
+                });
+            }
+        }
+
+        // History: Settlements
+        const settlements = await X402Settlement.find()
+            .populate({
+                path: 'contractId',
+                populate: [
+                    { path: 'campaignId', select: 'title' },
+                    { path: 'creatorId', select: 'name' }
+                ]
+            });
+
+        const history = settlements.map(s => ({
+            id: s._id,
+            campaignName: s.contractId?.campaignId?.title || 'Unknown',
+            creatorName: s.contractId?.creatorId?.name || 'Unknown',
+            amount: s.total_paid,
+            status: 'Paid',
+            date: s.timestamp
+        }));
+
+        res.json({ pending, history });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Execute Payment
 app.post('/api/payments/execute', async (req, res) => {
     const { contractId, auditId } = req.body;
 

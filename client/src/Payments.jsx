@@ -1,11 +1,26 @@
-import React, { useState } from 'react';
-import { mockData } from './mockData';
-import { CheckCircle, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CheckCircle, Clock, Loader } from 'lucide-react';
 
 const Payments = () => {
-    // Group pending and paid for clarity
-    const pending = mockData.payments.filter(p => p.status === 'Pending');
-    const paid = mockData.payments.filter(p => p.status === 'Paid');
+    const [pending, setPending] = useState([]);
+    const [paid, setPaid] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('http://localhost:3000/api/payments')
+            .then(res => res.json())
+            .then(data => {
+                setPending(data.pending);
+                setPaid(data.history); // API returns { pending, history }
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+            });
+    }, []);
+
+    if (loading) return <div className="p-8 flex justify-center"><Loader className="animate-spin" /></div>;
 
     return (
         <div className="p-4">

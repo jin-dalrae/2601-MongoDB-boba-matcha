@@ -51,6 +51,10 @@ const actionRequired = [
 
 export default function Deals({ onBack }) {
     const [showContent, setShowContent] = useState(false);
+
+    // Track confirmed deals that are in the 30-min cancel window
+    // Format: { ...deal, confirmedAt: Date.now(), timeLeft: 1800 }
+    const [confirmedDeals, setConfirmedDeals] = useState([]);
     const [negotiatingDeal, setNegotiatingDeal] = useState(null);
 
     useEffect(() => {
@@ -69,28 +73,83 @@ export default function Deals({ onBack }) {
         return amount;
     };
 
-    const handleStartNegotiation = (deal) => {
-        setNegotiatingDeal(deal);
+    // Timer logic for confirmed deals
+    useEffect(() => {
+        if (confirmedDeals.length === 0) return;
+
+        const timer = setInterval(() => {
+            setConfirmedDeals(prevDeals =>
+                prevDeals.map(deal => {
+                    const elapsed = Math.floor((Date.now() - deal.confirmedAt) / 1000);
+                    const remaining = 30 * 60 - elapsed; // 30 mins in seconds
+                    return { ...deal, timeLeft: remaining > 0 ? remaining : 0 };
+                })
+            );
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [confirmedDeals.length]);
+
+    const formatTime = (seconds) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
     };
 
-    const handleAccept = (dealId) => {
-        // In a real app, this would call an API
-        // For prototype, we'll just show an alert or console log for now, 
-        // or effectively "move" it to active. 
-        // Let's toggle a visual success state locally if possible, or just open a success modal.
-        // Re-using the negotiation success modal state for simplicity might be easiest, 
-        // or just a browser alert for the "functional" requirement if simple. 
-        // Better: trigger a "confetti" effect or just simple success toast.
-        // For now, let's just log it and maybe remove it from the list to simulate "moved to active"
-        console.log("Accepted deal:", dealId);
-        // We could also reuse NegotiationModal in 'success' state immediately
-        setNegotiatingDeal({ ...aiSuggested.find(d => d.id === dealId) || inNegotiation.find(d => d.id === dealId), status: 'accepted_immediate' });
+    const [dealUpdates] = useState(new Map());
+
+    // Helper to get current status
+    const getDealStatus = (deal) => dealUpdates.get(deal.id) || deal.negotiationStatus;
+
+    const handleStartNegotiation = (deal) => {
+        // If deal doesn't have a status yet, init as 'started'
+        // If it was already negotiating, keep it
+        const currentStatus = deal.negotiationStatus || 'started';
+        setNegotiatingDeal({ ...deal, negotiationStatus: currentStatus });
+    };
+
+    const handleNegotiationUpdate = (updatedDeal) => {
+        // Called when we close the "Bidding Started" modal or update progress
+        // Find the deal in our lists (aiSuggested or inNegotiation) and update it
+        // For prototype, we'll just update local lists (though props are read-only if passed down, 
+        // we're using MOCK_DEALS imported or props... wait, aiSuggested is valid constant in this file scope?
+        // Ah, aiSuggested in this file is actually a prop or local const? 
+        // Let's assume we need to update a local state version of deals if we want persistence.
+        // For this task, updating `negotiatingDeal` isn't enough if we close it.
+        // We need to persist that "Adidas" is now "negotiating".
+
+        // Since we don't have a global store, we'll just hack it for the active session 
+        // by mutating the source array for the prototype demo or setting local state overrides.
+        if (updatedDeal.id) {
+            dealUpdates.set(updatedDeal.id, updatedDeal.negotiationStatus);
+        }
+    };
+
+    const handleNegotiationComplete = (completedDeal) => {
+        // Remove from AI Suggested or In Negotiation
+        // Add to "Active Pacts" (or a special "Pending Confirmation" section if we want)
+        // For this prototype, let's treat "In Negotiation" as the place they stay but with updated status,
+        // OR move them to a new "Confirmed" section. 
+        // Let's create a local "Confirmed" list for the demo to show the timer clearly.
+
+        const newConfirmed = {
+            ...completedDeal,
+            confirmedAt: Date.now(),
+            timeLeft: 30 * 60, // 30 mins
+            status: 'confirmed_pending'
+        };
+
+        setConfirmedDeals(prev => [...prev, newConfirmed]);
+        // Ideally remove from other lists, but for prototype ID matching is enough or just separate display
+    };
+
+    const handleCancelDeal = (dealId) => {
+        setConfirmedDeals(prev => prev.filter(d => d.id !== dealId));
+        // Logic to revert or delete
     };
 
     const handleDecline = (dealId) => {
         console.log("Declined deal:", dealId);
-        // Visual feedback: remove card? 
-        // For prototype, let's just hide it.
         const card = document.getElementById(`deal-${dealId}`);
         if (card) {
             card.style.opacity = '0';
@@ -98,13 +157,64 @@ export default function Deals({ onBack }) {
         }
     };
 
+    const handleAccept = (dealId) => {
+        console.log("Accepted deal:", dealId);
+        // Placeholder for accept logic
+    };
+
     return (
         <div className="page deals-page">
-            {/* Left-aligned page header */}
             <header className={`page-header ${showContent ? 'animate-in' : ''}`}>
                 <h1 className="page-title">Deals</h1>
                 <p className="page-subtitle">Active negotiations & opportunities</p>
             </header>
+
+            {/* CONFIRMED DEALS (CANCEL WINDOW) */}
+            {confirmedDeals.length > 0 && (
+                <section className="deals-section animate-in">
+                    <div className="section-header">
+                        <h2 className="section-title">New Active Pacts</h2>
+                        <span className="action-count">{confirmedDeals.length}</span>
+                    </div>
+                    <div className="deals-list">
+                        {confirmedDeals.map(deal => (
+                            <div key={deal.id} className="deal-card confirmed">
+                                <div className="deal-header">
+                                    <div className="deal-info">
+                                        <h3 className="deal-brand">{deal.brand}</h3>
+                                        <p className="deal-campaign">{deal.campaign}</p>
+                                    </div>
+                                    <div className="status-badge success">
+                                        Confirmed
+                                    </div>
+                                </div>
+
+                                <div className="confirmation-info">
+                                    <p className="info-text">
+                                        Final Payout: <span className="highlight">${deal.finalPrice}</span>
+                                    </p>
+                                    <p className="info-text">
+                                        Deliverable: 1 TikTok Video
+                                    </p>
+                                </div>
+
+                                <div className="cancel-window-container">
+                                    <div className="cancel-text">
+                                        Auto-confirmed. Cancel available for <span className="timer">{formatTime(deal.timeLeft)}</span>
+                                    </div>
+                                    <button
+                                        className="btn btn-secondary btn-sm interaction-press"
+                                        onClick={() => handleCancelDeal(deal.id)}
+                                        disabled={deal.timeLeft === 0}
+                                    >
+                                        Cancel Deal
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {/* AI Suggested - with glow */}
             {aiSuggested.length > 0 && (
@@ -114,51 +224,64 @@ export default function Deals({ onBack }) {
                         <StatusIndicator status="ai-working" size={16} />
                     </div>
                     <div className="deals-list">
-                        {aiSuggested.map((deal) => (
-                            <div key={deal.id} id={`deal-${deal.id}`} className="deal-card ai-suggested">
-                                <div className="deal-header">
-                                    <div className="deal-info">
-                                        <h3 className="deal-brand">{deal.brand}</h3>
-                                        <p className="deal-campaign">{deal.campaign}</p>
+                        {aiSuggested.map((deal) => {
+                            const status = getDealStatus(deal);
+                            const isNegotiating = status === 'negotiating';
+
+                            if (confirmedDeals.find(d => d.id === deal.id)) return null; // Hide if confirmed
+
+                            return (
+                                <div key={deal.id} id={`deal-${deal.id}`} className="deal-card ai-suggested">
+                                    <div className="deal-header">
+                                        <div className="deal-info">
+                                            <h3 className="deal-brand">{deal.brand}</h3>
+                                            <p className="deal-campaign">{deal.campaign}</p>
+                                        </div>
+                                        <div className="ai-match">
+                                            <span className="match-value">{deal.matchPercent}%</span>
+                                            <span className="match-label">match</span>
+                                        </div>
                                     </div>
-                                    <div className="ai-match">
-                                        <span className="match-value">{deal.matchPercent}%</span>
-                                        <span className="match-label">match</span>
+                                    <div className="deal-suggestion">
+                                        <div className="suggestion-row">
+                                            <span className="suggestion-label">Suggested Bid</span>
+                                            <span className="suggestion-value">{deal.suggestedBid}</span>
+                                        </div>
+                                        <div className="suggestion-row muted">
+                                            <span className="suggestion-label">Budget Range</span>
+                                            <span className="suggestion-value">{deal.budgetRange}</span>
+                                        </div>
+                                    </div>
+                                    <div className="deal-actions">
+                                        {isNegotiating ? (
+                                            <button
+                                                className="btn btn-secondary btn-full interaction-press"
+                                                onClick={() => handleStartNegotiation({ ...deal, negotiationStatus: 'negotiating' })}
+                                            >
+                                                <span className="pulse-dot-sm"></span>
+                                                View Negotiation
+                                            </button>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    className="btn btn-primary interaction-press"
+                                                    onClick={() => handleStartNegotiation({ ...deal, negotiationStatus: 'started' })}
+                                                >
+                                                    Start Bidding
+                                                </button>
+                                                <div style={{ flex: 1 }}></div>
+                                                <button
+                                                    className="btn-text"
+                                                    onClick={() => handleDecline(deal.id)}
+                                                >
+                                                    Decline
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
-                                <div className="deal-suggestion">
-                                    <div className="suggestion-row">
-                                        <span className="suggestion-label">Suggested Bid</span>
-                                        <span className="suggestion-value">{deal.suggestedBid}</span>
-                                    </div>
-                                    <div className="suggestion-row muted">
-                                        <span className="suggestion-label">Budget Range</span>
-                                        <span className="suggestion-value">{deal.budgetRange}</span>
-                                    </div>
-                                </div>
-                                <div className="deal-actions">
-                                    <button
-                                        className="btn btn-primary interaction-press"
-                                        onClick={() => handleAccept(deal.id)}
-                                    >
-                                        Accept
-                                    </button>
-                                    <button
-                                        className="btn btn-secondary interaction-press"
-                                        onClick={() => handleStartNegotiation(deal)}
-                                    >
-                                        Adjust
-                                    </button>
-                                    <div style={{ flex: 1 }}></div>
-                                    <button
-                                        className="btn-text"
-                                        onClick={() => handleDecline(deal.id)}
-                                    >
-                                        Decline
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </section>
             )}
@@ -261,6 +384,7 @@ export default function Deals({ onBack }) {
                 isOpen={!!negotiatingDeal}
                 campaign={negotiatingDeal}
                 onClose={() => setNegotiatingDeal(null)}
+                onComplete={handleNegotiationComplete}
             />
         </div>
     );

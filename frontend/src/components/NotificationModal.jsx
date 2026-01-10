@@ -4,33 +4,39 @@ import './NotificationModal.css';
 const MOCK_NOTIFICATIONS = [
     {
         id: 1,
-        brand: 'Sephora',
-        action: 'Action required',
-        message: 'requested clarification on posting date',
+        brand: 'Nike',
+        message: 'Negotiation completed. Final payout: $725',
         time: '2m',
-        type: 'action',
-        detail: 'The brand has questions about your proposed timeline. Please clarify when you intend to post the first video.',
-        cta: 'Respond via agent'
+        status: 'success', // action, warning, success
+        detail: {
+            title: 'Negotiation Update',
+            context: 'Your AI agent successfully finalized this deal on your behalf. Auto-confirmed with a 30-minute cancellation window.',
+            action: 'View Deal'
+        }
     },
     {
         id: 2,
-        brand: 'Nike',
-        action: 'Counter received',
-        message: 'countered your bid at $450',
+        brand: 'Sephora',
+        message: 'Action required - requested clarification on posting date',
         time: '12m',
-        type: 'warning',
-        detail: 'Nike has countered your initial bid of $500. Their new offer is $450 with the same deliverables.',
-        cta: 'Review counter'
+        status: 'action',
+        detail: {
+            title: 'Clarification Needed',
+            context: 'The brand has questions about your proposed timeline. Please clarify when you intend to post the first video.',
+            action: 'Respond via agent'
+        }
     },
     {
         id: 3,
         brand: 'Spotify',
-        action: 'Campaign approved',
-        message: 'approved your proposal',
+        message: 'Content approved · bonus unlocked 🎉',
         time: '1h',
-        type: 'success',
-        detail: 'Great news! Spotify has approved your campaign proposal. You can now proceed to the next steps.',
-        cta: 'View details'
+        status: 'success',
+        detail: {
+            title: 'Audit Status',
+            context: 'Your content has passed all brand safety checks and the performance bonus has been unlocked.',
+            action: 'View Earnings'
+        }
     }
 ];
 

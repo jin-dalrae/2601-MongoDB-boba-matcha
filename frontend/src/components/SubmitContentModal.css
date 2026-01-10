@@ -187,3 +187,10 @@
         transform: scale(1);
     }
 }
+
+.submit-subtext {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-top: -16px;
+    margin-bottom: 32px;
+}

@@ -43,7 +43,7 @@ const Dashboard = () => {
             {/* Second Section: Campaign Status */}
             <div className="mb-6">
                 <h2 className="text-section-header mb-4">Campaign Status</h2>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 grid-cols-1 md:grid-cols-2">
                     {mockData.campaigns.map(c => (
                         <div key={c.id} className="card p-2 flex justify-between items-center" style={{ marginBottom: 0 }}>
                             <div>

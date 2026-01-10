@@ -97,7 +97,7 @@ const Shortlist = () => {
             </div>
 
             {/* List */}
-            <div className="flex flex-col gap-4">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 {mockData.creators.map(creator => (
                     <div key={creator.id} className="card p-4" onClick={() => setSelectedCreatorId(creator.id)}>
                         <div className="flex justify-between items-start mb-2">

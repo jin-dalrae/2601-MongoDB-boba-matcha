@@ -4,7 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const {
     Contract, AuditReport, X402Settlement, User, Wallet,
-    Campaign, AgentLog, AutoBid
+    Campaign, AgentLog, AutoBid, ContentSubmission
 } = require('./models');
 
 const app = express();
@@ -315,6 +315,19 @@ app.post('/api/payments/execute', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+// 5. Content Submissions (Demo Videos)
+app.get('/api/content', async (req, res) => {
+    try {
+        const submissions = await ContentSubmission.find({})
+            .populate('contractId')
+            .sort({ submitted_at: -1 });
+        res.status(200).json(submissions);
+    } catch (error) {
+        console.error('Content API Error:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 });
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutGrid, Link, Layers, User } from 'lucide-react';
+import { LayoutGrid, Link, Layers, User, CreditCard } from 'lucide-react';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 
 const Layout = ({ children }) => {
@@ -17,19 +17,11 @@ const Layout = ({ children }) => {
                 <div className="brand-logo">Matcha</div>
                 <nav className="flex-col gap-4" style={{ display: 'flex' }}>
                     <div
-                        className={`desktop-nav-item ${isActive('/') && !isActive('/shortlist') && !isActive('/campaigns') ? 'active' : ''}`}
+                        className={`desktop-nav-item ${isActive('/') ? 'active' : ''}`}
                         onClick={() => navigate('/')}
                     >
                         <LayoutGrid size={20} />
                         <span>Overview</span>
-                    </div>
-
-                    <div
-                        className={`desktop-nav-item ${isActive('/shortlist') ? 'active' : ''}`}
-                        onClick={() => navigate('/shortlist')}
-                    >
-                        <Link size={20} />
-                        <span>Matches</span>
                     </div>
 
                     <div
@@ -38,6 +30,14 @@ const Layout = ({ children }) => {
                     >
                         <Layers size={20} />
                         <span>Campaigns</span>
+                    </div>
+
+                    <div
+                        className={`desktop-nav-item ${isActive('/payments') ? 'active' : ''}`}
+                        onClick={() => navigate('/payments')}
+                    >
+                        <CreditCard size={20} />
+                        <span>Payments</span>
                     </div>
                 </nav>
             </div>
@@ -52,19 +52,11 @@ const Layout = ({ children }) => {
             {/* Mobile Bottom Navigation (Hidden on Desktop via CSS) */}
             <nav className="nav-bar">
                 <div
-                    className={`nav-item ${isActive('/') && !isActive('/shortlist') && !isActive('/campaigns') ? 'active' : ''}`}
+                    className={`nav-item ${isActive('/') ? 'active' : ''}`}
                     onClick={() => navigate('/')}
                 >
                     <LayoutGrid size={24} />
                     <span>Overview</span>
-                </div>
-
-                <div
-                    className={`nav-item ${isActive('/shortlist') ? 'active' : ''}`}
-                    onClick={() => navigate('/shortlist')}
-                >
-                    <Link size={24} />
-                    <span>Matches</span>
                 </div>
 
                 <div
@@ -73,6 +65,14 @@ const Layout = ({ children }) => {
                 >
                     <Layers size={24} />
                     <span>Campaigns</span>
+                </div>
+
+                <div
+                    className={`nav-item ${isActive('/payments') ? 'active' : ''}`}
+                    onClick={() => navigate('/payments')}
+                >
+                    <CreditCard size={24} />
+                    <span>Payments</span>
                 </div>
             </nav>
         </div>

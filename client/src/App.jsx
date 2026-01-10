@@ -2,8 +2,9 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
-import Shortlist from './Shortlist';
 import Campaigns from './Campaigns';
+import Payments from './Payments';
+import CampaignDetail from './CampaignDetail';
 
 function App() {
   return (
@@ -11,8 +12,9 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/shortlist" element={<Shortlist />} />
           <Route path="/campaigns" element={<Campaigns />} />
+          <Route path="/campaigns/:id" element={<CampaignDetail />} />
+          <Route path="/payments" element={<Payments />} />
         </Routes>
       </Layout>
     </BrowserRouter>

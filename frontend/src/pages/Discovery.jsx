@@ -11,46 +11,45 @@ const categoryFilters = [
     { value: 'budget', label: 'Budget', hasDropdown: true },
 ];
 
-const discoveryCampaigns = [
-    {
-        id: 1,
-        brand: 'Glossier',
-        summary: 'Looking for beauty creators to showcase our new Summer Collection. Focus on skincare and natural makeup looks.',
-        budgetRange: '$500 - $1,000',
-        category: 'Beauty',
-    },
-    {
-        id: 2,
-        brand: 'Notion',
-        summary: 'Productivity app tutorial. Show your workflow and organization tips for content creators.',
-        budgetRange: '$200 - $500',
-        category: 'Tech',
-    },
-    {
-        id: 3,
-        brand: 'Lululemon',
-        summary: 'Fitness content featuring our new activewear line. Looking for workout routines and lifestyle content.',
-        budgetRange: '$800 - $1,500',
-        category: 'Fitness',
-    },
-    {
-        id: 4,
-        brand: 'Canva',
-        summary: 'Design tutorial showcasing creative process. Target audience: aspiring designers and small business owners.',
-        budgetRange: '$300 - $600',
-        category: 'Design',
-    },
+import { useState, useEffect } from 'react';
+import TopBar from '../components/TopBar';
+import FilterChips from '../components/FilterChips';
+import CampaignCard from '../components/CampaignCard';
+import './Discovery.css';
+
+const categoryFilters = [
+    { value: 'all', label: 'All', hasDropdown: false },
+    { value: 'category', label: 'Category', hasDropdown: true },
+    { value: 'platform', label: 'Platform', hasDropdown: true },
+    { value: 'budget', label: 'Budget', hasDropdown: true },
 ];
 
 export default function Discovery({ onSelectCampaign }) {
     const [activeFilter, setActiveFilter] = useState('all');
+    const [campaigns, setCampaigns] = useState([]);
+
+    useEffect(() => {
+        fetch('http://localhost:3000/api/campaigns')
+            .then(res => res.json())
+            .then(data => setCampaigns(data))
+            .catch(err => console.error(err));
+    }, []);
+
+    const getTimeLeft = (deadline) => {
+        if (!deadline) return null;
+        const diff = new Date(deadline) - new Date();
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        if (diff < 0) return 'Ended';
+        return `${days}d ${hours}h left`;
+    };
 
     return (
         <div className="page discovery">
             <TopBar
                 showAvatar={false}
                 showNotification={false}
-                title="Discover"
+                title="Discover Jobs"
             />
 
             <section className="discovery-filters">
@@ -63,14 +62,20 @@ export default function Discovery({ onSelectCampaign }) {
 
             <section className="discovery-campaigns mt-lg">
                 <div className="campaign-grid">
-                    {discoveryCampaigns.map((campaign) => (
-                        <CampaignCard
-                            key={campaign.id}
-                            brand={campaign.brand}
-                            summary={campaign.summary}
-                            budgetRange={campaign.budgetRange}
-                            onClick={() => onSelectCampaign?.(campaign)}
-                        />
+                    {campaigns.length === 0 && <div className="empty-state">No campaigns found.</div>}
+                    {campaigns.map((campaign) => (
+                        <div key={campaign._id} className="relative">
+                            <CampaignCard
+                                brand={campaign.title} // Mapping title to brand for existing card
+                                summary={campaign.product_info?.description || 'No description'}
+                                budgetRange={`$${campaign.budget_limit}`}
+                                onClick={() => onSelectCampaign?.(campaign)}
+                            />
+                            {/* Overlay Deadline Badge */}
+                            <div style={{ position: 'absolute', top: 10, right: 10, background: '#00000080', padding: '4px 8px', borderRadius: 4, fontSize: 10, color: '#9FE870', backdropFilter: 'blur(4px)' }}>
+                                {getTimeLeft(campaign.deadline)}
+                            </div>
+                        </div>
                     ))}
                 </div>
             </section>

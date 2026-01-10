@@ -88,13 +88,14 @@ const CreateCampaign = () => {
                             />
                         </div>
                         <div>
-                            <label className="text-label block mb-2">Duration (Days)</label>
+                            <label className="text-label block mb-2">Bidding Process Ends</label>
                             <input
-                                type="text"
-                                name="duration"
-                                value={formData.duration}
+                                type="datetime-local"
+                                name="deadline"
+                                value={formData.deadline || ''}
                                 onChange={handleChange}
                                 className="w-full bg-[#121212] border border-[#232626] rounded p-2 text-white"
+                                required
                             />
                         </div>
                     </div>

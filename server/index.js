@@ -24,51 +24,92 @@ let users = [
 const seedData = () => {
     console.log('Seeding In-Memory Data...');
 
-    // Campaign 1: Beauty Launch
+    // Campaign 1: Tech Gadget Showcase (Rich Demo)
     const camp1 = {
         _id: 'camp_1',
         advertiserId: 'user_1',
-        title: 'Summer Glow Serum Launch',
+        title: 'Smart Home Hub Launch',
         product_info: {
-            name: 'Glow Serum',
-            description: 'Organic vitamin C serum for summer skin.',
+            name: 'Nexus Hub X',
+            description: 'AI-powered smart home controller for modern living.',
             requires_shipping: true,
             keep_product: true
         },
-        budget_limit: 5000,
+        budget_limit: 8000,
         status: 'Matching',
+        deadline: new Date(Date.now() + 172800000).toISOString(), // 48h
         createdAt: new Date()
     };
     campaigns.push(camp1);
 
-    // Bids for Camp 1
+    // Bid 1: High Reach, Low Engagement (Common Mismatch)
     bids.push({
         _id: 'bid_1',
         campaignId: 'camp_1',
-        creatorId: users[1], // Alice
-        current_bid: 1200,
+        creatorId: { _id: 'u2', name: 'Mega Gamer', role: 'Creator' },
+        current_bid: 7500,
         status: 'Proposed',
+        pitch: "I'll feature this in my monthly setup tour. My audience loves tech.",
         negotiationLog: {
             round_history: [
-                { round: 1, price: 1500, concessions: 'None', reasoning: 'High engagement rate', timestamp: new Date(Date.now() - 100000) },
-                { round: 2, price: 1200, concessions: 'Will do 2 stories', reasoning: 'Long term partnership', timestamp: new Date() }
+                { round: 1, price: 7500, concessions: 'None', reasoning: 'Standard integration rate', timestamp: new Date(Date.now() - 100000) }
             ]
         },
-        profileStats: { followers: 120000, engagement: '4.5%', category: 'Beauty', viralityScore: 8 }
+        profileStats: {
+            followers: 1200000,
+            engagement: '0.8%',
+            avg_comments: 120,
+            target_audience: 'Gen Z Gamers',
+            product_category: 'Gaming Peripherals',
+            viralityScore: 9
+        }
     });
 
+    // Bid 2: Perfect Match (Niche, High Engagement)
     bids.push({
         _id: 'bid_2',
         campaignId: 'camp_1',
-        creatorId: users[2], // Bob (mismatch maybe?)
-        current_bid: 900,
+        creatorId: { _id: 'u3', name: 'Tech Life Jane', role: 'Creator' },
+        current_bid: 4500,
         status: 'Proposed',
+        pitch: "I focus on smart home automation. I can do a deep-dive review + installation guide.",
         negotiationLog: {
             round_history: [
-                { round: 1, price: 900, concessions: 'None', reasoning: 'Standard rate', timestamp: new Date() }
+                { round: 1, price: 5000, concessions: 'None', reasoning: 'Deep dive video takes time', timestamp: new Date(Date.now() - 80000) },
+                { round: 2, price: 4500, concessions: 'Will add an IG Reel', reasoning: 'Love the product', timestamp: new Date() }
             ]
         },
-        profileStats: { followers: 45000, engagement: '2.1%', category: 'Tech', viralityScore: 3 }
+        profileStats: {
+            followers: 85000,
+            engagement: '6.5%',
+            avg_comments: 450,
+            target_audience: 'Homeowners & Tech Enthusiasts',
+            product_category: 'Smart Home',
+            viralityScore: 5
+        }
+    });
+
+    // Bid 3: Low Reach, Wrong Category
+    bids.push({
+        _id: 'bid_3',
+        campaignId: 'camp_1',
+        creatorId: { _id: 'u4', name: 'Fitness Frank', role: 'Creator' },
+        current_bid: 1000,
+        status: 'Proposed',
+        pitch: "I can use it to control my gym music.",
+        negotiationLog: {
+            round_history: [
+                { round: 1, price: 1000, concessions: 'None', reasoning: 'Quick shoutout', timestamp: new Date() }
+            ]
+        },
+        profileStats: {
+            followers: 15000,
+            engagement: '2.1%',
+            avg_comments: 15,
+            target_audience: 'Gym Goers',
+            product_category: 'Fitness',
+            viralityScore: 2
+        }
     });
 
     console.log(`Seeded: ${campaigns.length} campaigns, ${bids.length} bids.`);
@@ -89,7 +130,7 @@ app.post('/api/campaigns', (req, res) => {
     try {
         const {
             name, description, budget, duration,
-            productName, shipProduct, keepProduct
+            productName, shipProduct, keepProduct, deadline
         } = req.body;
 
         const newCampaign = {
@@ -104,6 +145,7 @@ app.post('/api/campaigns', (req, res) => {
             },
             budget_limit: Number(budget),
             status: 'Matching',
+            deadline: deadline || new Date(Date.now() + 86400000).toISOString(), // Default 24h
             createdAt: new Date()
         };
 
@@ -139,7 +181,7 @@ app.post('/api/campaigns', (req, res) => {
                 },
                 profileStats: { followers: 22000, engagement: '3.8%', category: 'Review', viralityScore: 4 }
             });
-        }, 5000); // 5 seconds delay to simulate "Influencers making bids"
+        }, 5000); // 5 seconds delay
 
         res.status(201).json(newCampaign);
     } catch (err) {
@@ -152,6 +194,38 @@ app.get('/api/campaigns/:id/bids', (req, res) => {
     const { id } = req.params;
     const campaignBids = bids.filter(b => b.campaignId === id);
     res.json(campaignBids);
+});
+
+// New Endpoint: POST /api/bids (Manual Bid)
+app.post('/api/bids', (req, res) => {
+    try {
+        const { campaignId, bidAmount, reasoning } = req.body;
+
+        const newBid = {
+            _id: 'bid_man_' + Date.now(),
+            campaignId,
+            creatorId: users[3], // 'Charlie Vlog' (Simulating 'You' as the logged in creator)
+            current_bid: Number(bidAmount),
+            status: 'Proposed',
+            negotiationLog: {
+                round_history: [
+                    {
+                        round: 1,
+                        price: Number(bidAmount),
+                        concessions: 'N/A',
+                        reasoning: reasoning || 'Manual Bid',
+                        timestamp: new Date()
+                    }
+                ]
+            },
+            profileStats: { followers: 5000, engagement: '6.0%', category: 'General', viralityScore: 2 }
+        };
+
+        bids.push(newBid);
+        res.status(201).json(newBid);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // 4. POST /api/agent/select (Agent Action Placeholder)
@@ -177,10 +251,13 @@ app.post('/api/agent/select', async (req, res) => {
         contracts.push(contract);
 
         const reasoning = `
-            Selected this creator because:
-            1. High audience overlap with product category.
-            2. Consistent engagement rate.
-            3. Bid is within budget.
+            Selected 'Tech Life Jane' because:
+            1. **Category Match**: 'Smart Home' aligns perfectly with 'Nexus Hub X'.
+            2. **High Engagement**: 6.5% engagement and 450 avg comments indicates an active community.
+            3. **Target Audience**: Reaches 'Homeowners & Tech Enthusiasts' who are likely to buy.
+            4. **Negotiation**: Willing to include an IG Reel for a lower price ($4500) than the initial ask.
+            
+            'Mega Gamer' had more followers but lower engagement and mismatched audience. 'Fitness Frank' was not relevant.
         `;
 
         res.json({

@@ -1,40 +1,42 @@
 import React from 'react';
-import { LayoutGrid, Link, Layers, User, CreditCard } from 'lucide-react';
+import { LayoutGrid, Layers, User, CreditCard } from 'lucide-react'; // Removing Link as we use navigate
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
 
 const Layout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Updated active check to be robust for sub-routes if needed, or exact matching
     const isActive = (path) => {
-        return !!matchPath({ path, end: false }, location.pathname);
+        if (path === '/advertiser/overview' && location.pathname === '/advertiser/overview') return true;
+        return location.pathname.startsWith(path) && path !== '/advertiser/overview';
     };
 
     return (
         <div className="app-frame">
             {/* Desktop Sidebar (Hidden on Mobile via CSS) */}
             <div className="desktop-sidebar">
-                <div className="brand-logo">Matcha</div>
+                <div className="brand-logo cursor-pointer" onClick={() => navigate('/')}>Matcha</div>
                 <nav className="flex-col gap-4" style={{ display: 'flex' }}>
                     <div
-                        className={`desktop-nav-item ${isActive('/') ? 'active' : ''}`}
-                        onClick={() => navigate('/')}
+                        className={`desktop-nav-item ${location.pathname.includes('overview') ? 'active' : ''}`}
+                        onClick={() => navigate('/advertiser/overview')}
                     >
                         <LayoutGrid size={20} />
                         <span>Overview</span>
                     </div>
 
                     <div
-                        className={`desktop-nav-item ${isActive('/campaigns') ? 'active' : ''}`}
-                        onClick={() => navigate('/campaigns')}
+                        className={`desktop-nav-item ${location.pathname.includes('campaigns') ? 'active' : ''}`}
+                        onClick={() => navigate('/advertiser/campaigns')}
                     >
                         <Layers size={20} />
                         <span>Campaigns</span>
                     </div>
 
                     <div
-                        className={`desktop-nav-item ${isActive('/payments') ? 'active' : ''}`}
-                        onClick={() => navigate('/payments')}
+                        className={`desktop-nav-item ${location.pathname.includes('payments') ? 'active' : ''}`}
+                        onClick={() => navigate('/advertiser/payments')}
                     >
                         <CreditCard size={20} />
                         <span>Payments</span>
@@ -52,24 +54,24 @@ const Layout = ({ children }) => {
             {/* Mobile Bottom Navigation (Hidden on Desktop via CSS) */}
             <nav className="nav-bar">
                 <div
-                    className={`nav-item ${isActive('/') ? 'active' : ''}`}
-                    onClick={() => navigate('/')}
+                    className={`nav-item ${location.pathname.includes('overview') ? 'active' : ''}`}
+                    onClick={() => navigate('/advertiser/overview')}
                 >
                     <LayoutGrid size={24} />
                     <span>Overview</span>
                 </div>
 
                 <div
-                    className={`nav-item ${isActive('/campaigns') ? 'active' : ''}`}
-                    onClick={() => navigate('/campaigns')}
+                    className={`nav-item ${location.pathname.includes('campaigns') ? 'active' : ''}`}
+                    onClick={() => navigate('/advertiser/campaigns')}
                 >
                     <Layers size={24} />
                     <span>Campaigns</span>
                 </div>
 
                 <div
-                    className={`nav-item ${isActive('/payments') ? 'active' : ''}`}
-                    onClick={() => navigate('/payments')}
+                    className={`nav-item ${location.pathname.includes('payments') ? 'active' : ''}`}
+                    onClick={() => navigate('/advertiser/payments')}
                 >
                     <CreditCard size={24} />
                     <span>Payments</span>

@@ -17,7 +17,7 @@ const CampaignDetails = () => {
 
     const fetchBids = async () => {
         try {
-            const res = await fetch(`http://localhost:3000/api/campaigns/${id}/bids`);
+            const res = await fetch(`/api/campaigns/${id}/bids`);
             const data = await res.json();
             setBids(data);
         } catch (err) {
@@ -32,7 +32,7 @@ const CampaignDetails = () => {
             // But API expects user selection OR agent selection. Here we trigger Agent.
             const targetBid = bids[0]; // Simplification for demo
 
-            const res = await fetch('http://localhost:3000/api/agent/select', {
+            const res = await fetch('/api/agent/select', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ campaignId: id, bidId: targetBid._id })
@@ -55,7 +55,7 @@ const CampaignDetails = () => {
     const handlePayment = async (contractId, amount) => {
         setPaymentStatus('Processing Payment...');
         try {
-            const res = await fetch('http://localhost:3000/api/payment/send', {
+            const res = await fetch('/api/payment/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contractId, amount, recipient: 'CreatorWallet' })

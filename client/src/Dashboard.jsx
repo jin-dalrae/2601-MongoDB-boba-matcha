@@ -8,7 +8,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/dashboard')
+        fetch('/api/dashboard')
             .then(res => res.json())
             .then(d => {
                 setData(d);

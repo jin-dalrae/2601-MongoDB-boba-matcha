@@ -12,7 +12,7 @@ const CampaignDetail = () => {
     const [selectedContract, setSelectedContract] = useState(null);
 
     useEffect(() => {
-        fetch(`http://localhost:3000/api/campaigns/${id}`)
+        fetch(`/api/campaigns/${id}`)
             .then(res => res.json())
             .then(d => {
                 setData(d);

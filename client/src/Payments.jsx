@@ -7,7 +7,7 @@ const Payments = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/payments')
+        fetch('/api/payments')
             .then(res => res.json())
             .then(data => {
                 setPending(data.pending);

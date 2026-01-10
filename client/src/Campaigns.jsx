@@ -8,7 +8,7 @@ const Campaigns = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/campaigns')
+        fetch('/api/campaigns')
             .then(res => res.json())
             .then(data => {
                 setCampaigns(data);

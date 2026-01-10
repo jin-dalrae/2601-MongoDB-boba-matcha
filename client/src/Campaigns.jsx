@@ -53,7 +53,7 @@ const Campaigns = () => {
                             className="card cursor-pointer hover:border-accent transition-colors"
                             onClick={(e) => {
                                 if (e.target.closest('button')) return;
-                                navigate(`/campaigns/${c.id}`);
+                                navigate(`/advertiser/campaigns/${c.id}`);
                             }}
                         >
                             <div className="flex justify-between items-start mb-4">

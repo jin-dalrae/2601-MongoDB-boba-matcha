@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, Loader, Plus } from 'lucide-react';
+import { User, Loader, Plus, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from './apiClient';
 
@@ -62,13 +62,22 @@ const Dashboard = () => {
 
             {/* Actions */}
             <div className="mb-6">
-                <button
-                    onClick={() => navigate('/create-campaign')}
-                    className="w-full bg-[#1E1E1E] border border-accent/20 text-accent py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-accent/10 transition-colors"
-                >
-                    <Plus size={20} />
-                    <span>Create New Campaign</span>
-                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <button
+                        onClick={() => navigate('/create-campaign')}
+                        className="w-full bg-[#1E1E1E] border border-accent/20 text-accent py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-accent/10 transition-colors"
+                    >
+                        <Plus size={20} />
+                        <span>Create New Campaign</span>
+                    </button>
+                    <button
+                        onClick={() => navigate('/advertiser/payments')}
+                        className="w-full bg-accent text-black font-bold py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-colors"
+                    >
+                        <CreditCard size={20} />
+                        <span>Review & Pay</span>
+                    </button>
+                </div>
             </div>
 
             {/* Second Section: Campaign Status */}

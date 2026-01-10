@@ -1,0 +1,180 @@
+.status-indicator-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.status-indicator-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.indicator {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* ========================================
+   ACTIVE - Pulsing green dot
+   ======================================== */
+
+.indicator-active {
+    position: relative;
+}
+
+.indicator-active .pulse-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    opacity: 0.3;
+    animation: pulse-ring 2s ease-in-out infinite;
+}
+
+.indicator-active .pulse-dot {
+    width: 40%;
+    height: 40%;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    box-shadow: 0 0 12px var(--color-primary);
+    z-index: 1;
+}
+
+@keyframes pulse-ring {
+
+    0%,
+    100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 0.1;
+    }
+}
+
+/* ========================================
+   PENDING - Half-filled ring
+   ======================================== */
+
+.indicator-pending .pending-ring {
+    width: 100%;
+    height: 100%;
+}
+
+.indicator-pending .pending-progress {
+    transform: rotate(-90deg);
+    transform-origin: center;
+    animation: pending-rotate 3s ease-in-out infinite;
+}
+
+@keyframes pending-rotate {
+    0% {
+        transform: rotate(-90deg);
+    }
+
+    100% {
+        transform: rotate(270deg);
+    }
+}
+
+/* ========================================
+   COMPLETED - Muted checkmark
+   ======================================== */
+
+.indicator-completed {
+    color: var(--color-text-muted);
+}
+
+.indicator-completed svg {
+    width: 70%;
+    height: 70%;
+}
+
+/* ========================================
+   AI WORKING - Animated sparkle ring
+   ======================================== */
+
+.indicator-ai-working {
+    position: relative;
+}
+
+.indicator-ai-working .sparkle-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.indicator-ai-working .rotating-ring {
+    animation: rotate-ring 2s linear infinite;
+    transform-origin: center;
+}
+
+@keyframes rotate-ring {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.indicator-ai-working .sparkle-center {
+    width: 50%;
+    height: 50%;
+    color: var(--color-lavender);
+    animation: sparkle-glow 1.5s ease-in-out infinite;
+}
+
+.indicator-ai-working .sparkle-center svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 4px var(--color-lavender));
+}
+
+@keyframes sparkle-glow {
+
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(0.8) rotate(45deg);
+        opacity: 0.7;
+    }
+}
+
+/* ========================================
+   LABELS
+   ======================================== */
+
+.status-indicator-label {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-medium);
+}
+
+.status-active .status-indicator-label {
+    color: var(--color-primary);
+}
+
+.status-pending .status-indicator-label {
+    color: var(--color-pending);
+}
+
+.status-completed .status-indicator-label {
+    color: var(--color-text-muted);
+}
+
+.status-ai-working .status-indicator-label {
+    color: var(--color-lavender);
+}

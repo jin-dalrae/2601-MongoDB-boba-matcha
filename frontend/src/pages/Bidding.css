@@ -4,12 +4,29 @@
     flex-direction: column;
 }
 
-/* Campaign Summary Card */
+/* Campaign Summary Card - Enhanced */
 .campaign-summary-card {
-    background-color: var(--color-bg-card);
+    background: linear-gradient(135deg,
+            var(--color-bg-card) 0%,
+            var(--color-bg-card-elevated) 100%);
     border-radius: var(--radius-card);
     padding: var(--spacing-xl);
-    border: 1px solid var(--color-divider);
+    border: 1px solid var(--color-divider-subtle);
+    position: relative;
+    overflow: hidden;
+}
+
+.campaign-summary-card::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -30%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle,
+            rgba(159, 232, 112, 0.08) 0%,
+            transparent 60%);
+    pointer-events: none;
 }
 
 .campaign-summary-card .campaign-brand {
@@ -17,6 +34,8 @@
     font-weight: var(--weight-semibold);
     color: var(--color-text-primary);
     margin-bottom: var(--spacing-sm);
+    position: relative;
+    z-index: 1;
 }
 
 .campaign-summary-card .campaign-description {
@@ -24,6 +43,8 @@
     color: var(--color-text-secondary);
     line-height: 1.4;
     margin-bottom: var(--spacing-lg);
+    position: relative;
+    z-index: 1;
 }
 
 .campaign-budget {
@@ -31,7 +52,9 @@
     justify-content: space-between;
     align-items: center;
     padding-top: var(--spacing-md);
-    border-top: 1px solid var(--color-divider);
+    border-top: 1px solid var(--color-divider-subtle);
+    position: relative;
+    z-index: 1;
 }
 
 .budget-label {
@@ -43,6 +66,7 @@
     font-size: var(--text-body);
     font-weight: var(--weight-semibold);
     color: var(--color-primary);
+    text-shadow: 0 0 16px rgba(159, 232, 112, 0.25);
 }
 
 /* Bidding Sections */
@@ -59,12 +83,29 @@
     margin-bottom: var(--spacing-md);
 }
 
-/* AI Suggestion Card */
+/* AI Suggestion Card - Lavender accent */
 .ai-suggestion-card {
-    background-color: transparent;
-    border: 1px dashed var(--color-divider);
+    background: linear-gradient(135deg,
+            rgba(198, 184, 255, 0.03) 0%,
+            transparent 100%);
+    border: 1px dashed rgba(198, 184, 255, 0.3);
     border-radius: var(--radius-card);
     padding: var(--spacing-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-suggestion-card::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -30%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle,
+            var(--color-lavender-glow) 0%,
+            transparent 60%);
+    pointer-events: none;
 }
 
 .ai-header {
@@ -73,21 +114,31 @@
     gap: var(--spacing-sm);
     font-size: var(--text-meta);
     font-weight: var(--weight-medium);
-    color: var(--color-text-muted);
+    color: var(--color-lavender);
     margin-bottom: var(--spacing-md);
+    position: relative;
+    z-index: 1;
+}
+
+.ai-header svg {
+    color: var(--color-lavender);
 }
 
 .ai-suggestion-range {
     font-size: 28px;
     font-weight: var(--weight-bold);
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     margin-bottom: var(--spacing-md);
+    position: relative;
+    z-index: 1;
 }
 
 .ai-confidence {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
+    position: relative;
+    z-index: 1;
 }
 
 .confidence-label {
@@ -105,20 +156,30 @@
     height: 8px;
     border-radius: 50%;
     background-color: var(--color-divider);
+    transition: all 0.3s ease;
 }
 
 .confidence-dot.filled {
-    background-color: var(--color-primary);
+    background-color: var(--color-lavender);
+    box-shadow: 0 0 8px var(--color-lavender-glow);
 }
 
-/* Bid Input */
+/* Bid Input - Enhanced */
 .bid-input-container {
     display: flex;
     align-items: center;
-    background-color: var(--color-bg-card);
-    border: 1px solid var(--color-divider);
+    background: linear-gradient(135deg,
+            var(--color-bg-card) 0%,
+            var(--color-bg-card-elevated) 100%);
+    border: 1px solid var(--color-divider-subtle);
     border-radius: var(--radius-card);
     padding: var(--spacing-lg);
+    transition: all 0.25s ease;
+}
+
+.bid-input-container:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 16px var(--color-primary-glow);
 }
 
 .currency-symbol {

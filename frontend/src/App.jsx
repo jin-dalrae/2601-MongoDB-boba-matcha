@@ -5,16 +5,32 @@ import Discovery from './pages/Discovery';
 import Bidding from './pages/Bidding';
 import ActiveCampaigns from './pages/ActiveCampaigns';
 import Loading from './pages/Loading';
+import { OnboardingFlow } from './pages/onboarding';
 import './index.css';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [activeFilter, setActiveFilter] = useState('today');
 
+  useEffect(() => {
+    // Check if user has completed onboarding
+    const onboardingComplete = localStorage.getItem('matcha_onboarding_complete');
+    if (!onboardingComplete) {
+      setShowOnboarding(true);
+      setIsLoading(false);
+    }
+  }, []);
+
   const handleLoadingComplete = () => {
     setIsLoading(false);
+  };
+
+  const handleOnboardingComplete = (userData) => {
+    console.log('Onboarding complete:', userData);
+    setShowOnboarding(false);
   };
 
   const handleSelectCampaign = (campaign) => {
@@ -33,6 +49,12 @@ export default function App() {
     setActiveTab('home');
   };
 
+  // Show onboarding for new users
+  if (showOnboarding) {
+    return <OnboardingFlow onComplete={handleOnboardingComplete} />;
+  }
+
+  // Show loading for returning users
   if (isLoading) {
     return <Loading onComplete={handleLoadingComplete} />;
   }

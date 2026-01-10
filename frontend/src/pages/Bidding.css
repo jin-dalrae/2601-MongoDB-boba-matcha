@@ -1,0 +1,154 @@
+.bidding {
+    padding-top: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Campaign Summary Card */
+.campaign-summary-card {
+    background-color: var(--color-bg-card);
+    border-radius: var(--radius-card);
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-divider);
+}
+
+.campaign-summary-card .campaign-brand {
+    font-size: var(--text-page-title);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.campaign-summary-card .campaign-description {
+    font-size: var(--text-body);
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-lg);
+}
+
+.campaign-budget {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-divider);
+}
+
+.budget-label {
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+}
+
+.budget-value {
+    font-size: var(--text-body);
+    font-weight: var(--weight-semibold);
+    color: var(--color-primary);
+}
+
+/* Bidding Sections */
+.bidding-section {
+    margin-top: var(--spacing-xl);
+}
+
+.section-label {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--spacing-md);
+}
+
+/* AI Suggestion Card */
+.ai-suggestion-card {
+    background-color: transparent;
+    border: 1px dashed var(--color-divider);
+    border-radius: var(--radius-card);
+    padding: var(--spacing-lg);
+}
+
+.ai-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--text-meta);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-md);
+}
+
+.ai-suggestion-range {
+    font-size: 28px;
+    font-weight: var(--weight-bold);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.ai-confidence {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.confidence-label {
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+}
+
+.confidence-dots {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.confidence-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-divider);
+}
+
+.confidence-dot.filled {
+    background-color: var(--color-primary);
+}
+
+/* Bid Input */
+.bid-input-container {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-card);
+    padding: var(--spacing-lg);
+}
+
+.currency-symbol {
+    font-size: var(--text-metric);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-muted);
+    margin-right: var(--spacing-sm);
+}
+
+.bid-input {
+    flex: 1;
+    background: none;
+    border: none;
+    font-family: var(--font-ui);
+    font-size: var(--text-metric);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.bid-input::-webkit-outer-spin-button,
+.bid-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Actions */
+.bidding-actions {
+    margin-top: auto;
+    padding-top: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+}

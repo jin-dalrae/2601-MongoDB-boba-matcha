@@ -1,0 +1,59 @@
+.keyword-input-container {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-card);
+    padding: var(--spacing-md);
+}
+
+.keyword-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.keyword-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: rgba(159, 232, 112, 0.1);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-chip);
+    font-size: var(--text-meta);
+    font-weight: var(--weight-medium);
+    color: var(--color-primary);
+}
+
+.keyword-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-primary);
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.keyword-remove:hover {
+    opacity: 1;
+}
+
+.keyword-input {
+    flex: 1;
+    min-width: 120px;
+    padding: var(--spacing-sm);
+    background: none;
+    border: none;
+    font-family: var(--font-ui);
+    font-size: var(--text-body);
+    color: var(--color-text-primary);
+    outline: none;
+}
+
+.keyword-input::placeholder {
+    color: var(--color-text-muted);
+}

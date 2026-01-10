@@ -1,0 +1,9 @@
+.active-campaigns {
+    padding-top: 0;
+}
+
+.campaigns-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}

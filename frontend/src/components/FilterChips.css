@@ -1,0 +1,32 @@
+.filter-chips {
+    display: flex;
+    gap: var(--spacing-sm);
+    overflow-x: auto;
+    padding: var(--spacing-xs) 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.filter-chips::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-chips .chip {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    white-space: nowrap;
+}
+
+.chip-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown-icon {
+    margin-left: var(--spacing-xs);
+    opacity: 0.6;
+}

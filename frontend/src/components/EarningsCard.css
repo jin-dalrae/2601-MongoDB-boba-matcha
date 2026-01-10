@@ -1,0 +1,76 @@
+.earnings-card {
+    background: linear-gradient(135deg, var(--color-bg-card) 0%, #1a1f1a 100%);
+    border-radius: var(--radius-card);
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-divider);
+    position: relative;
+    overflow: hidden;
+}
+
+.earnings-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+.earnings-header {
+    margin-bottom: var(--spacing-sm);
+}
+
+.earnings-label {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.earnings-amount {
+    font-size: 40px;
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    line-height: 1.1;
+    margin-bottom: var(--spacing-lg);
+}
+
+.earnings-breakdown {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-divider);
+}
+
+.earnings-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.earnings-item-label {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-muted);
+}
+
+.earnings-item-value {
+    font-size: var(--text-section-header);
+    font-weight: var(--weight-semibold);
+    color: var(--color-primary);
+}
+
+.earnings-item-value.pending {
+    color: var(--color-pending);
+}
+
+.earnings-divider {
+    width: 1px;
+    height: 32px;
+    background-color: var(--color-divider);
+}

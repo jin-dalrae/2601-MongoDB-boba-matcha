@@ -1,0 +1,93 @@
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-bg-app);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-2xl);
+}
+
+.logo-container {
+    transition: transform 0.4s ease-in-out, opacity 0.4s ease;
+}
+
+.logo-container.phase-0 {
+    transform: scale(1);
+}
+
+.logo-container.phase-1 {
+    transform: scale(1.02);
+}
+
+.logo-container.phase-2 {
+    transform: scale(0.98);
+}
+
+.logo {
+    font-size: 48px;
+}
+
+/* Geometric Shapes Animation */
+.loading-shapes {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.shape {
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-divider);
+    transition: all 0.4s ease;
+}
+
+.shape-1 {
+    border-radius: 50%;
+}
+
+.shape-2 {
+    border-radius: 2px;
+}
+
+.shape-3 {
+    border-radius: 50%;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
+}
+
+.shape.active {
+    background-color: var(--color-primary);
+    transform: scale(1.2);
+}
+
+.shape-3.active {
+    transform: rotate(45deg) scale(1.2);
+}
+
+/* Subtle pulsing animation */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.logo-container {
+    animation: pulse 2s ease-in-out infinite;
+}

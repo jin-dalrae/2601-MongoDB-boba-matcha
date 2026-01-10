@@ -1,0 +1,333 @@
+/* Matcha Design System - Global Styles */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Gluten:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+
+/* Design Tokens */
+:root {
+  /* Colors - Primary */
+  --color-primary: #9FE870;
+  
+  /* Colors - Background */
+  --color-bg-app: #0E0F0F;
+  --color-bg-card: #161818;
+  --color-divider: #232626;
+  
+  /* Colors - Text */
+  --color-text-primary: #F5F7F6;
+  --color-text-secondary: #AEB5B2;
+  --color-text-muted: #7C8481;
+  
+  /* Colors - Status */
+  --color-success: #9FE870;
+  --color-pending: #F2C94C;
+  --color-warning: #EB5757;
+  
+  /* Typography */
+  --font-brand: 'Gluten', cursive;
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Font Sizes */
+  --text-page-title: 24px;
+  --text-section-header: 16px;
+  --text-metric: 32px;
+  --text-body: 14px;
+  --text-meta: 12px;
+  --text-button: 14px;
+  
+  /* Font Weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  
+  /* Layout */
+  --page-padding: 20px;
+  --radius-card: 16px;
+  --radius-button: 12px;
+  --radius-chip: 20px;
+  
+  /* Safe Areas */
+  --safe-area-bottom: 34px;
+  --nav-height: 60px;
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: 1.25;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-app);
+}
+
+#root {
+  height: 100%;
+}
+
+/* App Container */
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Page Container */
+.page {
+  flex: 1;
+  padding: var(--page-padding);
+  padding-bottom: calc(var(--nav-height) + var(--safe-area-bottom) + var(--spacing-lg));
+  overflow-y: auto;
+}
+
+/* Typography Utilities */
+.text-page-title {
+  font-size: var(--text-page-title);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.text-section-header {
+  font-size: var(--text-section-header);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.text-metric {
+  font-size: var(--text-metric);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+}
+
+.text-body {
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-primary);
+}
+
+.text-meta {
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-primary-color {
+  color: var(--color-primary);
+}
+
+/* Card Base */
+.card {
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-card);
+  padding: var(--spacing-lg);
+}
+
+/* Button Base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-button);
+  font-family: var(--font-ui);
+  font-size: var(--text-button);
+  font-weight: var(--weight-medium);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-bg-app);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-divider);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-text-muted);
+}
+
+.btn-full {
+  width: 100%;
+}
+
+/* Chip / Pill Base */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-chip);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  border: 1px solid var(--color-divider);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip.active {
+  background-color: var(--color-primary);
+  color: var(--color-bg-app);
+  border-color: var(--color-primary);
+}
+
+/* Status Indicator */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-active .status-dot {
+  background-color: var(--color-success);
+}
+
+.status-active {
+  color: var(--color-success);
+}
+
+.status-pending .status-dot {
+  background-color: var(--color-pending);
+}
+
+.status-pending {
+  color: var(--color-pending);
+}
+
+.status-completed .status-dot {
+  background-color: var(--color-text-muted);
+}
+
+.status-completed {
+  color: var(--color-text-muted);
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background-color: var(--color-divider);
+  margin: var(--spacing-lg) 0;
+}
+
+/* Flex Utilities */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-xs {
+  gap: var(--spacing-xs);
+}
+
+.gap-sm {
+  gap: var(--spacing-sm);
+}
+
+.gap-md {
+  gap: var(--spacing-md);
+}
+
+.gap-lg {
+  gap: var(--spacing-lg);
+}
+
+/* Spacing Utilities */
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+.mt-2xl { margin-top: var(--spacing-2xl); }
+
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+.mb-xl { margin-bottom: var(--spacing-xl); }
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-divider);
+  border-radius: 2px;
+}
+
+/* Brand Logo */
+.logo {
+  font-family: var(--font-brand);
+  font-weight: var(--weight-bold);
+  color: var(--color-primary);
+}

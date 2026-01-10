@@ -1,0 +1,20 @@
+.dashboard {
+    padding-top: 0;
+}
+
+.dashboard-section {
+    margin-top: var(--spacing-xl);
+}
+
+.section-title {
+    font-size: var(--text-section-header);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.campaign-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}

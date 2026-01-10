@@ -24,132 +24,224 @@ const CHAT_SEQUENCE = [
     }
 ];
 
-export default function NegotiationModal({ isOpen, onClose, campaign, onComplete }) {
+export default function NegotiationModal({ isOpen, onClose, campaign, onUpdate, onComplete }) {
+    const [stage, setStage] = useState('started'); // started, negotiating, completed
     const [messages, setMessages] = useState([]);
     const [isThinking, setIsThinking] = useState(false);
-    const [status, setStatus] = useState('negotiating'); // negotiating, success
-    const [step, setStep] = useState(0);
-    const messagesEndRef = useRef(null);
+    const [chatStep, setChatStep] = useState(0);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
+    // Initial Start Modal
     useEffect(() => {
-        scrollToBottom();
-    }, [messages, isThinking]);
+        if (isOpen && campaign) {
+            // Restore stage from campaign status or default to started
+            const initialStage = campaign.negotiationStatus || 'started';
+            setStage(initialStage);
 
-    useEffect(() => {
-        if (!isOpen) {
-            setMessages([]);
-            setStep(0);
-            setStatus('negotiating');
-            return;
-        }
-
-        // Start the negotiation sequence
-        let timeoutId;
-
-        const processNextStep = () => {
-            if (step >= CHAT_SEQUENCE.length) {
-                // Done
-                setTimeout(() => setStatus('success'), 1000);
-                return;
+            // If returning to negotiation, restore chat history? 
+            // For now, if 'negotiating', we restart the chat sim or jump to a later state.
+            // Let's simpler: if 'negotiating', start chat.
+            if (initialStage === 'negotiating') {
+                setMessages([{ type: 'agent', text: 'Resuming negotiation with Brand Agent...' }]);
+                setChatStep(1); // Skip initial delay
+            } else {
+                setMessages([]);
+                setChatStep(0);
             }
+        }
+    }, [isOpen, campaign]);
 
-            const currentMsg = CHAT_SEQUENCE[step];
+    // Chat Simulation Logic
+    useEffect(() => {
+        if (stage !== 'negotiating') return;
+        // ... existing logic ...
 
-            // Artificial delay before typing starts
-            setIsThinking(true);
-
-            const thinkingTime = currentMsg.sender === 'system' ? 1500 : 2000;
-
-            timeoutId = setTimeout(() => {
-                setIsThinking(false);
-                setMessages(prev => [...prev, currentMsg]);
-                setStep(prev => prev + 1);
-            }, thinkingTime);
+        let timeoutId;
+        const processNextStep = () => {
+            if (chatStep === 0) {
+                // Initial state
+                setIsThinking(true);
+                timeoutId = setTimeout(() => {
+                    setIsThinking(false);
+                    setMessages([{ type: 'agent', text: 'Initiating contact with Brand Agent...' }]);
+                    setChatStep(1);
+                }, 1000);
+            } else if (chatStep === 1) {
+                // Brand proposes
+                setIsThinking(true);
+                timeoutId = setTimeout(() => {
+                    setIsThinking(false);
+                    setMessages(prev => [...prev, { type: 'brand', text: 'Brand agent offers $600 for 1 video.' }]);
+                    setChatStep(2);
+                }, 2000);
+            } else if (chatStep === 2) {
+                // You counter
+                setIsThinking(true);
+                timeoutId = setTimeout(() => {
+                    setIsThinking(false);
+                    setMessages(prev => [...prev, { type: 'agent', text: 'Countering offer at $750 based on engagement metrics.' }]);
+                    setChatStep(3);
+                }, 2500);
+            } else if (chatStep === 3) {
+                // Brand adjustment
+                setIsThinking(true);
+                timeoutId = setTimeout(() => {
+                    setIsThinking(false);
+                    setMessages(prev => [...prev, { type: 'brand', text: 'Brand agent increases budget by $100. New offer: $700.' }]);
+                    setChatStep(4);
+                }, 2500);
+            } else if (chatStep === 4) {
+                // Finalizing
+                setIsThinking(true);
+                timeoutId = setTimeout(() => {
+                    setIsThinking(false);
+                    setMessages(prev => [...prev, { type: 'agent', text: 'Finalizing deal parameters...' }]);
+                    setChatStep(5);
+                }, 2000);
+            } else if (chatStep === 5) {
+                // Complete
+                timeoutId = setTimeout(() => {
+                    setStage('completed');
+                }, 1000);
+            }
         };
 
         processNextStep();
-
         return () => clearTimeout(timeoutId);
-    }, [isOpen, step]);
+    }, [stage, chatStep]);
 
     if (!isOpen) return null;
 
+    // --- STAGE 1: BIDDING STARTED (Static Modal) ---
+    if (stage === 'started') {
+        return (
+            <div className="modal-overlay">
+                <div className="modal-center slide-up-content">
+                    <div className="modal-icon-header">
+                        <div className="spinner-ring" />
+                    </div>
+                    <h2 className="modal-title">Bidding Started</h2>
+                    <p className="modal-desc">
+                        Your AI agent is negotiating with the brand’s agent on your behalf.
+                        <br /><br />
+                        This process may take up to 24 hours. You don’t need to take any action.
+                    </p>
+                    <div className="modal-actions-col">
+                        <button
+                            className="btn btn-primary btn-full interaction-press"
+                            onClick={() => {
+                                setStartingBidding(true);
+                                // Transition to 'negotiating' status in background
+                                if (onUpdate) onUpdate('negotiating');
+
+                                // Small delay for visual feedback
+                                setTimeout(() => {
+                                    setStartingBidding(false);
+                                    onClose();
+                                }, 800);
+                            }}
+                            disabled={startingBidding}
+                        >
+                            {startingBidding ? (
+                                <span className="flex-center gap-2">
+                                    <span className="spinner-swirl-sm"></span> Starting...
+                                </span>
+                            ) : (
+                                "Got it"
+                            )}
+                        </button>
+                        <button
+                            className="btn-text interaction-press"
+                            onClick={() => {
+                                if (onUpdate) onUpdate('negotiating');
+                                setStage('negotiating');
+                            }}
+                        >
+                            View deal details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // --- STAGE 2: NEGOTIATING (Chat UI) ---
+    // --- STAGE 3: COMPLETED (Auto-Confirm Card) ---
     return (
         <div className="modal-fullscreen">
             {/* Header */}
             <div className="negotiation-header">
-                <button className="close-btn" onClick={onClose}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
+                <button className="back-btn" onClick={onClose}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
-                <div className="negotiation-title-container">
-                    <h2 className="text-section-header">AI Negotiation</h2>
-                    <span className="negotiation-subtitle">
-                        {campaign ? campaign.brand : 'Campaign'} Agent Active
+                <div className="header-title">
+                    <h3>AI Negotiation</h3>
+                    <span className="live-badge">
+                        <span className="pulse-dot"></span>
+                        {stage === 'negotiating' ? 'Live' : 'Completed'}
                     </span>
                 </div>
-                <div style={{ width: 24 }}></div> {/* Spacer for alignment */}
+                <div style={{ width: 24 }}></div>
             </div>
 
             <div className="negotiation-content">
                 {/* Chat Area */}
-                <div className={`chat-area ${status === 'success' ? 'faded' : ''}`}>
+                <div className={`chat-area ${stage === 'completed' ? 'faded' : ''}`}>
                     {messages.map((msg, idx) => (
-                        <div key={idx} className={`chat-message ${msg.sender} slide-in-bottom`}>
-                            {msg.sender !== 'system' && (
-                                <div className="avatar">
-                                    {msg.sender === 'creator' ? (
-                                        <div className="avatar-icon creator">You</div>
-                                    ) : (
-                                        <div className="avatar-icon brand">Brand</div>
-                                    )}
-                                </div>
-                            )}
-                            <div className="message-bubble">
+                        <div key={idx} className={`chat-message ${msg.type} slide-in`}>
+                            <div className="avatar">
+                                {msg.type === 'agent' ? 'You' : 'Brand'}
+                            </div>
+                            <div className="bubble">
                                 {msg.text}
+                                <span className="timestamp">Just now</span>
                             </div>
                         </div>
                     ))}
-
                     {isThinking && (
-                        <div className="chat-message system slide-in-bottom">
-                            <div className="typing-indicator">
-                                <span></span><span></span><span></span>
-                            </div>
+                        <div className="typing-indicator slide-in">
+                            <span></span><span></span><span></span>
                         </div>
                     )}
-                    <div ref={messagesEndRef} />
                 </div>
 
-                {/* Success Card Overlay */}
-                {status === 'success' && (
+                {/* Success Card Overlay (Auto-Confirm) */}
+                {stage === 'completed' && (
                     <div className="result-overlay rise-in">
-                        <div className="result-card glow-lavender">
-                            <div className="result-icon-wrapper">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="result-icon">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
+                        <div className="result-card">
+                            <div className="success-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             </div>
-                            <h3 className="result-title">Deal Negotiated</h3>
-                            <div className="result-amount">$475</div>
-                            <p className="result-desc">
-                                82% chance of acceptance. Increased from initial $200 offer.
+                            <h2 className="result-title">Negotiation Completed</h2>
+                            <p className="result-desc">Your AI agent successfully finalized this deal on your behalf.</p>
+
+                            <div className="deal-summary">
+                                <div className="summary-row">
+                                    <span className="label">Final Payout</span>
+                                    <span className="value highlight">$725</span>
+                                </div>
+                                <div className="summary-row">
+                                    <span className="label">Deliverable</span>
+                                    <span className="value">1 TikTok Video</span>
+                                </div>
+                                <div className="summary-row">
+                                    <span className="label">Brand</span>
+                                    <span className="value">Nike</span>
+                                </div>
+                            </div>
+
+                            <p className="auto-confirm-note">
+                                Deal auto-confirmed. You have 30 mins to cancel.
                             </p>
 
-                            <div className="result-actions">
-                                <button className="btn btn-primary btn-full success interaction-press" onClick={onClose}>
-                                    Accept Proposal
-                                </button>
-                                <button className="btn btn-secondary btn-full interaction-press" onClick={onClose}>
-                                    Counter
-                                </button>
-                            </div>
+                            <button
+                                className="btn btn-primary btn-full interaction-press"
+                                onClick={() => {
+                                    onComplete({ ...campaign, status: 'confirmed', finalPrice: 725 });
+                                    onClose();
+                                }}
+                            >
+                                Done
+                            </button>
                         </div>
                     </div>
                 )}

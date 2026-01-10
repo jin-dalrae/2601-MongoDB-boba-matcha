@@ -48,8 +48,8 @@ export default function SubmitContentModal({ isOpen, onClose }) {
             <div className="submit-content">
                 {status === 'input' && (
                     <div className="slide-up-content">
-                        <h2 className="submit-title">Submit Content</h2>
-                        <p className="submit-desc">Paste the link to your TikTok or Instagram video for AI verification.</p>
+                        <h2 className="submit-title">Upload Content</h2>
+                        <p className="submit-desc">Paste the content URL below for AI verification.</p>
 
                         <form onSubmit={handleSubmit} className="url-form">
                             <div className="input-group">
@@ -59,7 +59,7 @@ export default function SubmitContentModal({ isOpen, onClose }) {
                                 </svg>
                                 <input
                                     type="url"
-                                    placeholder="https://tiktok.com/@username/video..."
+                                    placeholder="https://tiktok.com/..."
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
                                     autoFocus
@@ -70,7 +70,7 @@ export default function SubmitContentModal({ isOpen, onClose }) {
                                 className="btn btn-primary btn-full btn-large interaction-press"
                                 disabled={!url}
                             >
-                                Verify Content
+                                Submit Content
                             </button>
                         </form>
                     </div>
@@ -81,13 +81,12 @@ export default function SubmitContentModal({ isOpen, onClose }) {
                         <div className="radar-spinner">
                             <div className="radar-sweep"></div>
                         </div>
-                        <h3 className="assessing-title">AI Agent Assessing</h3>
-                        <p className="assessing-desc">Analyzing video compliance, brand safety, and creative match...</p>
+                        <h3 className="assessing-title">AI Assessing...</h3>
+                        <p className="assessing-desc">Verifying content format and brand safety.</p>
 
                         <div className="progress-bar-container">
                             <div className="progress-bar" style={{ width: `${progress}%` }}></div>
                         </div>
-                        <span className="progress-text">{Math.floor(progress)}% verified</span>
                     </div>
                 )}
 
@@ -99,7 +98,13 @@ export default function SubmitContentModal({ isOpen, onClose }) {
                             </svg>
                         </div>
                         <h2 className="submit-title">Content Submitted</h2>
-                        <p className="submit-desc">Your video has been queued for brand approval. We'll notify you when payment is released.</p>
+                        <p className="submit-desc">
+                            The brand’s AI is reviewing your content. <br />
+                            This process usually takes up to 24 hours.
+                        </p>
+                        <p className="submit-subtext">
+                            You’ll be notified once the audit is complete.
+                        </p>
 
                         <button className="btn btn-primary btn-full btn-large interaction-press" onClick={onClose}>
                             Done

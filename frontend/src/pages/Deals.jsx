@@ -73,6 +73,31 @@ export default function Deals({ onBack }) {
         setNegotiatingDeal(deal);
     };
 
+    const handleAccept = (dealId) => {
+        // In a real app, this would call an API
+        // For prototype, we'll just show an alert or console log for now, 
+        // or effectively "move" it to active. 
+        // Let's toggle a visual success state locally if possible, or just open a success modal.
+        // Re-using the negotiation success modal state for simplicity might be easiest, 
+        // or just a browser alert for the "functional" requirement if simple. 
+        // Better: trigger a "confetti" effect or just simple success toast.
+        // For now, let's just log it and maybe remove it from the list to simulate "moved to active"
+        console.log("Accepted deal:", dealId);
+        // We could also reuse NegotiationModal in 'success' state immediately
+        setNegotiatingDeal({ ...aiSuggested.find(d => d.id === dealId) || inNegotiation.find(d => d.id === dealId), status: 'accepted_immediate' });
+    };
+
+    const handleDecline = (dealId) => {
+        console.log("Declined deal:", dealId);
+        // Visual feedback: remove card? 
+        // For prototype, let's just hide it.
+        const card = document.getElementById(`deal-${dealId}`);
+        if (card) {
+            card.style.opacity = '0';
+            setTimeout(() => card.style.display = 'none', 300);
+        }
+    };
+
     return (
         <div className="page deals-page">
             {/* Left-aligned page header */}
@@ -90,7 +115,7 @@ export default function Deals({ onBack }) {
                     </div>
                     <div className="deals-list">
                         {aiSuggested.map((deal) => (
-                            <div key={deal.id} className="deal-card ai-suggested">
+                            <div key={deal.id} id={`deal-${deal.id}`} className="deal-card ai-suggested">
                                 <div className="deal-header">
                                     <div className="deal-info">
                                         <h3 className="deal-brand">{deal.brand}</h3>
@@ -114,13 +139,23 @@ export default function Deals({ onBack }) {
                                 <div className="deal-actions">
                                     <button
                                         className="btn btn-primary interaction-press"
+                                        onClick={() => handleAccept(deal.id)}
+                                    >
+                                        Accept
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary interaction-press"
                                         onClick={() => handleStartNegotiation(deal)}
                                     >
-                                        Start Bidding
+                                        Adjust
                                     </button>
-                                    <button className="btn btn-secondary interaction-press">Adjust</button>
                                     <div style={{ flex: 1 }}></div>
-                                    <button className="btn-text">Decline</button>
+                                    <button
+                                        className="btn-text"
+                                        onClick={() => handleDecline(deal.id)}
+                                    >
+                                        Decline
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -136,6 +171,7 @@ export default function Deals({ onBack }) {
                         {inNegotiation.map((deal, index) => (
                             <div
                                 key={deal.id}
+                                id={`deal-${deal.id}`}
                                 className={`deal-card negotiation ${deal.status}`}
                                 style={{ '--stagger': `${index * 40}ms` }}
                             >
@@ -167,10 +203,25 @@ export default function Deals({ onBack }) {
 
                                 {deal.status === 'counter' && (
                                     <div className="deal-actions">
-                                        <button className="btn btn-primary interaction-press">Accept</button>
-                                        <button className="btn btn-secondary interaction-press">Counter</button>
+                                        <button
+                                            className="btn btn-primary interaction-press"
+                                            onClick={() => handleAccept(deal.id)}
+                                        >
+                                            Accept
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary interaction-press"
+                                            onClick={() => handleStartNegotiation(deal)}
+                                        >
+                                            Counter
+                                        </button>
                                         <div style={{ flex: 1 }}></div>
-                                        <button className="btn-text">Decline</button>
+                                        <button
+                                            className="btn-text"
+                                            onClick={() => handleDecline(deal.id)}
+                                        >
+                                            Decline
+                                        </button>
                                     </div>
                                 )}
                             </div>

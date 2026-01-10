@@ -1,0 +1,189 @@
+.modal-fullscreen-dark {
+    position: fixed;
+    inset: 0;
+    background-color: var(--color-bg-app);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.close-icon-btn {
+    position: absolute;
+    top: var(--safe-area-top);
+    right: var(--page-padding);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--color-text-secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.submit-content {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.slide-up-content {
+    animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.submit-title {
+    font-size: 28px;
+    font-weight: var(--weight-bold);
+    margin-bottom: var(--spacing-md);
+    background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.submit-desc {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-2xl);
+    line-height: 1.5;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: var(--spacing-xl);
+}
+
+.input-group input {
+    width: 100%;
+    background: var(--color-bg-card-elevated);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-button);
+    padding: 16px 16px 16px 48px;
+    color: var(--color-text-primary);
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    border-color: var(--color-primary);
+}
+
+.link-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-muted);
+}
+
+.btn-large {
+    height: 56px;
+    font-size: 16px;
+}
+
+/* Radar Spinner */
+.radar-spinner {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid rgba(159, 232, 112, 0.2);
+    position: relative;
+    margin: 0 auto var(--spacing-xl);
+    background: radial-gradient(circle, rgba(159, 232, 112, 0.1) 0%, transparent 70%);
+}
+
+.radar-sweep {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(159, 232, 112, 0.4) 360deg);
+    animation: spin 1.5s linear infinite;
+    mask: radial-gradient(transparent 60%, black 61%);
+    -webkit-mask: radial-gradient(transparent 60%, black 61%);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.assessing-title {
+    font-size: 20px;
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--spacing-sm);
+}
+
+.assessing-desc {
+    color: var(--color-text-muted);
+    font-size: var(--text-body);
+    margin-bottom: var(--spacing-xl);
+}
+
+.progress-bar-container {
+    height: 6px;
+    background: var(--color-divider);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: 3px;
+    transition: width 0.1s linear;
+}
+
+.progress-text {
+    font-size: var(--text-meta);
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.success-icon-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(159, 232, 112, 0.1);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-xl);
+    border: 1px solid var(--color-primary-glow);
+    box-shadow: 0 0 32px var(--color-primary-glow);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import MatchaLoader from './MatchaLoader';
 import './NegotiationModal.css';
 
 const CHAT_SEQUENCE = [
@@ -29,6 +30,7 @@ export default function NegotiationModal({ isOpen, onClose, campaign, onUpdate, 
     const [messages, setMessages] = useState([]);
     const [isThinking, setIsThinking] = useState(false);
     const [chatStep, setChatStep] = useState(0);
+    const [startingBidding, setStartingBidding] = useState(false);
 
     // Initial Start Modal
     useEffect(() => {
@@ -115,15 +117,16 @@ export default function NegotiationModal({ isOpen, onClose, campaign, onUpdate, 
     if (stage === 'started') {
         return (
             <div className="modal-overlay">
-                <div className="modal-center slide-up-content">
+                <div className="modal-center negotiation-slide-up">
                     <div className="modal-icon-header">
-                        <div className="spinner-ring" />
+                        <GradientLoader size={120} />
                     </div>
-                    <h2 className="modal-title">Bidding Started</h2>
+                    <h2 className="modal-title">Processing...</h2>
                     <p className="modal-desc">
-                        Your AI agent is negotiating with the brand’s agent on your behalf.
-                        <br /><br />
-                        This process may take up to 24 hours. You don’t need to take any action.
+                        Our AI agents are working on this.
+                        <br />
+                        You don’t need to take any action.
+                        <span className="text-meta block mt-md">This may take up to 24 hours.</span>
                     </p>
                     <div className="modal-actions-col">
                         <button
@@ -143,7 +146,7 @@ export default function NegotiationModal({ isOpen, onClose, campaign, onUpdate, 
                         >
                             {startingBidding ? (
                                 <span className="flex-center gap-2">
-                                    <span className="spinner-swirl-sm"></span> Starting...
+                                    Starting...
                                 </span>
                             ) : (
                                 "Got it"

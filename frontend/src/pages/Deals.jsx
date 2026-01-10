@@ -49,103 +49,91 @@ const actionRequired = [
     }
 ];
 
-export default function Deals({ onBack }) {
+export default function Deals({ onBack, activeDeal }) {
     const [showContent, setShowContent] = useState(false);
 
-    // Track confirmed deals that are in the 30-min cancel window
-    // Format: { ...deal, confirmedAt: Date.now(), timeLeft: 1800 }
+    // Track confirmed deals
     const [confirmedDeals, setConfirmedDeals] = useState([]);
+
+    // Lists state
+    const [suggestedDeals, setSuggestedDeals] = useState(aiSuggested);
+    const [negotiatingDeals, setNegotiatingDeals] = useState(inNegotiation);
+
     const [negotiatingDeal, setNegotiatingDeal] = useState(null);
 
+    // Initial load animation
     useEffect(() => {
         const timer = setTimeout(() => setShowContent(true), 100);
         return () => clearTimeout(timer);
     }, []);
 
-    const formatCurrency = (amount) => {
-        if (typeof amount === 'number') {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-            }).format(amount);
-        }
-        return amount;
-    };
-
-    // Timer logic for confirmed deals
+    // Handle incoming deal from Discover (Bidding Started flow)
     useEffect(() => {
-        if (confirmedDeals.length === 0) return;
+        if (activeDeal) {
+            // Check if it's already in negotiation to avoid dupes
+            const alreadyExists = negotiatingDeals.find(d => d.id === activeDeal.id);
+            const isConfirmed = confirmedDeals.find(d => d.id === activeDeal.id);
 
-        const timer = setInterval(() => {
-            setConfirmedDeals(prevDeals =>
-                prevDeals.map(deal => {
-                    const elapsed = Math.floor((Date.now() - deal.confirmedAt) / 1000);
-                    const remaining = 30 * 60 - elapsed; // 30 mins in seconds
-                    return { ...deal, timeLeft: remaining > 0 ? remaining : 0 };
-                })
-            );
-        }, 1000);
+            if (!alreadyExists && !isConfirmed) {
+                // Add to negotiation list
+                const newNegotiation = {
+                    ...activeDeal,
+                    yourBid: activeDeal.suggestedBid ? parseInt(activeDeal.suggestedBid.replace(/\D/g, '')) : 600,
+                    brandCounter: null,
+                    status: 'processing', // Initial state
+                    agentInsight: 'AI agents are exchanging terms',
+                    lastUpdate: 'Just now'
+                };
 
-        return () => clearInterval(timer);
-    }, [confirmedDeals.length]);
+                setNegotiatingDeals(prev => [newNegotiation, ...prev]);
 
-    const formatTime = (seconds) => {
-        const m = Math.floor(seconds / 60);
-        const s = seconds % 60;
-        return `${m}:${s < 10 ? '0' : ''}${s}`;
+                // Remove from suggested if it was there (matching by ID)
+                setSuggestedDeals(prev => prev.filter(d => d.id !== activeDeal.id));
+            }
+        }
+    }, [activeDeal]); // Run when activeDeal changes
+
+    const formatCurrency = (amount) => {
+        // ... (rest is same helper)
     };
 
-    const [dealUpdates] = useState(new Map());
+    // ... (timer logic) ...
 
-    // Helper to get current status
-    const getDealStatus = (deal) => dealUpdates.get(deal.id) || deal.negotiationStatus;
+    // ... (remove dealUpdates Map, use state directly)
 
     const handleStartNegotiation = (deal) => {
-        // If deal doesn't have a status yet, init as 'started'
-        // If it was already negotiating, keep it
-        const currentStatus = deal.negotiationStatus || 'started';
-        setNegotiatingDeal({ ...deal, negotiationStatus: currentStatus });
+        setNegotiatingDeal(deal);
     };
 
     const handleNegotiationUpdate = (updatedDeal) => {
-        // Called when we close the "Bidding Started" modal or update progress
-        // Find the deal in our lists (aiSuggested or inNegotiation) and update it
-        // For prototype, we'll just update local lists (though props are read-only if passed down, 
-        // we're using MOCK_DEALS imported or props... wait, aiSuggested is valid constant in this file scope?
-        // Ah, aiSuggested in this file is actually a prop or local const? 
-        // Let's assume we need to update a local state version of deals if we want persistence.
-        // For this task, updating `negotiatingDeal` isn't enough if we close it.
-        // We need to persist that "Adidas" is now "negotiating".
-
-        // Since we don't have a global store, we'll just hack it for the active session 
-        // by mutating the source array for the prototype demo or setting local state overrides.
-        if (updatedDeal.id) {
-            dealUpdates.set(updatedDeal.id, updatedDeal.negotiationStatus);
-        }
+        // Update local state for negotiations
+        setNegotiatingDeals(prev => prev.map(d =>
+            d.id === updatedDeal.id ? { ...d, ...updatedDeal } : d
+        ));
     };
 
     const handleNegotiationComplete = (completedDeal) => {
-        // Remove from AI Suggested or In Negotiation
-        // Add to "Active Pacts" (or a special "Pending Confirmation" section if we want)
-        // For this prototype, let's treat "In Negotiation" as the place they stay but with updated status,
-        // OR move them to a new "Confirmed" section. 
-        // Let's create a local "Confirmed" list for the demo to show the timer clearly.
-
+        // Move to confirmed
         const newConfirmed = {
             ...completedDeal,
             confirmedAt: Date.now(),
-            timeLeft: 30 * 60, // 30 mins
+            timeLeft: 30 * 60,
             status: 'confirmed_pending'
         };
 
         setConfirmedDeals(prev => [...prev, newConfirmed]);
-        // Ideally remove from other lists, but for prototype ID matching is enough or just separate display
+
+        // Remove from negotiation list
+        setNegotiatingDeals(prev => prev.filter(d => d.id !== completedDeal.id));
     };
 
     const handleCancelDeal = (dealId) => {
         setConfirmedDeals(prev => prev.filter(d => d.id !== dealId));
-        // Logic to revert or delete
+    };
+
+    const handleAccept = (dealId) => {
+        console.log("Accepted deal:", dealId);
+        // Placeholder for accept logic
     };
 
     const handleDecline = (dealId) => {
@@ -157,10 +145,7 @@ export default function Deals({ onBack }) {
         }
     };
 
-    const handleAccept = (dealId) => {
-        console.log("Accepted deal:", dealId);
-        // Placeholder for accept logic
-    };
+
 
     return (
         <div className="page deals-page">

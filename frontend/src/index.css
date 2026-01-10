@@ -1,4 +1,5 @@
 /* Matcha Design System - Global Styles */
+/* Enhanced with visual depth, expanded colors, and polished feel */
 
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Gluten:wght@700&family=Inter:wght@400;500;600;700&display=swap');
@@ -7,26 +8,36 @@
 :root {
   /* Colors - Primary */
   --color-primary: #9FE870;
-  
+  --color-primary-glow: rgba(159, 232, 112, 0.12);
+  --color-primary-soft: rgba(159, 232, 112, 0.08);
+
+  /* Colors - Secondary Accents */
+  --color-salmon: #FFB3A7;
+  --color-salmon-glow: rgba(255, 179, 167, 0.15);
+  --color-lavender: #C6B8FF;
+  --color-lavender-glow: rgba(198, 184, 255, 0.15);
+
   /* Colors - Background */
   --color-bg-app: #0E0F0F;
   --color-bg-card: #161818;
+  --color-bg-card-elevated: #1a1c1c;
   --color-divider: #232626;
-  
+  --color-divider-subtle: #1e2020;
+
   /* Colors - Text */
   --color-text-primary: #F5F7F6;
   --color-text-secondary: #AEB5B2;
   --color-text-muted: #7C8481;
-  
+
   /* Colors - Status */
   --color-success: #9FE870;
   --color-pending: #F2C94C;
   --color-warning: #EB5757;
-  
+
   /* Typography */
   --font-brand: 'Gluten', cursive;
   --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  
+
   /* Font Sizes */
   --text-page-title: 24px;
   --text-section-header: 16px;
@@ -34,40 +45,45 @@
   --text-body: 14px;
   --text-meta: 12px;
   --text-button: 14px;
-  
+
   /* Font Weights */
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
   --weight-bold: 700;
-  
-  /* Spacing */
+
+  /* Spacing - 8pt grid */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 12px;
   --spacing-lg: 16px;
   --spacing-xl: 20px;
   --spacing-2xl: 24px;
-  
+  --spacing-3xl: 32px;
+
   /* Layout */
   --page-padding: 20px;
   --radius-card: 16px;
-  --radius-button: 12px;
+  --radius-card-md: 12px;
+  --radius-button: 14px;
   --radius-chip: 20px;
-  
+
   /* Safe Areas */
   --safe-area-bottom: 34px;
-  --nav-height: 60px;
+  --nav-height: 64px;
 }
 
 /* Reset & Base */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -149,14 +165,59 @@ body {
   color: var(--color-primary);
 }
 
-/* Card Base */
+/* ========================================
+   CARD SYSTEM - Enhanced with depth
+   ======================================== */
+
 .card {
-  background-color: var(--color-bg-card);
+  background: linear-gradient(135deg,
+      var(--color-bg-card) 0%,
+      var(--color-bg-card-elevated) 100%);
   border-radius: var(--radius-card);
   padding: var(--spacing-lg);
+  border: 1px solid var(--color-divider-subtle);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Button Base */
+/* Radial glow effect for cards */
+.card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top right,
+      var(--color-primary-glow) 0%,
+      transparent 60%);
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.card.card-salmon::before {
+  background: radial-gradient(circle at top right,
+      var(--color-salmon-glow) 0%,
+      transparent 60%);
+}
+
+.card.card-lavender::before {
+  background: radial-gradient(circle at top right,
+      var(--color-lavender-glow) 0%,
+      transparent 60%);
+}
+
+.card.card-active {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-bg-card-elevated) 100%) padding-box,
+    linear-gradient(135deg, var(--color-primary) 0%, rgba(159, 232, 112, 0.3) 100%) border-box;
+}
+
+/* ========================================
+   BUTTON SYSTEM - Refined
+   ======================================== */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -169,20 +230,23 @@ body {
   font-weight: var(--weight-medium);
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-primary {
-  background-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #8AD962 100%);
   color: var(--color-bg-app);
+  box-shadow: 0 4px 16px rgba(159, 232, 112, 0.25);
 }
 
 .btn-primary:hover {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(159, 232, 112, 0.35);
 }
 
 .btn-primary:active {
-  transform: scale(0.98);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(159, 232, 112, 0.2);
 }
 
 .btn-secondary {
@@ -193,13 +257,17 @@ body {
 
 .btn-secondary:hover {
   border-color: var(--color-text-muted);
+  background-color: var(--color-bg-card);
 }
 
 .btn-full {
   width: 100%;
 }
 
-/* Chip / Pill Base */
+/* ========================================
+   CHIP / PILL SYSTEM
+   ======================================== */
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -214,13 +282,114 @@ body {
   transition: all 0.2s ease;
 }
 
-.chip.active {
-  background-color: var(--color-primary);
-  color: var(--color-bg-app);
-  border-color: var(--color-primary);
+.chip:hover {
+  border-color: var(--color-text-muted);
+  background-color: var(--color-bg-card);
 }
 
-/* Status Indicator */
+.chip.active {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #8AD962 100%);
+  color: var(--color-bg-app);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(159, 232, 112, 0.3);
+}
+
+/* ========================================
+   STATUS INDICATORS - Icon-led
+   ======================================== */
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  position: relative;
+}
+
+/* Active: Pulsing green dot */
+.status-indicator.status-active::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  box-shadow: 0 0 8px var(--color-primary);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px var(--color-primary);
+  }
+
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 16px var(--color-primary);
+  }
+}
+
+/* Pending: Half-filled ring */
+.status-indicator.status-pending {
+  border: 2px solid var(--color-divider);
+  border-radius: 50%;
+  background: conic-gradient(var(--color-pending) 0deg 180deg,
+      transparent 180deg 360deg);
+}
+
+.status-indicator.status-pending::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--color-bg-card);
+}
+
+/* Completed: Muted checkmark */
+.status-indicator.status-completed {
+  color: var(--color-text-muted);
+}
+
+.status-indicator.status-completed::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237C8481' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* AI Working: Animated sparkle ring */
+.status-indicator.status-ai-working {
+  animation: rotate-slow 3s linear infinite;
+}
+
+.status-indicator.status-ai-working::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top-color: var(--color-lavender);
+  border-right-color: var(--color-lavender);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--color-lavender-glow);
+}
+
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Legacy status classes (backwards compatible) */
 .status {
   display: inline-flex;
   align-items: center;
@@ -230,13 +399,28 @@ body {
 }
 
 .status-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  position: relative;
 }
 
 .status-active .status-dot {
   background-color: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .status-active {
@@ -244,7 +428,8 @@ body {
 }
 
 .status-pending .status-dot {
-  background-color: var(--color-pending);
+  background: conic-gradient(var(--color-pending) 0deg 180deg,
+      var(--color-divider) 180deg 360deg);
 }
 
 .status-pending {
@@ -259,14 +444,67 @@ body {
   color: var(--color-text-muted);
 }
 
-/* Divider */
+/* ========================================
+   LOGO SYSTEM - Sparkle design
+   ======================================== */
+
+.logo {
+  font-family: var(--font-brand);
+  font-weight: var(--weight-bold);
+  color: var(--color-primary);
+}
+
+.logo-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-icon-wrapper.ai-working {
+  animation: logo-pulse 2s ease-in-out infinite;
+}
+
+.logo-icon-wrapper.ai-working .logo-glow {
+  background: var(--color-lavender-glow);
+  box-shadow: 0 0 24px var(--color-lavender-glow);
+}
+
+.logo-icon-wrapper.idle .logo-glow {
+  background: var(--color-primary-glow);
+  box-shadow: 0 0 16px var(--color-primary-glow);
+}
+
+@keyframes logo-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+/* ========================================
+   DIVIDER
+   ======================================== */
+
 .divider {
   height: 1px;
-  background-color: var(--color-divider);
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--color-divider) 20%,
+      var(--color-divider) 80%,
+      transparent 100%);
   margin: var(--spacing-lg) 0;
 }
 
-/* Flex Utilities */
+/* ========================================
+   FLEX UTILITIES
+   ======================================== */
+
 .flex {
   display: flex;
 }
@@ -299,19 +537,50 @@ body {
   gap: var(--spacing-lg);
 }
 
-/* Spacing Utilities */
-.mt-sm { margin-top: var(--spacing-sm); }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
-.mt-xl { margin-top: var(--spacing-xl); }
-.mt-2xl { margin-top: var(--spacing-2xl); }
+/* ========================================
+   SPACING UTILITIES
+   ======================================== */
 
-.mb-sm { margin-bottom: var(--spacing-sm); }
-.mb-md { margin-bottom: var(--spacing-md); }
-.mb-lg { margin-bottom: var(--spacing-lg); }
-.mb-xl { margin-bottom: var(--spacing-xl); }
+.mt-sm {
+  margin-top: var(--spacing-sm);
+}
 
-/* Scrollbar Styling */
+.mt-md {
+  margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+  margin-top: var(--spacing-lg);
+}
+
+.mt-xl {
+  margin-top: var(--spacing-xl);
+}
+
+.mt-2xl {
+  margin-top: var(--spacing-2xl);
+}
+
+.mb-sm {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+  margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+  margin-bottom: var(--spacing-lg);
+}
+
+.mb-xl {
+  margin-bottom: var(--spacing-xl);
+}
+
+/* ========================================
+   SCROLLBAR
+   ======================================== */
+
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -325,9 +594,138 @@ body {
   border-radius: 2px;
 }
 
-/* Brand Logo */
-.logo {
-  font-family: var(--font-brand);
-  font-weight: var(--weight-bold);
-  color: var(--color-primary);
+/* ========================================
+   GLOW EFFECTS
+   ======================================== */
+
+.glow-primary {
+  box-shadow: 0 0 20px var(--color-primary-glow);
+}
+
+.glow-salmon {
+  box-shadow: 0 0 20px var(--color-salmon-glow);
+}
+
+.glow-lavender {
+  box-shadow: 0 0 20px var(--color-lavender-glow);
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sparkle {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease;
+}
+/* ========================================
+   MOTION SYSTEM
+   ======================================== */
+
+/* Staggered Children Animation */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: staggerIn 0.24s ease-out forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 40ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 80ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 120ms; }
+
+@keyframes staggerIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button Loading State */
+.btn.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top-color: var(--color-bg-app);
+  border-radius: 50%;
+  animation: btnSpinner 0.8s linear infinite;
+}
+
+@keyframes btnSpinner {
+  to { transform: rotate(360deg); }
+}
+
+/* Bottom Sheet */
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 430px;
+  margin: 0 auto;
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  padding: var(--spacing-xl);
+  transform: translateY(100%);
+  transition: transform 0.32s ease-out;
+  z-index: 201;
+}
+
+.bottom-sheet.open {
+  transform: translateY(0);
+}
+
+.bottom-sheet-handle {
+  width: 36px;
+  height: 4px;
+  background-color: var(--color-divider);
+  border-radius: 2px;
+  margin: 0 auto var(--spacing-lg);
 }

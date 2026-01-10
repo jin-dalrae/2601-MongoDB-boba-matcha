@@ -1,9 +1,357 @@
+/* ========================================
+   ACTIVE CAMPAIGNS PAGE
+   ======================================== */
+
 .active-campaigns {
     padding-top: 0;
+}
+
+.campaigns-section {
+    margin-bottom: var(--spacing-2xl);
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.32s ease-out, transform 0.32s ease-out;
+    transition-delay: var(--delay, 0ms);
+}
+
+.campaigns-section.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.section-title {
+    font-size: var(--text-section-header);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.action-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--color-warning);
+    font-size: 11px;
+    font-weight: var(--weight-semibold);
+    color: #fff;
 }
 
 .campaigns-list {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+}
+
+/* ========================================
+   CAMPAIGN CARD
+   ======================================== */
+
+.campaign-card {
+    background: linear-gradient(135deg,
+            var(--color-bg-card) 0%,
+            var(--color-bg-card-elevated) 100%);
+    border-radius: var(--radius-card);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--color-divider-subtle);
+    position: relative;
+    overflow: hidden;
+    animation: staggerFadeIn 0.32s ease-out both;
+    animation-delay: var(--stagger, 0ms);
+}
+
+@keyframes staggerFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.campaign-card.status-live::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -30%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(circle,
+            rgba(159, 232, 112, 0.1) 0%,
+            transparent 60%);
+    pointer-events: none;
+}
+
+.campaign-card.status-action {
+    border-color: var(--color-warning);
+}
+
+.campaign-card.status-action::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -30%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(circle,
+            rgba(235, 87, 87, 0.08) 0%,
+            transparent 60%);
+    pointer-events: none;
+}
+
+.campaign-card.status-completed {
+    opacity: 0.8;
+}
+
+.campaign-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-md);
+}
+
+.campaign-info {
+    flex: 1;
+}
+
+.campaign-brand {
+    font-size: var(--text-body);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.campaign-name {
+    font-size: var(--text-meta);
+    color: var(--color-text-secondary);
+}
+
+/* ========================================
+   STATUS ICONS
+   ======================================== */
+
+.status-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Live - glowing ring */
+.status-icon.live {
+    width: 28px;
+    height: 28px;
+}
+
+.status-icon.live .live-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary);
+    opacity: 0.3;
+    animation: pulse-ring 2s ease-in-out infinite;
+}
+
+.status-icon.live .live-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    box-shadow: 0 0 12px var(--color-primary);
+}
+
+@keyframes pulse-ring {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1.15);
+        opacity: 0.1;
+    }
+}
+
+/* Pending - rotating arc */
+.status-icon.pending svg {
+    width: 24px;
+    height: 24px;
+}
+
+.status-icon.pending .arc {
+    transform: rotate(-90deg);
+    transform-origin: center;
+    animation: rotate-arc 2s linear infinite;
+}
+
+@keyframes rotate-arc {
+    to {
+        transform: rotate(270deg);
+    }
+}
+
+/* Completed - checkmark */
+.status-icon.completed {
+    color: var(--color-text-muted);
+}
+
+.status-icon.completed svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Action - alert */
+.status-icon.action {
+    color: var(--color-warning);
+}
+
+.status-icon.action svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* ========================================
+   CAMPAIGN METRICS
+   ======================================== */
+
+.campaign-metrics {
+    display: flex;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-md);
+    background-color: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-card-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.metric-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--color-text-muted);
+}
+
+.metric-value {
+    font-size: var(--text-body);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+}
+
+.metric-value.status-label.live {
+    color: var(--color-primary);
+}
+
+.metric-value.status-label.pending {
+    color: var(--color-pending);
+}
+
+.metric-value.status-label.completed {
+    color: var(--color-text-muted);
+}
+
+.metric-value.status-label.action {
+    color: var(--color-warning);
+}
+
+/* ========================================
+   PAYMENT
+   ======================================== */
+
+.campaign-payment {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-divider-subtle);
+}
+
+.payment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.payment-label {
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+}
+
+.payment-value {
+    font-size: var(--text-section-header);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-muted);
+}
+
+.payment-value.released {
+    color: var(--color-primary);
+}
+
+.payment-status {
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+}
+
+/* ========================================
+   AGENT NOTE
+   ======================================== */
+
+.agent-note {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(198, 184, 255, 0.08);
+    border-radius: var(--radius-card-md);
+    font-size: var(--text-meta);
+    color: var(--color-lavender);
+}
+
+.campaign-card.status-action .agent-note {
+    background: rgba(235, 87, 87, 0.08);
+    color: var(--color-warning);
+}
+
+/* ========================================
+   PERFORMANCE BADGE
+   ======================================== */
+
+.performance-badge {
+    display: inline-flex;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(159, 232, 112, 0.1);
+    border-radius: var(--radius-chip);
+    font-size: var(--text-meta);
+    font-weight: var(--weight-medium);
+    color: var(--color-primary);
+    margin-top: var(--spacing-md);
+}
+
+/* ========================================
+   ACTION BUTTON
+   ======================================== */
+
+.campaign-action {
+    margin-top: var(--spacing-md);
 }

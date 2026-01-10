@@ -1,3 +1,4 @@
+import StatusIndicator from './StatusIndicator';
 import './CampaignCard.css';
 
 export default function CampaignCard({
@@ -22,22 +23,24 @@ export default function CampaignCard({
         return value;
     };
 
-    const getStatusClass = () => {
+    const getStatusType = () => {
         switch (status?.toLowerCase()) {
             case 'active':
-                return 'status-active';
+                return 'active';
             case 'pending':
-                return 'status-pending';
+                return 'pending';
             case 'completed':
-                return 'status-completed';
+                return 'completed';
             default:
-                return '';
+                return null;
         }
     };
 
+    const statusType = getStatusType();
+
     return (
         <div
-            className={`campaign-card ${expanded ? 'expanded' : ''} ${getStatusClass()}`}
+            className={`campaign-card ${expanded ? 'expanded' : ''} ${statusType ? `status-${statusType}` : ''}`}
             onClick={onClick}
         >
             <div className="campaign-header">
@@ -45,11 +48,8 @@ export default function CampaignCard({
                     <h3 className="campaign-brand">{brand}</h3>
                     {summary && <p className="campaign-summary">{summary}</p>}
                 </div>
-                {status && (
-                    <div className={`status ${getStatusClass()}`}>
-                        <span className="status-dot"></span>
-                        <span>{status}</span>
-                    </div>
+                {statusType && (
+                    <StatusIndicator status={statusType} size={20} />
                 )}
             </div>
 

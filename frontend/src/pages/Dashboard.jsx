@@ -1,71 +1,303 @@
+import { useState, useEffect } from 'react';
 import TopBar from '../components/TopBar';
-import EarningsCard from '../components/EarningsCard';
-import FilterChips from '../components/FilterChips';
-import CampaignCard from '../components/CampaignCard';
+import StatusIndicator from '../components/StatusIndicator';
 import './Dashboard.css';
 
-const timeFilters = [
-    { value: 'today', label: 'Today' },
-    { value: 'yesterday', label: 'Yesterday' },
-    { value: 'this-week', label: 'This week' },
+// Earnings data
+const earningsData = {
+    totalEarned: 6480,
+    pendingPayouts: 2100,
+    bonusesEarned: 980,
+    avgPayoutTime: 2.4
+};
+
+// Agent Status
+const agentStatus = {
+    status: 'Actively negotiating 2 deals',
+    lastUpdate: '12 min ago'
+};
+
+// Notifications
+const notifications = [
+    { id: 1, message: 'Nike countered your bid', type: 'negotiation', time: '5m ago', unread: true },
+    { id: 2, message: 'Spotify campaign approved', type: 'success', time: '2h ago', unread: true },
+    { id: 3, message: 'Payment released for Adidas', type: 'payment', time: '1d ago', unread: false }
 ];
 
-const campaigns = [
+// Active Pacts data
+const activePacts = [
     {
         id: 1,
         brand: 'Sephora',
-        summary: 'Beauty product showcase',
-        status: 'Active',
-        amount: 120,
+        campaign: 'Glow Serum Launch',
+        platform: 'TikTok',
+        deliverable: '1 tutorial video',
+        payout: 2500,
+        bonus: 400,
+        status: 'active',
+        statusLabel: 'Audit Passed',
+        dueDate: 'Mar 18'
     },
     {
         id: 2,
-        brand: 'Nike',
-        summary: 'Athletic wear promotion',
-        status: 'Pending',
-        amount: 86,
-    },
-    {
-        id: 3,
-        brand: 'Spotify',
-        summary: 'Music streaming campaign',
-        status: 'Active',
-        amount: 200,
-    },
+        brand: 'Gymshark',
+        campaign: 'Spring Training Drop',
+        platform: 'Instagram Reel',
+        deliverable: '1 workout reel',
+        payout: 1800,
+        bonus: null,
+        status: 'pending',
+        statusLabel: 'In Review',
+        dueDate: 'Mar 22'
+    }
 ];
 
-export default function Dashboard({ activeFilter, onFilterChange }) {
+// Agent Activity feed
+const agentActivity = [
+    { id: 1, message: 'Your agent bid on 3 campaigns today', time: '2h ago', type: 'bid' },
+    { id: 2, message: 'You were selected by Sephora', time: '5h ago', type: 'selected' },
+    { id: 3, message: 'Audit passed · bonus unlocked', time: '1d ago', type: 'success' },
+    { id: 4, message: 'Payment of $2,900 confirmed', time: '2d ago', type: 'payment' }
+];
+
+// Recommended Opportunities
+const opportunities = [
+    {
+        id: 1,
+        brand: 'Lululemon',
+        payRange: '$1,500–$3,000',
+        platform: 'TikTok',
+        status: 'Agent reviewing fit',
+        statusType: 'ai-working'
+    },
+    {
+        id: 2,
+        brand: 'Rare Beauty',
+        payRange: '$2,000–$4,000',
+        platform: 'Instagram',
+        status: 'Eligible',
+        statusType: 'active'
+    }
+];
+
+// Reputation data
+const reputationData = {
+    deliveryReliability: 96,
+    auditPassRate: 94,
+    avgRevisionRequests: 0.6,
+    badge: 'High Reliability'
+};
+
+// Animated counter hook
+function useAnimatedCounter(target, duration = 1000) {
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        let start = 0;
+        const increment = target / (duration / 16);
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= target) {
+                setCount(target);
+                clearInterval(timer);
+            } else {
+                setCount(Math.floor(start));
+            }
+        }, 16);
+        return () => clearInterval(timer);
+    }, [target, duration]);
+
+    return count;
+}
+
+export default function Dashboard() {
+    const animatedTotal = useAnimatedCounter(earningsData.totalEarned, 1200);
+    const [showContent, setShowContent] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setShowContent(true), 100);
+        return () => clearTimeout(timer);
+    }, []);
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+        }).format(amount);
+    };
+
     return (
         <div className="page dashboard">
             <TopBar showAvatar={true} showNotification={true} />
 
-            <EarningsCard
-                total={306.00}
-                available={220.00}
-                pending={86.00}
-            />
+            {/* Agent Status Bar */}
+            <div className={`agent-status-bar ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '0ms' }}>
+                <div className="agent-status-indicator">
+                    <StatusIndicator status="ai-working" size={16} />
+                </div>
+                <div className="agent-status-content">
+                    <span className="agent-status-text">{agentStatus.status}</span>
+                    <span className="agent-status-time">Last update: {agentStatus.lastUpdate}</span>
+                </div>
+            </div>
 
-            <section className="dashboard-section mt-xl">
-                <FilterChips
-                    options={timeFilters}
-                    activeFilter={activeFilter || 'today'}
-                    onFilterChange={onFilterChange || (() => { })}
-                />
-            </section>
-
-            <section className="dashboard-section mt-lg">
-                <h2 className="section-title">Recent Campaigns</h2>
-                <div className="campaign-list">
-                    {campaigns.map((campaign) => (
-                        <CampaignCard
-                            key={campaign.id}
-                            brand={campaign.brand}
-                            summary={campaign.summary}
-                            status={campaign.status}
-                            amount={campaign.amount}
-                        />
+            {/* Notifications */}
+            <section className={`dashboard-section notifications-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '40ms' }}>
+                <div className="notifications-scroll">
+                    {notifications.map((notif) => (
+                        <div key={notif.id} className={`notification-chip ${notif.type} ${notif.unread ? 'unread' : ''}`}>
+                            <span className="notif-dot" />
+                            <span className="notif-message">{notif.message}</span>
+                            <span className="notif-time">{notif.time}</span>
+                        </div>
                     ))}
                 </div>
+            </section>
+
+            {/* 1️⃣ Earnings Overview */}
+            <section className={`dashboard-section earnings-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '80ms' }}>
+                <h2 className="section-title">Earnings</h2>
+                <div className="earnings-card">
+                    <div className="earnings-main">
+                        <span className="earnings-label">Total Earned (30 days)</span>
+                        <span className="earnings-amount">{formatCurrency(animatedTotal)}</span>
+                    </div>
+                    <div className="earnings-grid">
+                        <div className="earnings-stat">
+                            <span className="stat-label">Pending</span>
+                            <span className="stat-value pending">{formatCurrency(earningsData.pendingPayouts)}</span>
+                        </div>
+                        <div className="earnings-stat">
+                            <span className="stat-label">Bonuses</span>
+                            <span className="stat-value bonus">{formatCurrency(earningsData.bonusesEarned)}</span>
+                        </div>
+                        <div className="earnings-stat">
+                            <span className="stat-label">Avg. Payout</span>
+                            <span className="stat-value">{earningsData.avgPayoutTime}d</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 2️⃣ Active Pacts */}
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
+                <h2 className="section-title">Active Pacts</h2>
+                <div className="pacts-list">
+                    {activePacts.map((pact, index) => (
+                        <div
+                            key={pact.id}
+                            className="pact-card"
+                            style={{ '--stagger': `${index * 40}ms` }}
+                        >
+                            <div className="pact-header">
+                                <div className="pact-info">
+                                    <h3 className="pact-brand">{pact.brand}</h3>
+                                    <p className="pact-campaign">{pact.campaign}</p>
+                                </div>
+                                <StatusIndicator status={pact.status} size={20} />
+                            </div>
+                            <div className="pact-details">
+                                <div className="pact-meta">
+                                    <span className="meta-item">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                            <line x1="8" y1="21" x2="16" y2="21" />
+                                            <line x1="12" y1="17" x2="12" y2="21" />
+                                        </svg>
+                                        {pact.platform}
+                                    </span>
+                                    <span className="meta-item">{pact.deliverable}</span>
+                                </div>
+                                <div className="pact-footer">
+                                    <div className="pact-payout">
+                                        <span className="payout-amount">{formatCurrency(pact.payout)}</span>
+                                        {pact.bonus && <span className="payout-bonus">+ {formatCurrency(pact.bonus)}</span>}
+                                    </div>
+                                    <span className="pact-due">Due {pact.dueDate}</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* 3️⃣ Agent Activity Feed */}
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '160ms' }}>
+                <h2 className="section-title">Agent Activity</h2>
+                <div className="activity-feed">
+                    {agentActivity.map((activity, index) => (
+                        <div
+                            key={activity.id}
+                            className={`activity-item activity-${activity.type}`}
+                            style={{ '--stagger': `${index * 30}ms` }}
+                        >
+                            <div className="activity-dot" />
+                            <div className="activity-content">
+                                <p className="activity-message">{activity.message}</p>
+                                <span className="activity-time">{activity.time}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* 4️⃣ Recommended Opportunities */}
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '200ms' }}>
+                <h2 className="section-title">Recommended</h2>
+                <div className="opportunities-list">
+                    {opportunities.map((opp, index) => (
+                        <div
+                            key={opp.id}
+                            className="opportunity-card"
+                            style={{ '--stagger': `${index * 40}ms` }}
+                        >
+                            <div className="opp-header">
+                                <h3 className="opp-brand">{opp.brand}</h3>
+                                <StatusIndicator status={opp.statusType} size={18} />
+                            </div>
+                            <div className="opp-details">
+                                <span className="opp-pay">{opp.payRange}</span>
+                                <span className="opp-platform">{opp.platform}</span>
+                            </div>
+                            <div className="opp-status">{opp.status}</div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* 5️⃣ Trust & Reliability */}
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '240ms' }}>
+                <h2 className="section-title">Your Reputation</h2>
+                <div className="reputation-card">
+                    <div className="reputation-badge">
+                        <StatusIndicator status="active" size={16} />
+                        <span>{reputationData.badge}</span>
+                    </div>
+                    <div className="reputation-stats">
+                        <div className="rep-stat">
+                            <span className="rep-label">Delivery</span>
+                            <div className="rep-bar-container">
+                                <div className="rep-bar" style={{ '--width': `${reputationData.deliveryReliability}%` }} />
+                            </div>
+                            <span className="rep-value">{reputationData.deliveryReliability}%</span>
+                        </div>
+                        <div className="rep-stat">
+                            <span className="rep-label">Audit Rate</span>
+                            <div className="rep-bar-container">
+                                <div className="rep-bar" style={{ '--width': `${reputationData.auditPassRate}%` }} />
+                            </div>
+                            <span className="rep-value">{reputationData.auditPassRate}%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 6️⃣ Primary Action */}
+            <section className={`dashboard-section action-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '280ms' }}>
+                <button className="btn btn-primary btn-full">
+                    Submit Content
+                </button>
             </section>
         </div>
     );

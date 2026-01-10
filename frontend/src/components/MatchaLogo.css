@@ -1,0 +1,169 @@
+.matcha-logo {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.logo-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Glow layer */
+.logo-glow {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    transition: all 0.5s ease;
+    pointer-events: none;
+}
+
+.matcha-logo.idle .logo-glow {
+    background: radial-gradient(circle,
+            rgba(159, 232, 112, 0.15) 0%,
+            transparent 70%);
+}
+
+.matcha-logo.ai-working .logo-glow {
+    background: radial-gradient(circle,
+            rgba(198, 184, 255, 0.2) 0%,
+            transparent 70%);
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* Logo SVG */
+.logo-svg {
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.matcha-logo.idle .logo-svg {
+    color: var(--color-primary);
+}
+
+.matcha-logo.ai-working .logo-svg {
+    color: var(--color-lavender);
+}
+
+/* Circle animation */
+.logo-circle {
+    transition: all 0.3s ease;
+}
+
+.matcha-logo.ai-working .logo-circle {
+    animation: circle-rotate 8s linear infinite;
+    transform-origin: center;
+}
+
+@keyframes circle-rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Sparkle animation */
+.logo-sparkle {
+    transition: all 0.3s ease;
+}
+
+.matcha-logo.ai-working .logo-sparkle {
+    animation: sparkle-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkle-pulse {
+
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(0.9) rotate(15deg);
+        opacity: 0.8;
+    }
+}
+
+/* Sparkle dots animation */
+.sparkle-dot {
+    animation: dot-twinkle 2s ease-in-out infinite;
+}
+
+.sparkle-dot:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.sparkle-dot:nth-child(3) {
+    animation-delay: 1s;
+}
+
+.sparkle-dot:nth-child(4) {
+    animation-delay: 1.5s;
+}
+
+@keyframes dot-twinkle {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.matcha-logo.ai-working .sparkle-dot {
+    animation: dot-orbit 2s ease-in-out infinite;
+}
+
+@keyframes dot-orbit {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+/* Wordmark */
+.logo-wordmark {
+    font-family: var(--font-brand);
+    font-weight: var(--weight-bold);
+    transition: color 0.3s ease;
+}
+
+.matcha-logo.idle .logo-wordmark {
+    color: var(--color-primary);
+}
+
+.matcha-logo.ai-working .logo-wordmark {
+    color: var(--color-lavender);
+}

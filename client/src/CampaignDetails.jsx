@@ -7,13 +7,16 @@ const CampaignDetails = () => {
     const navigate = useNavigate();
     const [bids, setBids] = useState([]);
     const [selectedBid, setSelectedBid] = useState(null);
-    const [agentReasoning, setAgentReasoning] = useState('');
+    const [contract, setContract] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [paymentStatus, setPaymentStatus] = useState('');
 
     useEffect(() => {
         fetchBids();
-    }, [id]);
+        const interval = setInterval(() => {
+            if (contract?._id) fetchContract(contract._id);
+        }, 2000);
+        return () => clearInterval(interval);
+    }, [id, contract?._id]);
 
     const fetchBids = async () => {
         try {
@@ -25,12 +28,22 @@ const CampaignDetails = () => {
         }
     };
 
+    const fetchContract = async (contractId) => {
+        try {
+            const res = await fetch(`http://localhost:3000/api/contracts/${contractId}`);
+            if (res.ok) {
+                const data = await res.json();
+                setContract(data);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     const handleRunAgent = async () => {
         setLoading(true);
         try {
-            // Pick the first bid for demo purposes if none selected explicitly (or logic in backend)
-            // But API expects user selection OR agent selection. Here we trigger Agent.
-            const targetBid = bids[0]; // Simplification for demo
+            const targetBid = selectedBid || bids[0];
 
             const res = await fetch('/api/agent/select', {
                 method: 'POST',
@@ -39,12 +52,14 @@ const CampaignDetails = () => {
             });
             const data = await res.json();
 
-            setAgentReasoning(data.reasoning);
+            setContract({
+                _id: data.contractId,
+                status: 'EscrowFunded',
+                escrowTx: data.escrowTx,
+                reasoning: data.reasoning
+            });
+
             setSelectedBid(targetBid);
-
-            // Auto trigger payment
-            handlePayment(data.contractId, targetBid.current_bid);
-
         } catch (err) {
             console.error(err);
         } finally {
@@ -52,18 +67,27 @@ const CampaignDetails = () => {
         }
     };
 
-    const handlePayment = async (contractId, amount) => {
-        setPaymentStatus('Processing Payment...');
+    const handleVerifyWork = async () => {
+        setLoading(true);
         try {
-            const res = await fetch('/api/payment/send', {
+            const res = await fetch('http://localhost:3000/api/contracts/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contractId, amount, recipient: 'CreatorWallet' })
+                body: JSON.stringify({ contractId: contract._id })
             });
             const data = await res.json();
-            setPaymentStatus(`Payment Sent! TX: ${data.transactionHash.substr(0, 10)}...`);
+
+            setContract(prev => ({
+                ...prev,
+                status: 'Released',
+                releaseTx: data.releaseTx,
+                verificationReasoning: data.reasoning
+            }));
+
         } catch (err) {
-            setPaymentStatus('Payment Failed');
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -117,23 +141,13 @@ const CampaignDetails = () => {
                     </div>
 
                     {/* Agent Action Area */}
-                    <div className="card bg-[#1E1E1E] flex-1 flex flex-col">
+                    <div className="card bg-[#1E1E1E] flex-1 flex flex-col p-4 relative overflow-hidden">
                         <h2 className="text-section-header mb-4 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-                            Agent AI
+                            Agent Workflow
                         </h2>
 
-                        {agentReasoning ? (
-                            <div className="space-y-4">
-                                <div className="bg-[#2A302C] p-3 rounded text-sm text-[#AEB5B2] whitespace-pre-line border-l-2 border-accent">
-                                    {agentReasoning}
-                                </div>
-                                <div className="flex items-center gap-2 text-green-400">
-                                    <CheckCircle size={16} />
-                                    <span>{paymentStatus}</span>
-                                </div>
-                            </div>
-                        ) : (
+                        {!contract ? (
                             <div className="text-center py-8">
                                 <p className="text-muted text-sm mb-4">Ready to analyze negotiation logs and select best match.</p>
                                 <button
@@ -143,6 +157,71 @@ const CampaignDetails = () => {
                                 >
                                     {loading ? 'Analyzing...' : 'Run Auto-Selection'}
                                 </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-6 relative h-full overflow-y-auto pr-2 custom-scrollbar">
+                                {/* Timeline Line */}
+                                <div className="absolute left-2.5 top-2 bottom-2 w-0.5 bg-gray-700"></div>
+
+                                {/* Step 1: Selection & Escrow */}
+                                <div className="relative pl-8">
+                                    <div className="absolute left-0 w-5 h-5 rounded-full bg-accent flex items-center justify-center text-black text-xs font-bold">1</div>
+                                    <h3 className="text-white font-bold text-sm">Escrow Funded</h3>
+                                    <p className="text-xs text-gray-400 font-mono mb-2">{contract.escrowTx?.substr(0, 18)}...</p>
+                                    <div className="bg-[#2A302C] p-2 rounded text-xs text-gray-300 italic border-l-2 border-accent mb-2">
+                                        "{contract.reasoning?.split('\n')[1] || 'Selected best match based on criteria.'}"
+                                    </div>
+                                    <div className="flex items-center gap-1 text-green-400 text-xs">
+                                        <CheckCircle size={12} /> <span>Funds Locked</span>
+                                    </div>
+                                </div>
+
+                                {/* Step 2: Creator Upload */}
+                                <div className="relative pl-8">
+                                    <div className={`absolute left-0 w-5 h-5 rounded-full flex items-center justify-center text-black text-xs font-bold ${contract.status === 'WorkSubmitted' || contract.status === 'Released' ? 'bg-accent' : 'bg-gray-600'}`}>2</div>
+                                    <h3 className={`font-bold text-sm ${contract.status === 'WorkSubmitted' || contract.status === 'Released' ? 'text-white' : 'text-gray-500'}`}>Creator Work</h3>
+                                    {contract.status === 'EscrowFunded' && <p className="text-xs text-yellow-500 animate-pulse">Waiting for upload...</p>}
+                                    {(contract.status === 'WorkSubmitted' || contract.status === 'Released') && (
+                                        <div className="mt-1">
+                                            <a href="#" className="text-accent text-xs underline truncate block max-w-[200px]">{contract.submissionUrl || 'video_link.mp4'}</a>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Step 3: Verification */}
+                                <div className="relative pl-8">
+                                    <div className={`absolute left-0 w-5 h-5 rounded-full flex items-center justify-center text-black text-xs font-bold ${contract.status === 'Released' ? 'bg-accent' : 'bg-gray-600'}`}>3</div>
+                                    <h3 className={`font-bold text-sm ${contract.status === 'Released' ? 'text-white' : 'text-gray-500'}`}>Video Verification</h3>
+
+                                    {contract.status === 'WorkSubmitted' && (
+                                        <div className="mt-2">
+                                            <button
+                                                onClick={handleVerifyWork}
+                                                disabled={loading}
+                                                className="bg-white text-black text-xs px-3 py-1 rounded font-bold hover:bg-gray-200 w-full"
+                                            >
+                                                {loading ? 'AI Analyzing...' : 'Verify Content'}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {contract.status === 'Released' && (
+                                        <div className="bg-[#2A302C] p-2 rounded text-xs text-gray-300 border-l-2 border-accent mt-2">
+                                            {contract.verificationReasoning}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Step 4: Release */}
+                                <div className="relative pl-8">
+                                    <div className={`absolute left-0 w-5 h-5 rounded-full flex items-center justify-center text-black text-xs font-bold ${contract.status === 'Released' ? 'bg-accent' : 'bg-gray-600'}`}>4</div>
+                                    <h3 className={`font-bold text-sm ${contract.status === 'Released' ? 'text-white' : 'text-gray-500'}`}>Payment Released</h3>
+                                    {contract.status === 'Released' && (
+                                        <div className="flex items-center gap-1 text-green-400 text-xs mt-1">
+                                            <CheckCircle size={12} /> <span>TX: {contract.releaseTx?.substr(0, 10)}...</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>

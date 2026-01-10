@@ -228,7 +228,7 @@ app.post('/api/bids', (req, res) => {
     }
 });
 
-// 4. POST /api/agent/select (Agent Action Placeholder)
+// 4. POST /api/agent/select (Agent Action: Fund Escrow)
 app.post('/api/agent/select', async (req, res) => {
     try {
         const { campaignId, bidId } = req.body;
@@ -242,11 +242,14 @@ app.post('/api/agent/select', async (req, res) => {
             bids[bidIndex].status = 'Accepted';
         }
 
-        // Create Contract
+        // Create Contract (Escrow)
         const contract = {
             _id: 'contract_' + Date.now(),
+            campaignId,
             autoBidId: bidId,
-            status: 'Signed'
+            status: 'EscrowFunded', // Changed from 'Signed'
+            escrowTx: '0xEscrow' + Math.random().toString(16).substr(2, 40),
+            createdAt: new Date()
         };
         contracts.push(contract);
 
@@ -263,6 +266,7 @@ app.post('/api/agent/select', async (req, res) => {
         res.json({
             success: true,
             contractId: contract._id,
+            escrowTx: contract.escrowTx,
             reasoning: reasoning.trim()
         });
     } catch (err) {
@@ -270,19 +274,61 @@ app.post('/api/agent/select', async (req, res) => {
     }
 });
 
-// 5. POST /api/payment/send (Payment Placeholder)
-app.post('/api/payment/send', async (req, res) => {
-    try {
-        const { contractId, amount } = req.body;
+// 5. GET /api/contracts/:id (Check Status)
+app.get('/api/contracts/:id', (req, res) => {
+    const contract = contracts.find(c => c._id === req.params.id);
+    if (!contract) return res.status(404).json({ error: 'Not Found' });
+    res.json(contract);
+});
 
-        // Simulate Blockchain
-        await new Promise(resolve => setTimeout(resolve, 1500));
+// 5b. GET /api/campaigns/:id/contract (Get Contract by Campaign)
+app.get('/api/campaigns/:id/contract', (req, res) => {
+    const contract = contracts.find(c => c.campaignId === req.params.id);
+    if (!contract) return res.status(404).json({ error: 'Contract Not Found' });
+    res.json(contract);
+});
+
+// 6. POST /api/contracts/submit (Creator Uploads Work)
+app.post('/api/contracts/submit', (req, res) => {
+    const { contractId, submissionUrl } = req.body;
+    const contract = contracts.find(c => c._id === contractId);
+    if (!contract) return res.status(404).json({ error: 'Not Found' });
+
+    contract.status = 'WorkSubmitted';
+    contract.submissionUrl = submissionUrl;
+
+    res.json({ success: true, status: 'WorkSubmitted' });
+});
+
+// 7. POST /api/contracts/verify (Agent Verifies Content & Releases Funds)
+app.post('/api/contracts/verify', async (req, res) => {
+    try {
+        const { contractId } = req.body;
+        const contract = contracts.find(c => c._id === contractId);
+        if (!contract) return res.status(404).json({ error: 'Contract not found' });
+
+        // Simulate AI Vision Analysis
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        contract.status = 'Released';
+        contract.releaseTx = '0xRelease' + Math.random().toString(16).substr(2, 40);
+
+        const verificationReasoning = `
+            **Content Analysis Passed**:
+            1. **Product Visibility**: 'Nexus Hub X' detected in 45% of frames.
+            2. **Sentiment**: Positive sentiment detected in audio transcript.
+            3. **Requirements Met**: 'Deep dive review' format confirmed.
+            
+            Funds released to Creator.
+        `;
 
         res.json({
             success: true,
-            transactionHash: '0x' + Math.random().toString(16).substr(2, 40),
-            status: 'Confirmed'
+            status: 'Released',
+            releaseTx: contract.releaseTx,
+            reasoning: verificationReasoning.trim()
         });
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

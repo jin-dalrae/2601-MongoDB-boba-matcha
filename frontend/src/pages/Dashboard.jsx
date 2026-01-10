@@ -11,6 +11,19 @@ const earningsData = {
     avgPayoutTime: 2.4
 };
 
+// Agent Status
+const agentStatus = {
+    status: 'Actively negotiating 2 deals',
+    lastUpdate: '12 min ago'
+};
+
+// Notifications
+const notifications = [
+    { id: 1, message: 'Nike countered your bid', type: 'negotiation', time: '5m ago', unread: true },
+    { id: 2, message: 'Spotify campaign approved', type: 'success', time: '2h ago', unread: true },
+    { id: 3, message: 'Payment released for Adidas', type: 'payment', time: '1d ago', unread: false }
+];
+
 // Active Pacts data
 const activePacts = [
     {
@@ -98,12 +111,10 @@ function useAnimatedCounter(target, duration = 1000) {
 }
 
 export default function Dashboard() {
-    const [activeFilter, setActiveFilter] = useState('30days');
     const animatedTotal = useAnimatedCounter(earningsData.totalEarned, 1200);
     const [showContent, setShowContent] = useState(false);
 
     useEffect(() => {
-        // Staggered entrance animation
         const timer = setTimeout(() => setShowContent(true), 100);
         return () => clearTimeout(timer);
     }, []);
@@ -116,18 +127,36 @@ export default function Dashboard() {
         }).format(amount);
     };
 
-    const timeFilters = [
-        { value: '7days', label: '7 days' },
-        { value: '30days', label: '30 days' },
-        { value: 'all', label: 'All time' }
-    ];
-
     return (
         <div className="page dashboard">
             <TopBar showAvatar={true} showNotification={true} />
 
+            {/* Agent Status Bar */}
+            <div className={`agent-status-bar ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '0ms' }}>
+                <div className="agent-status-indicator">
+                    <StatusIndicator status="ai-working" size={16} />
+                </div>
+                <div className="agent-status-content">
+                    <span className="agent-status-text">{agentStatus.status}</span>
+                    <span className="agent-status-time">Last update: {agentStatus.lastUpdate}</span>
+                </div>
+            </div>
+
+            {/* Notifications */}
+            <section className={`dashboard-section notifications-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '40ms' }}>
+                <div className="notifications-scroll">
+                    {notifications.map((notif) => (
+                        <div key={notif.id} className={`notification-chip ${notif.type} ${notif.unread ? 'unread' : ''}`}>
+                            <span className="notif-dot" />
+                            <span className="notif-message">{notif.message}</span>
+                            <span className="notif-time">{notif.time}</span>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
             {/* 1️⃣ Earnings Overview */}
-            <section className={`dashboard-section earnings-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '0ms' }}>
+            <section className={`dashboard-section earnings-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '80ms' }}>
                 <h2 className="section-title">Earnings</h2>
                 <div className="earnings-card">
                     <div className="earnings-main">
@@ -136,23 +165,23 @@ export default function Dashboard() {
                     </div>
                     <div className="earnings-grid">
                         <div className="earnings-stat">
-                            <span className="stat-label">Pending Payouts</span>
+                            <span className="stat-label">Pending</span>
                             <span className="stat-value pending">{formatCurrency(earningsData.pendingPayouts)}</span>
                         </div>
                         <div className="earnings-stat">
-                            <span className="stat-label">Bonuses Earned</span>
+                            <span className="stat-label">Bonuses</span>
                             <span className="stat-value bonus">{formatCurrency(earningsData.bonusesEarned)}</span>
                         </div>
                         <div className="earnings-stat">
-                            <span className="stat-label">Avg. Payout Time</span>
-                            <span className="stat-value">{earningsData.avgPayoutTime} days</span>
+                            <span className="stat-label">Avg. Payout</span>
+                            <span className="stat-value">{earningsData.avgPayoutTime}d</span>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* 2️⃣ Active Pacts */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '60ms' }}>
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
                 <h2 className="section-title">Active Pacts</h2>
                 <div className="pacts-list">
                     {activePacts.map((pact, index) => (
@@ -183,7 +212,7 @@ export default function Dashboard() {
                                 <div className="pact-footer">
                                     <div className="pact-payout">
                                         <span className="payout-amount">{formatCurrency(pact.payout)}</span>
-                                        {pact.bonus && <span className="payout-bonus">+ {formatCurrency(pact.bonus)} bonus</span>}
+                                        {pact.bonus && <span className="payout-bonus">+ {formatCurrency(pact.bonus)}</span>}
                                     </div>
                                     <span className="pact-due">Due {pact.dueDate}</span>
                                 </div>
@@ -194,7 +223,7 @@ export default function Dashboard() {
             </section>
 
             {/* 3️⃣ Agent Activity Feed */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '160ms' }}>
                 <h2 className="section-title">Agent Activity</h2>
                 <div className="activity-feed">
                     {agentActivity.map((activity, index) => (
@@ -214,8 +243,8 @@ export default function Dashboard() {
             </section>
 
             {/* 4️⃣ Recommended Opportunities */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '180ms' }}>
-                <h2 className="section-title">Recommended Opportunities</h2>
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '200ms' }}>
+                <h2 className="section-title">Recommended</h2>
                 <div className="opportunities-list">
                     {opportunities.map((opp, index) => (
                         <div
@@ -237,7 +266,7 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            {/* 5️⃣ Trust & Reliability Snapshot */}
+            {/* 5️⃣ Trust & Reliability */}
             <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '240ms' }}>
                 <h2 className="section-title">Your Reputation</h2>
                 <div className="reputation-card">
@@ -247,29 +276,25 @@ export default function Dashboard() {
                     </div>
                     <div className="reputation-stats">
                         <div className="rep-stat">
-                            <span className="rep-label">Delivery Reliability</span>
+                            <span className="rep-label">Delivery</span>
                             <div className="rep-bar-container">
                                 <div className="rep-bar" style={{ '--width': `${reputationData.deliveryReliability}%` }} />
                             </div>
                             <span className="rep-value">{reputationData.deliveryReliability}%</span>
                         </div>
                         <div className="rep-stat">
-                            <span className="rep-label">Audit Pass Rate</span>
+                            <span className="rep-label">Audit Rate</span>
                             <div className="rep-bar-container">
                                 <div className="rep-bar" style={{ '--width': `${reputationData.auditPassRate}%` }} />
                             </div>
                             <span className="rep-value">{reputationData.auditPassRate}%</span>
-                        </div>
-                        <div className="rep-stat">
-                            <span className="rep-label">Avg. Revision Requests</span>
-                            <span className="rep-value small">{reputationData.avgRevisionRequests}</span>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* 6️⃣ Primary Action */}
-            <section className={`dashboard-section action-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '300ms' }}>
+            <section className={`dashboard-section action-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '280ms' }}>
                 <button className="btn btn-primary btn-full">
                     Submit Content
                 </button>

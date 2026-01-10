@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import BottomNav from './components/BottomNav';
 import Dashboard from './pages/Dashboard';
 import Discovery from './pages/Discovery';
-import Bidding from './pages/Bidding';
+import Deals from './pages/Deals';
 import ActiveCampaigns from './pages/ActiveCampaigns';
+import Profile from './pages/Profile';
 import Loading from './pages/Loading';
 import { OnboardingFlow } from './pages/onboarding';
 import './index.css';
@@ -13,7 +14,6 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedCampaign, setSelectedCampaign] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('today');
 
   useEffect(() => {
     // Check if user has completed onboarding
@@ -43,12 +43,6 @@ export default function App() {
     setActiveTab('campaigns');
   };
 
-  const handleSubmitBid = (bidData) => {
-    console.log('Bid submitted:', bidData);
-    setSelectedCampaign(null);
-    setActiveTab('home');
-  };
-
   // Show onboarding for new users
   if (showOnboarding) {
     return <OnboardingFlow onComplete={handleOnboardingComplete} />;
@@ -62,24 +56,17 @@ export default function App() {
   const renderPage = () => {
     switch (activeTab) {
       case 'home':
-        return (
-          <Dashboard
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-          />
-        );
+        return <Dashboard />;
       case 'campaigns':
         return <Discovery onSelectCampaign={handleSelectCampaign} />;
       case 'bidding':
-        return (
-          <Bidding
-            campaign={selectedCampaign}
-            onBack={handleBackFromBidding}
-            onSubmit={handleSubmitBid}
-          />
+        return selectedCampaign ? (
+          <Deals onBack={handleBackFromBidding} />
+        ) : (
+          <Deals />
         );
       case 'profile':
-        return <ActiveCampaigns />;
+        return <Profile />;
       default:
         return <Dashboard />;
     }

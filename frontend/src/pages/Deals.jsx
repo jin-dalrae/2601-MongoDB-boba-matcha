@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import TopBar from '../components/TopBar';
 import StatusIndicator from '../components/StatusIndicator';
 import './Deals.css';
 
@@ -11,8 +10,7 @@ const aiSuggested = [
         campaign: 'Summer Skin Tint',
         suggestedBid: '$650',
         budgetRange: '$500 – $1,000',
-        aiFit: 4,
-        confidence: 85
+        matchPercent: 85
     }
 ];
 
@@ -52,7 +50,6 @@ const actionRequired = [
 
 export default function Deals({ onBack }) {
     const [showContent, setShowContent] = useState(false);
-    const [counterValue, setCounterValue] = useState('');
 
     useEffect(() => {
         const timer = setTimeout(() => setShowContent(true), 100);
@@ -72,11 +69,15 @@ export default function Deals({ onBack }) {
 
     return (
         <div className="page deals-page">
-            <TopBar title="Deals" showBack={false} />
+            {/* Left-aligned page header */}
+            <header className={`page-header ${showContent ? 'animate-in' : ''}`}>
+                <h1 className="page-title">Deals</h1>
+                <p className="page-subtitle">Active negotiations & opportunities</p>
+            </header>
 
-            {/* AI Suggested */}
+            {/* AI Suggested - with glow */}
             {aiSuggested.length > 0 && (
-                <section className={`deals-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '0ms' }}>
+                <section className={`deals-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '60ms' }}>
                     <div className="section-header">
                         <h2 className="section-title">AI Suggested</h2>
                         <StatusIndicator status="ai-working" size={16} />
@@ -89,9 +90,9 @@ export default function Deals({ onBack }) {
                                         <h3 className="deal-brand">{deal.brand}</h3>
                                         <p className="deal-campaign">{deal.campaign}</p>
                                     </div>
-                                    <div className="ai-confidence">
-                                        <span className="confidence-value">{deal.confidence}%</span>
-                                        <span className="confidence-label">match</span>
+                                    <div className="ai-match">
+                                        <span className="match-value">{deal.matchPercent}%</span>
+                                        <span className="match-label">match</span>
                                     </div>
                                 </div>
                                 <div className="deal-suggestion">
@@ -105,8 +106,9 @@ export default function Deals({ onBack }) {
                                     </div>
                                 </div>
                                 <div className="deal-actions">
-                                    <button className="btn btn-primary">Accept Suggestion</button>
+                                    <button className="btn btn-primary">Accept</button>
                                     <button className="btn btn-secondary">Adjust</button>
+                                    <button className="btn-text">Decline</button>
                                 </div>
                             </div>
                         ))}
@@ -116,7 +118,7 @@ export default function Deals({ onBack }) {
 
             {/* In Negotiation */}
             {inNegotiation.length > 0 && (
-                <section className={`deals-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '60ms' }}>
+                <section className={`deals-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
                     <h2 className="section-title">In Negotiation</h2>
                     <div className="deals-list">
                         {inNegotiation.map((deal, index) => (
@@ -152,10 +154,10 @@ export default function Deals({ onBack }) {
                                 </div>
 
                                 {deal.status === 'counter' && (
-                                    <div className="deal-actions three-col">
+                                    <div className="deal-actions">
                                         <button className="btn btn-primary">Accept</button>
                                         <button className="btn btn-secondary">Counter</button>
-                                        <button className="btn-text-danger">Decline</button>
+                                        <button className="btn-text">Decline</button>
                                     </div>
                                 )}
                             </div>
@@ -166,7 +168,7 @@ export default function Deals({ onBack }) {
 
             {/* Action Required */}
             {actionRequired.length > 0 && (
-                <section className={`deals-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
+                <section className={`deals-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '180ms' }}>
                     <div className="section-header">
                         <h2 className="section-title">Action Required</h2>
                         <span className="action-count">{actionRequired.length}</span>
@@ -179,7 +181,6 @@ export default function Deals({ onBack }) {
                                         <h3 className="deal-brand">{deal.brand}</h3>
                                         <p className="deal-campaign">{deal.campaign}</p>
                                     </div>
-                                    <StatusIndicator status="pending" size={20} />
                                 </div>
                                 <p className="action-issue">{deal.issue}</p>
                                 <button className="btn btn-primary btn-full">

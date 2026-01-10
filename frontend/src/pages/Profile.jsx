@@ -1,36 +1,35 @@
 import { useState, useEffect } from 'react';
-import TopBar from '../components/TopBar';
 import StatusIndicator from '../components/StatusIndicator';
 import './Profile.css';
 
-// Creator data
+// Creator data - Meredith Duxbury
 const creatorData = {
-    name: 'Alex Chen',
-    handle: '@alexcreates',
-    followers: '45.2K',
-    avgViews: '12.8K',
-    categories: ['Lifestyle', 'Beauty', 'Fashion']
+    name: 'Meredith Duxbury',
+    handle: '@meredithduxbury',
+    followers: '18.2M',
+    avgViews: '4.8M',
+    categories: ['Beauty', 'Makeup', 'Lifestyle']
 };
 
 // Agent preferences
 const agentPreferences = {
-    minDealValue: '$200',
-    preferredBrands: ['Beauty', 'Fashion', 'Tech'],
-    contentFrequency: '3 per week max'
+    minDealValue: '$1,000',
+    preferredBrands: ['Beauty', 'Skincare', 'Fashion'],
+    contentFrequency: '5 per week max'
 };
 
 // Connected accounts
 const connectedAccounts = [
-    { platform: 'TikTok', handle: '@alexcreates', connected: true },
-    { platform: 'Instagram', handle: null, connected: false }
+    { platform: 'TikTok', handle: '@meredithduxbury', connected: true },
+    { platform: 'Instagram', handle: '@meredithduxbury', connected: true }
 ];
 
 // Payout info
 const payoutInfo = {
     bankConnected: true,
-    bankName: '••••4521',
+    bankName: '••••7892',
     nextPayout: 'Mar 25',
-    pendingAmount: '$2,100'
+    pendingAmount: '$12,400'
 };
 
 export default function Profile() {
@@ -43,20 +42,19 @@ export default function Profile() {
 
     return (
         <div className="page profile-page">
-            <TopBar title="Profile" showBack={false} />
-
-            {/* Creator Snapshot */}
-            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '0ms' }}>
-                <div className="creator-header">
-                    <div className="creator-avatar">
-                        {creatorData.name.charAt(0)}
-                    </div>
-                    <div className="creator-info">
-                        <h2 className="creator-name">{creatorData.name}</h2>
-                        <span className="creator-handle">{creatorData.handle}</span>
-                    </div>
+            {/* Left-aligned page header with avatar */}
+            <header className={`profile-header ${showContent ? 'animate-in' : ''}`}>
+                <div className="creator-avatar">
+                    M
                 </div>
+                <div className="creator-info">
+                    <h1 className="creator-name">{creatorData.name}</h1>
+                    <span className="creator-handle">{creatorData.handle}</span>
+                </div>
+            </header>
 
+            {/* Stats card */}
+            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '60ms' }}>
                 <div className="creator-stats">
                     <div className="stat-item">
                         <span className="stat-value">{creatorData.followers}</span>
@@ -77,7 +75,7 @@ export default function Profile() {
             </section>
 
             {/* Agent Preferences */}
-            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '60ms' }}>
+            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
                 <h3 className="section-title">Agent Preferences</h3>
                 <div className="preferences-card">
                     <div className="pref-row">
@@ -101,7 +99,7 @@ export default function Profile() {
             </section>
 
             {/* Connected Accounts */}
-            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
+            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '180ms' }}>
                 <h3 className="section-title">Connected Accounts</h3>
                 <div className="accounts-list">
                     {connectedAccounts.map((account) => (
@@ -120,24 +118,16 @@ export default function Profile() {
                             </div>
                             <div className="account-info">
                                 <span className="account-platform">{account.platform}</span>
-                                {account.connected ? (
-                                    <span className="account-handle">{account.handle}</span>
-                                ) : (
-                                    <span className="account-status">Not connected</span>
-                                )}
+                                <span className="account-handle">{account.handle}</span>
                             </div>
-                            {account.connected ? (
-                                <StatusIndicator status="active" size={16} />
-                            ) : (
-                                <button className="btn-connect">Connect</button>
-                            )}
+                            <StatusIndicator status="active" size={16} />
                         </div>
                     ))}
                 </div>
             </section>
 
             {/* Payout */}
-            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '180ms' }}>
+            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '240ms' }}>
                 <h3 className="section-title">Payout</h3>
                 <div className="payout-card">
                     <div className="payout-row">
@@ -158,7 +148,7 @@ export default function Profile() {
             </section>
 
             {/* Sign Out */}
-            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '240ms' }}>
+            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '300ms' }}>
                 <button className="btn-signout">Sign Out</button>
             </section>
         </div>

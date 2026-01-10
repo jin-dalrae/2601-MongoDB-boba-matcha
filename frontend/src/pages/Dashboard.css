@@ -1,12 +1,72 @@
 /* ========================================
-   DASHBOARD STYLES - Complete with Motion
+   DASHBOARD STYLES - Refined with Glow
    ======================================== */
 
 .dashboard {
     padding-top: 0;
 }
 
-/* Section Animation */
+/* ========================================
+   DASHBOARD HEADER
+   ======================================== */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.32s ease-out, transform 0.32s ease-out;
+}
+
+.dashboard-header.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-divider-subtle);
+    border-radius: 50%;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.18s ease-out;
+}
+
+.notification-btn:hover {
+    background: var(--color-bg-card-elevated);
+    border-color: var(--color-divider);
+    color: var(--color-text-primary);
+}
+
+.notification-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-warning);
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: var(--weight-semibold);
+    color: #fff;
+}
+
+/* ========================================
+   SECTION ANIMATION
+   ======================================== */
+
 .dashboard-section {
     margin-bottom: var(--spacing-xl);
     opacity: 0;
@@ -38,20 +98,17 @@
     padding: var(--spacing-md) var(--spacing-lg);
     background: linear-gradient(135deg, rgba(198, 184, 255, 0.08) 0%, transparent 100%);
     border: 1px solid rgba(198, 184, 255, 0.15);
-    border-radius: var(--radius-card-md);
+    border-radius: var(--radius-card);
     margin-bottom: var(--spacing-lg);
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.32s ease-out, transform 0.32s ease-out;
+    transition-delay: var(--delay, 0ms);
 }
 
 .agent-status-bar.animate-in {
     opacity: 1;
     transform: translateY(0);
-}
-
-.agent-status-indicator {
-    flex-shrink: 0;
 }
 
 .agent-status-content {
@@ -72,7 +129,7 @@
 }
 
 /* ========================================
-   NOTIFICATIONS SCROLL
+   NOTIFICATIONS
    ======================================== */
 
 .notifications-section {
@@ -83,7 +140,6 @@
     display: flex;
     gap: var(--spacing-sm);
     overflow-x: auto;
-    padding-bottom: var(--spacing-sm);
     margin: 0 calc(var(--page-padding) * -1);
     padding: 0 var(--page-padding);
     scrollbar-width: none;
@@ -98,7 +154,7 @@
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
-    background-color: var(--color-bg-card);
+    background: var(--color-bg-card);
     border: 1px solid var(--color-divider-subtle);
     border-radius: var(--radius-chip);
     white-space: nowrap;
@@ -107,35 +163,31 @@
 }
 
 .notification-chip.unread {
-    background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-bg-card-elevated) 100%);
+    background: linear-gradient(145deg, var(--color-bg-card) 0%, var(--color-bg-card-elevated) 100%);
     border-color: var(--color-divider);
-}
-
-.notification-chip:hover {
-    transform: translateY(-1px);
 }
 
 .notif-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: var(--color-text-muted);
+    background: var(--color-text-muted);
     flex-shrink: 0;
 }
 
 .notification-chip.negotiation .notif-dot {
-    background-color: var(--color-pending);
-    box-shadow: 0 0 6px rgba(242, 201, 76, 0.4);
+    background: var(--color-pending);
+    box-shadow: 0 0 8px rgba(242, 201, 76, 0.5);
 }
 
 .notification-chip.success .notif-dot {
-    background-color: var(--color-primary);
-    box-shadow: 0 0 6px var(--color-primary-glow);
+    background: var(--color-primary);
+    box-shadow: 0 0 8px rgba(159, 232, 112, 0.5);
 }
 
 .notification-chip.payment .notif-dot {
-    background-color: var(--color-salmon);
-    box-shadow: 0 0 6px var(--color-salmon-glow);
+    background: var(--color-salmon);
+    box-shadow: 0 0 8px rgba(255, 179, 167, 0.5);
 }
 
 .notif-message {
@@ -144,54 +196,33 @@
     color: var(--color-text-primary);
 }
 
-.notif-time {
-    font-size: 11px;
-    color: var(--color-text-muted);
-}
-
 /* ========================================
-   EARNINGS SECTION
+   EARNINGS CARD - With Glow Border
    ======================================== */
 
-.earnings-section .earnings-card {
-    background: linear-gradient(135deg,
+.earnings-card {
+    background: linear-gradient(145deg,
             var(--color-bg-card) 0%,
-            var(--color-bg-card-elevated) 50%,
-            rgba(26, 32, 26, 1) 100%);
+            var(--color-bg-card-elevated) 100%);
     border-radius: var(--radius-card);
     padding: var(--spacing-xl);
-    border: 1px solid transparent;
+    border: 1px solid rgba(159, 232, 112, 0.2);
+    box-shadow:
+        0 0 0 1px rgba(159, 232, 112, 0.08),
+        0 0 32px rgba(159, 232, 112, 0.06);
     position: relative;
     overflow: hidden;
 }
 
-.earnings-section .earnings-card::before {
+.earnings-card::before {
     content: '';
     position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: var(--radius-card);
-    background: linear-gradient(135deg,
-            rgba(159, 232, 112, 0.3) 0%,
-            rgba(159, 232, 112, 0.1) 50%,
-            transparent 100%);
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-}
-
-.earnings-section .earnings-card::after {
-    content: '';
-    position: absolute;
-    top: -30%;
-    right: -30%;
-    width: 60%;
-    height: 60%;
+    top: -40%;
+    right: -40%;
+    width: 80%;
+    height: 80%;
     background: radial-gradient(circle,
-            rgba(159, 232, 112, 0.12) 0%,
+            rgba(159, 232, 112, 0.1) 0%,
             transparent 60%);
     pointer-events: none;
 }
@@ -216,7 +247,7 @@
     font-weight: var(--weight-bold);
     color: var(--color-text-primary);
     line-height: 1.1;
-    background: linear-gradient(135deg, var(--color-text-primary) 0%, rgba(245, 247, 246, 0.85) 100%);
+    background: linear-gradient(135deg, var(--color-text-primary) 0%, rgba(245, 247, 246, 0.8) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -261,7 +292,7 @@
 }
 
 /* ========================================
-   ACTIVE PACTS
+   PACTS LIST - With Status Glow
    ======================================== */
 
 .pacts-list {
@@ -271,7 +302,7 @@
 }
 
 .pact-card {
-    background: linear-gradient(135deg,
+    background: linear-gradient(145deg,
             var(--color-bg-card) 0%,
             var(--color-bg-card-elevated) 100%);
     border-radius: var(--radius-card);
@@ -296,9 +327,14 @@
     }
 }
 
-.pact-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--color-divider);
+.pact-card.status-active {
+    border-color: rgba(159, 232, 112, 0.25);
+    box-shadow: 0 0 24px rgba(159, 232, 112, 0.06);
+}
+
+.pact-card.status-pending {
+    border-color: rgba(242, 201, 76, 0.25);
+    box-shadow: 0 0 24px rgba(242, 201, 76, 0.06);
 }
 
 .pact-header {
@@ -337,15 +373,8 @@
 }
 
 .meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-xs);
     font-size: var(--text-meta);
     color: var(--color-text-muted);
-}
-
-.meta-item svg {
-    opacity: 0.6;
 }
 
 .pact-footer {
@@ -379,14 +408,13 @@
 }
 
 /* ========================================
-   AGENT ACTIVITY FEED
+   ACTIVITY FEED
    ======================================== */
 
 .activity-feed {
     display: flex;
     flex-direction: column;
-    gap: 0;
-    background: linear-gradient(135deg,
+    background: linear-gradient(145deg,
             var(--color-bg-card) 0%,
             var(--color-bg-card-elevated) 100%);
     border-radius: var(--radius-card);
@@ -400,7 +428,6 @@
     gap: var(--spacing-md);
     padding: var(--spacing-md);
     border-radius: var(--radius-card-md);
-    transition: background-color 0.18s ease-out;
     animation: staggerFadeIn 0.28s ease-out both;
     animation-delay: var(--stagger, 0ms);
 }
@@ -409,28 +436,29 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: var(--color-divider);
+    background: var(--color-divider);
     margin-top: 5px;
     flex-shrink: 0;
 }
 
 .activity-selected .activity-dot,
 .activity-success .activity-dot {
-    background-color: var(--color-primary);
-    box-shadow: 0 0 8px var(--color-primary-glow);
+    background: var(--color-primary);
+    box-shadow: 0 0 8px rgba(159, 232, 112, 0.5);
 }
 
 .activity-payment .activity-dot {
-    background-color: var(--color-salmon);
+    background: var(--color-salmon);
+    box-shadow: 0 0 8px rgba(255, 179, 167, 0.5);
 }
 
 .activity-bid .activity-dot {
-    background-color: var(--color-lavender);
+    background: var(--color-lavender);
+    box-shadow: 0 0 8px rgba(198, 184, 255, 0.5);
 }
 
 .activity-content {
     flex: 1;
-    min-width: 0;
 }
 
 .activity-message {
@@ -446,78 +474,11 @@
 }
 
 /* ========================================
-   OPPORTUNITIES
-   ======================================== */
-
-.opportunities-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.opportunity-card {
-    background: linear-gradient(135deg,
-            var(--color-bg-card) 0%,
-            var(--color-bg-card-elevated) 100%);
-    border-radius: var(--radius-card);
-    padding: var(--spacing-lg);
-    border: 1px dashed var(--color-divider);
-    position: relative;
-    overflow: hidden;
-    transition: all 0.24s ease-out;
-}
-
-.opportunity-card:hover {
-    border-style: solid;
-    border-color: var(--color-lavender);
-    transform: translateY(-2px);
-}
-
-.opp-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-}
-
-.opp-brand {
-    font-size: var(--text-body);
-    font-weight: var(--weight-semibold);
-    color: var(--color-text-primary);
-}
-
-.opp-details {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
-}
-
-.opp-pay {
-    font-size: var(--text-body);
-    font-weight: var(--weight-semibold);
-    color: var(--color-primary);
-}
-
-.opp-platform {
-    font-size: 11px;
-    color: var(--color-text-muted);
-    padding: 2px 8px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-chip);
-}
-
-.opp-status {
-    font-size: var(--text-meta);
-    color: var(--color-lavender);
-}
-
-/* ========================================
-   REPUTATION
+   REPUTATION - With Glow
    ======================================== */
 
 .reputation-card {
-    background: linear-gradient(135deg,
+    background: linear-gradient(145deg,
             var(--color-bg-card) 0%,
             var(--color-bg-card-elevated) 100%);
     border-radius: var(--radius-card);
@@ -531,11 +492,13 @@
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     background: rgba(159, 232, 112, 0.1);
+    border: 1px solid rgba(159, 232, 112, 0.2);
     border-radius: var(--radius-chip);
     margin-bottom: var(--spacing-lg);
     font-size: var(--text-meta);
     font-weight: var(--weight-medium);
     color: var(--color-primary);
+    box-shadow: 0 0 16px rgba(159, 232, 112, 0.1);
 }
 
 .reputation-stats {
@@ -559,7 +522,7 @@
 .rep-bar-container {
     flex: 1;
     height: 4px;
-    background-color: var(--color-divider);
+    background: var(--color-divider);
     border-radius: 2px;
     overflow: hidden;
 }
@@ -591,7 +554,7 @@
 }
 
 /* ========================================
-   PRIMARY ACTION
+   ACTION SECTION
    ======================================== */
 
 .action-section {

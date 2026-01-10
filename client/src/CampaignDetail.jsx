@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Info, FileText, Loader } from 'lucide-react';
+import { apiFetch } from './apiClient';
 
 const CampaignDetail = () => {
     const { id } = useParams();
@@ -14,9 +15,9 @@ const CampaignDetail = () => {
 
     useEffect(() => {
         // Fetch Campaign Data
-        const p1 = fetch(`/api/campaigns/${id}`).then(res => res.json());
+        const p1 = apiFetch(`/api/campaigns/${id}`).then(res => res.json());
         // Fetch Content Submissions (Demo: Fetch all for now)
-        const p2 = fetch('/api/content').then(res => res.json());
+        const p2 = apiFetch('/api/content').then(res => res.json());
 
         Promise.all([p1, p2])
             .then(([campaignData, contentData]) => {

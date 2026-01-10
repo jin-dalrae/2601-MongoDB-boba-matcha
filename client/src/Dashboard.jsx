@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { User, Loader, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from './apiClient';
 
 const Dashboard = () => {
     const [data, setData] = useState(null);
@@ -8,7 +9,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('/api/dashboard')
+        apiFetch('/api/dashboard')
             .then(res => res.json())
             .then(d => {
                 setData(d);

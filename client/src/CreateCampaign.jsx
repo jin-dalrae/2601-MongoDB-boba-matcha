@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { apiFetch } from './apiClient';
 
 const CreateCampaign = () => {
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ const CreateCampaign = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('/api/campaigns', {
+            const response = await apiFetch('/api/campaigns', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

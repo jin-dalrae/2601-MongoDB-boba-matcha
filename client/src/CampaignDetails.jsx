@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, MessageCircle, BarChart2, CheckCircle } from 'lucide-react';
+import { apiFetch } from './apiClient';
 
 const CampaignDetails = () => {
     const { id } = useParams();
@@ -20,7 +21,7 @@ const CampaignDetails = () => {
 
     const fetchBids = async () => {
         try {
-            const res = await fetch(`/api/campaigns/${id}/bids`);
+            const res = await apiFetch(`/api/campaigns/${id}/bids`);
             const data = await res.json();
             setBids(data);
         } catch (err) {
@@ -30,7 +31,7 @@ const CampaignDetails = () => {
 
     const fetchContract = async (contractId) => {
         try {
-            const res = await fetch(`http://localhost:3000/api/contracts/${contractId}`);
+            const res = await apiFetch(`/api/contracts/${contractId}`);
             if (res.ok) {
                 const data = await res.json();
                 setContract(data);
@@ -45,7 +46,7 @@ const CampaignDetails = () => {
         try {
             const targetBid = selectedBid || bids[0];
 
-            const res = await fetch('/api/agent/select', {
+            const res = await apiFetch('/api/agent/select', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ campaignId: id, bidId: targetBid._id })
@@ -70,7 +71,7 @@ const CampaignDetails = () => {
     const handleVerifyWork = async () => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:3000/api/contracts/verify', {
+            const res = await apiFetch('/api/contracts/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contractId: contract._id })

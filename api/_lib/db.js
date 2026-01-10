@@ -42,16 +42,24 @@ const autoBidSchema = new mongoose.Schema({
     creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     current_bid: Number,
     status: { type: String, default: 'Pending' },
+    pitch: String,
+    profileStats: Object,
+    negotiationLog: Object,
     createdAt: { type: Date, default: Date.now }
 });
 
 const contractSchema = new mongoose.Schema({
     autoBidId: { type: mongoose.Schema.Types.ObjectId, ref: 'AutoBid' },
+    campaignId: { type: mongoose.Schema.Types.ObjectId, ref: 'Campaign' },
     advertiserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     base_payout: Number,
     audit_criteria: String,
     status: { type: String, default: 'Pending' },
+    escrowTx: String,
+    releaseTx: String,
+    submissionUrl: String,
+    verificationReasoning: String,
     createdAt: { type: Date, default: Date.now }
 });
 

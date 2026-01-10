@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, CheckCircle, Loader, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from './apiClient';
 
 const Campaigns = () => {
     const [campaigns, setCampaigns] = useState([]);
@@ -8,7 +9,7 @@ const Campaigns = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('/api/campaigns')
+        apiFetch('/api/campaigns')
             .then(res => res.json())
             .then(data => {
                 setCampaigns(data);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, Clock, Loader } from 'lucide-react';
+import { apiFetch } from './apiClient';
 
 const Payments = () => {
     const [pending, setPending] = useState([]);
@@ -7,7 +8,7 @@ const Payments = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/payments')
+        apiFetch('/api/payments')
             .then(res => res.json())
             .then(data => {
                 setPending(data.pending);

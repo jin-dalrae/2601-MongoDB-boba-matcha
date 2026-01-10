@@ -93,7 +93,7 @@ const CampaignDetails = () => {
     };
 
     return (
-        <div className="p-4 page-container h-full flex flex-col">
+        <div className="p-4 page-container negotiation-layout">
             <div className="flex items-center mb-6">
                 <button onClick={() => navigate(-1)} className="mr-4 text-muted">
                     <ArrowLeft size={24} />
@@ -101,135 +101,47 @@ const CampaignDetails = () => {
                 <h1 className="text-page-title text-accent">Campaign Negotiation</h1>
             </div>
 
-            <div className="flex-1 overflow-hidden flex gap-4">
-                {/* Left: Top Profiles & Agent View */}
-                <div className="w-1/3 flex flex-col gap-4">
-                    <div className="card bg-[#1E1E1E]">
-                        <h2 className="text-section-header mb-4">Top Candidates</h2>
-                        <div className="space-y-3">
-                            {bids.slice(0, 5).map((bid, idx) => (
-                                <div key={bid._id}
-                                    className={`p-3 rounded cursor-pointer border transition-colors ${selectedBid?._id === bid._id ? 'border-accent bg-[#2A302C]' : 'border-transparent bg-[#121212] hover:bg-[#1A1D1E]'}`}
-                                    onClick={() => setSelectedBid(bid)}
-                                >
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="font-bold text-white">{bid.creatorId?.name || 'Creator'}</span>
-                                        <span className="text-accent font-mono">${bid.current_bid}</span>
-                                    </div>
-                                    <div className="text-sm text-gray-400 italic mb-2 line-clamp-2">"{bid.pitch || 'No pitch provided'}"</div>
-
-                                    <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-muted">
-                                        <div className="flex justify-between">
-                                            <span>Followers:</span>
-                                            <span className="text-white">{bid.profileStats?.followers.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>Engagement:</span>
-                                            <span className="text-white">{bid.profileStats?.engagement}</span>
-                                        </div>
-                                        <div className="flex justify-between col-span-2 border-t border-gray-800 pt-1 mt-1">
-                                            <span>Category:</span>
-                                            <span className="text-accent">{bid.profileStats?.product_category}</span>
-                                        </div>
-                                        <div className="col-span-2 text-[10px] text-gray-500 truncate">
-                                            Audience: {bid.profileStats?.target_audience}
-                                        </div>
-                                    </div>
+            <div className="negotiation-top">
+                {/* Left: Top Profiles */}
+                <div className="card bg-[#1E1E1E]">
+                    <h2 className="text-section-header mb-4">Top Candidates</h2>
+                    <div className="space-y-3">
+                        {bids.slice(0, 5).map((bid) => (
+                            <div key={bid._id}
+                                className={`p-3 rounded cursor-pointer border transition-colors ${selectedBid?._id === bid._id ? 'border-accent bg-[#2A302C]' : 'border-transparent bg-[#121212] hover:bg-[#1A1D1E]'}`}
+                                onClick={() => setSelectedBid(bid)}
+                            >
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="font-bold text-white">{bid.creatorId?.name || 'Creator'}</span>
+                                    <span className="text-accent font-mono">${bid.current_bid}</span>
                                 </div>
-                            ))}
-                            {bids.length === 0 && <div className="text-muted text-center py-4">No bids yet</div>}
-                        </div>
-                    </div>
+                                <div className="text-sm text-gray-400 italic mb-2 line-clamp-2">"{bid.pitch || 'No pitch provided'}"</div>
 
-                    {/* Agent Action Area */}
-                    <div className="card bg-[#1E1E1E] flex-1 flex flex-col p-4 relative overflow-hidden">
-                        <h2 className="text-section-header mb-4 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-                            Agent Workflow
-                        </h2>
-
-                        {!contract ? (
-                            <div className="text-center py-8">
-                                <p className="text-muted text-sm mb-4">Ready to analyze negotiation logs and select best match.</p>
-                                <button
-                                    onClick={handleRunAgent}
-                                    disabled={loading || bids.length === 0}
-                                    className="w-full bg-accent text-black font-bold py-3 rounded hover:opacity-90 disabled:opacity-50"
-                                >
-                                    {loading ? 'Analyzing...' : 'Run Auto-Selection'}
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="space-y-6 relative h-full overflow-y-auto pr-2 custom-scrollbar">
-                                {/* Timeline Line */}
-                                <div className="absolute left-2.5 top-2 bottom-2 w-0.5 bg-gray-700"></div>
-
-                                {/* Step 1: Selection & Escrow */}
-                                <div className="relative pl-8">
-                                    <div className="absolute left-0 w-5 h-5 rounded-full bg-accent flex items-center justify-center text-black text-xs font-bold">1</div>
-                                    <h3 className="text-white font-bold text-sm">Escrow Funded</h3>
-                                    <p className="text-xs text-gray-400 font-mono mb-2">{contract.escrowTx?.substr(0, 18)}...</p>
-                                    <div className="bg-[#2A302C] p-2 rounded text-xs text-gray-300 italic border-l-2 border-accent mb-2">
-                                        "{contract.reasoning?.split('\n')[1] || 'Selected best match based on criteria.'}"
+                                <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-muted">
+                                    <div className="flex justify-between">
+                                        <span>Followers:</span>
+                                        <span className="text-white">{bid.profileStats?.followers.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex items-center gap-1 text-green-400 text-xs">
-                                        <CheckCircle size={12} /> <span>Funds Locked</span>
+                                    <div className="flex justify-between">
+                                        <span>Engagement:</span>
+                                        <span className="text-white">{bid.profileStats?.engagement}</span>
                                     </div>
-                                </div>
-
-                                {/* Step 2: Creator Upload */}
-                                <div className="relative pl-8">
-                                    <div className={`absolute left-0 w-5 h-5 rounded-full flex items-center justify-center text-black text-xs font-bold ${contract.status === 'WorkSubmitted' || contract.status === 'Released' ? 'bg-accent' : 'bg-gray-600'}`}>2</div>
-                                    <h3 className={`font-bold text-sm ${contract.status === 'WorkSubmitted' || contract.status === 'Released' ? 'text-white' : 'text-gray-500'}`}>Creator Work</h3>
-                                    {contract.status === 'EscrowFunded' && <p className="text-xs text-yellow-500 animate-pulse">Waiting for upload...</p>}
-                                    {(contract.status === 'WorkSubmitted' || contract.status === 'Released') && (
-                                        <div className="mt-1">
-                                            <a href="#" className="text-accent text-xs underline truncate block max-w-[200px]">{contract.submissionUrl || 'video_link.mp4'}</a>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Step 3: Verification */}
-                                <div className="relative pl-8">
-                                    <div className={`absolute left-0 w-5 h-5 rounded-full flex items-center justify-center text-black text-xs font-bold ${contract.status === 'Released' ? 'bg-accent' : 'bg-gray-600'}`}>3</div>
-                                    <h3 className={`font-bold text-sm ${contract.status === 'Released' ? 'text-white' : 'text-gray-500'}`}>Video Verification</h3>
-
-                                    {contract.status === 'WorkSubmitted' && (
-                                        <div className="mt-2">
-                                            <button
-                                                onClick={handleVerifyWork}
-                                                disabled={loading}
-                                                className="bg-white text-black text-xs px-3 py-1 rounded font-bold hover:bg-gray-200 w-full"
-                                            >
-                                                {loading ? 'AI Analyzing...' : 'Verify Content'}
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {contract.status === 'Released' && (
-                                        <div className="bg-[#2A302C] p-2 rounded text-xs text-gray-300 border-l-2 border-accent mt-2">
-                                            {contract.verificationReasoning}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Step 4: Release */}
-                                <div className="relative pl-8">
-                                    <div className={`absolute left-0 w-5 h-5 rounded-full flex items-center justify-center text-black text-xs font-bold ${contract.status === 'Released' ? 'bg-accent' : 'bg-gray-600'}`}>4</div>
-                                    <h3 className={`font-bold text-sm ${contract.status === 'Released' ? 'text-white' : 'text-gray-500'}`}>Payment Released</h3>
-                                    {contract.status === 'Released' && (
-                                        <div className="flex items-center gap-1 text-green-400 text-xs mt-1">
-                                            <CheckCircle size={12} /> <span>TX: {contract.releaseTx?.substr(0, 10)}...</span>
-                                        </div>
-                                    )}
+                                    <div className="flex justify-between col-span-2 border-t border-gray-800 pt-1 mt-1">
+                                        <span>Category:</span>
+                                        <span className="text-accent">{bid.profileStats?.product_category}</span>
+                                    </div>
+                                    <div className="col-span-2 text-[10px] text-gray-500 truncate">
+                                        Audience: {bid.profileStats?.target_audience}
+                                    </div>
                                 </div>
                             </div>
-                        )}
+                        ))}
+                        {bids.length === 0 && <div className="text-muted text-center py-4">No bids yet</div>}
                     </div>
                 </div>
 
                 {/* Right: Negotiation Detail / Graph */}
-                <div className="w-2/3 card bg-[#1E1E1E] flex flex-col">
+                <div className="card bg-[#1E1E1E] flex flex-col">
                     <h2 className="text-section-header mb-4">Negotiation History</h2>
 
                     {/* Placeholder Graph Area */}
@@ -278,6 +190,92 @@ const CampaignDetails = () => {
                         )}
                     </div>
                 </div>
+            </div>
+
+            {/* Agent Action Area */}
+            <div className="card bg-[#1E1E1E] agent-workflow p-4 relative overflow-hidden">
+                <h2 className="text-section-header mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+                    Agent Workflow
+                </h2>
+
+                {!contract ? (
+                    <div className="text-center py-8">
+                        <p className="text-muted text-sm mb-4">Ready to analyze negotiation logs and select best match.</p>
+                        <button
+                            onClick={handleRunAgent}
+                            disabled={loading || bids.length === 0}
+                            className="w-full bg-accent text-black font-bold py-3 rounded hover:opacity-90 disabled:opacity-50"
+                        >
+                            {loading ? 'Analyzing...' : 'Run Auto-Selection'}
+                        </button>
+                    </div>
+                ) : (
+                    <div className="space-y-6 relative overflow-y-auto pr-2 custom-scrollbar">
+                        {/* Timeline Line */}
+                        <div className="absolute left-2.5 top-2 bottom-2 w-0.5 bg-gray-700"></div>
+
+                        {/* Step 1: Selection & Escrow */}
+                        <div className="relative pl-8">
+                            <div className="absolute left-0 w-5 h-5 rounded-full bg-accent flex items-center justify-center text-black text-xs font-bold">1</div>
+                            <h3 className="text-white font-bold text-sm">Escrow Funded</h3>
+                            <p className="text-xs text-gray-400 font-mono mb-2">{contract.escrowTx?.substr(0, 18)}...</p>
+                            <div className="bg-[#2A302C] p-2 rounded text-xs text-gray-300 italic border-l-2 border-accent mb-2">
+                                "{contract.reasoning?.split('\n')[1] || 'Selected best match based on criteria.'}"
+                            </div>
+                            <div className="flex items-center gap-1 text-green-400 text-xs">
+                                <CheckCircle size={12} /> <span>Funds Locked</span>
+                            </div>
+                        </div>
+
+                        {/* Step 2: Creator Upload */}
+                        <div className="relative pl-8">
+                            <div className={`absolute left-0 w-5 h-5 rounded-full flex items-center justify-center text-black text-xs font-bold ${contract.status === 'WorkSubmitted' || contract.status === 'Released' ? 'bg-accent' : 'bg-gray-600'}`}>2</div>
+                            <h3 className={`font-bold text-sm ${contract.status === 'WorkSubmitted' || contract.status === 'Released' ? 'text-white' : 'text-gray-500'}`}>Creator Work</h3>
+                            {contract.status === 'EscrowFunded' && <p className="text-xs text-yellow-500 animate-pulse">Waiting for upload...</p>}
+                            {(contract.status === 'WorkSubmitted' || contract.status === 'Released') && (
+                                <div className="mt-1">
+                                    <a href="#" className="text-accent text-xs underline truncate block max-w-[200px]">{contract.submissionUrl || 'video_link.mp4'}</a>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Step 3: Verification */}
+                        <div className="relative pl-8">
+                            <div className={`absolute left-0 w-5 h-5 rounded-full flex items-center justify-center text-black text-xs font-bold ${contract.status === 'Released' ? 'bg-accent' : 'bg-gray-600'}`}>3</div>
+                            <h3 className={`font-bold text-sm ${contract.status === 'Released' ? 'text-white' : 'text-gray-500'}`}>Video Verification</h3>
+
+                            {contract.status === 'WorkSubmitted' && (
+                                <div className="mt-2">
+                                    <button
+                                        onClick={handleVerifyWork}
+                                        disabled={loading}
+                                        className="bg-white text-black text-xs px-3 py-1 rounded font-bold hover:bg-gray-200 w-full"
+                                    >
+                                        {loading ? 'AI Analyzing...' : 'Verify Content'}
+                                    </button>
+                                </div>
+                            )}
+
+                            {contract.status === 'Released' && (
+                                <div className="bg-[#2A302C] p-2 rounded text-xs text-gray-300 border-l-2 border-accent mt-2">
+                                    {contract.verificationReasoning}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Step 4: Release */}
+                        <div className="relative pl-8">
+                            <div className={`absolute left-0 w-5 h-5 rounded-full flex items-center justify-center text-black text-xs font-bold ${contract.status === 'Released' ? 'bg-accent' : 'bg-gray-600'}`}>4</div>
+                            <h3 className={`font-bold text-sm ${contract.status === 'Released' ? 'text-white' : 'text-gray-500'}`}>Payment Released</h3>
+                            {contract.status === 'Released' && (
+                                <div className="flex items-center gap-1 text-green-400 text-xs mt-1">
+                                    <CheckCircle size={12} /> <span>TX: {contract.releaseTx?.substr(0, 10)}...</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

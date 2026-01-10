@@ -257,6 +257,63 @@ body {
   background-color: var(--color-accent-primary);
 }
 
+.page-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* Layout helpers for negotiation screen */
+.negotiation-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.negotiation-top {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.agent-workflow {
+  margin-top: 8px;
+}
+
+/* Forms */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.input-control,
+.textarea-control {
+  width: 100%;
+  background: #121212;
+  border: 1px solid #232626;
+  border-radius: 8px;
+  color: #fff;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.textarea-control {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 12px;
+}
+
 /* Navigation - Mobile Bottom Bar */
 .nav-bar {
   background-color: var(--color-bg-primary);

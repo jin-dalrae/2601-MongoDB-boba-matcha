@@ -8,6 +8,7 @@ import CampaignDetail from './CampaignDetail';
 import LandingPage from './LandingPage';
 import AdvertiserSignup from './AdvertiserSignup';
 import CreatorSignup from './CreatorSignup';
+import CreateCampaign from './CreateCampaign';
 
 // Wrapper for Layout to keep syntax clean
 const AppLayout = ({ children }) => <Layout>{children}</Layout>;
@@ -35,6 +36,12 @@ function App() {
         <Route path="/advertiser/campaigns" element={
           <AppLayout>
             <Campaigns />
+          </AppLayout>
+        } />
+
+        <Route path="/create-campaign" element={
+          <AppLayout>
+            <CreateCampaign />
           </AppLayout>
         } />
 

@@ -41,7 +41,7 @@ const Campaigns = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ maxWidth: '1000px' }}>
                 {campaigns.length === 0 ? (
                     <div className="col-span-2 text-center text-muted py-10">
                         No campaigns yet. Create one to get started!

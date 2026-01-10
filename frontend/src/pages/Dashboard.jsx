@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import TopBar from '../components/TopBar';
+import MatchaLogo from '../components/MatchaLogo';
 import StatusIndicator from '../components/StatusIndicator';
 import './Dashboard.css';
 
@@ -60,31 +60,10 @@ const agentActivity = [
     { id: 4, message: 'Payment of $2,900 confirmed', time: '2d ago', type: 'payment' }
 ];
 
-// Recommended Opportunities
-const opportunities = [
-    {
-        id: 1,
-        brand: 'Lululemon',
-        payRange: '$1,500–$3,000',
-        platform: 'TikTok',
-        status: 'Agent reviewing fit',
-        statusType: 'ai-working'
-    },
-    {
-        id: 2,
-        brand: 'Rare Beauty',
-        payRange: '$2,000–$4,000',
-        platform: 'Instagram',
-        status: 'Eligible',
-        statusType: 'active'
-    }
-];
-
 // Reputation data
 const reputationData = {
     deliveryReliability: 96,
     auditPassRate: 94,
-    avgRevisionRequests: 0.6,
     badge: 'High Reliability'
 };
 
@@ -129,13 +108,21 @@ export default function Dashboard() {
 
     return (
         <div className="page dashboard">
-            <TopBar showAvatar={true} showNotification={true} />
+            {/* Header with Logo */}
+            <header className={`dashboard-header ${showContent ? 'animate-in' : ''}`}>
+                <MatchaLogo size={32} />
+                <button className="notification-btn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    <span className="notification-badge">3</span>
+                </button>
+            </header>
 
             {/* Agent Status Bar */}
-            <div className={`agent-status-bar ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '0ms' }}>
-                <div className="agent-status-indicator">
-                    <StatusIndicator status="ai-working" size={16} />
-                </div>
+            <div className={`agent-status-bar ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '40ms' }}>
+                <StatusIndicator status="ai-working" size={16} />
                 <div className="agent-status-content">
                     <span className="agent-status-text">{agentStatus.status}</span>
                     <span className="agent-status-time">Last update: {agentStatus.lastUpdate}</span>
@@ -143,20 +130,19 @@ export default function Dashboard() {
             </div>
 
             {/* Notifications */}
-            <section className={`dashboard-section notifications-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '40ms' }}>
+            <section className={`dashboard-section notifications-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '80ms' }}>
                 <div className="notifications-scroll">
                     {notifications.map((notif) => (
                         <div key={notif.id} className={`notification-chip ${notif.type} ${notif.unread ? 'unread' : ''}`}>
                             <span className="notif-dot" />
                             <span className="notif-message">{notif.message}</span>
-                            <span className="notif-time">{notif.time}</span>
                         </div>
                     ))}
                 </div>
             </section>
 
-            {/* 1️⃣ Earnings Overview */}
-            <section className={`dashboard-section earnings-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '80ms' }}>
+            {/* Earnings Overview - with glow border */}
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
                 <h2 className="section-title">Earnings</h2>
                 <div className="earnings-card">
                     <div className="earnings-main">
@@ -180,14 +166,14 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            {/* 2️⃣ Active Pacts */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
+            {/* Active Pacts - with status glow */}
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '160ms' }}>
                 <h2 className="section-title">Active Pacts</h2>
                 <div className="pacts-list">
                     {activePacts.map((pact, index) => (
                         <div
                             key={pact.id}
-                            className="pact-card"
+                            className={`pact-card status-${pact.status}`}
                             style={{ '--stagger': `${index * 40}ms` }}
                         >
                             <div className="pact-header">
@@ -199,14 +185,7 @@ export default function Dashboard() {
                             </div>
                             <div className="pact-details">
                                 <div className="pact-meta">
-                                    <span className="meta-item">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                                            <line x1="8" y1="21" x2="16" y2="21" />
-                                            <line x1="12" y1="17" x2="12" y2="21" />
-                                        </svg>
-                                        {pact.platform}
-                                    </span>
+                                    <span className="meta-item">{pact.platform}</span>
                                     <span className="meta-item">{pact.deliverable}</span>
                                 </div>
                                 <div className="pact-footer">
@@ -222,8 +201,8 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            {/* 3️⃣ Agent Activity Feed */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '160ms' }}>
+            {/* Agent Activity Feed */}
+            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '200ms' }}>
                 <h2 className="section-title">Agent Activity</h2>
                 <div className="activity-feed">
                     {agentActivity.map((activity, index) => (
@@ -242,36 +221,12 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            {/* 4️⃣ Recommended Opportunities */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '200ms' }}>
-                <h2 className="section-title">Recommended</h2>
-                <div className="opportunities-list">
-                    {opportunities.map((opp, index) => (
-                        <div
-                            key={opp.id}
-                            className="opportunity-card"
-                            style={{ '--stagger': `${index * 40}ms` }}
-                        >
-                            <div className="opp-header">
-                                <h3 className="opp-brand">{opp.brand}</h3>
-                                <StatusIndicator status={opp.statusType} size={18} />
-                            </div>
-                            <div className="opp-details">
-                                <span className="opp-pay">{opp.payRange}</span>
-                                <span className="opp-platform">{opp.platform}</span>
-                            </div>
-                            <div className="opp-status">{opp.status}</div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* 5️⃣ Trust & Reliability */}
+            {/* Reputation - with glow badge */}
             <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '240ms' }}>
                 <h2 className="section-title">Your Reputation</h2>
                 <div className="reputation-card">
                     <div className="reputation-badge">
-                        <StatusIndicator status="active" size={16} />
+                        <StatusIndicator status="active" size={14} />
                         <span>{reputationData.badge}</span>
                     </div>
                     <div className="reputation-stats">
@@ -293,7 +248,7 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            {/* 6️⃣ Primary Action */}
+            {/* Primary Action */}
             <section className={`dashboard-section action-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '280ms' }}>
                 <button className="btn btn-primary btn-full">
                     Submit Content

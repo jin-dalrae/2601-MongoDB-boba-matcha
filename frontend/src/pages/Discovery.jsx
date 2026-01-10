@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react';
-import TopBar from '../components/TopBar';
-import FilterChips from '../components/FilterChips';
 import './Discovery.css';
 
 // Platform icons
 const PlatformIcon = ({ platform }) => {
     if (platform === 'TikTok') {
         return (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
             </svg>
         );
     }
     return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
@@ -39,19 +37,60 @@ const AIFitIndicator = ({ level }) => {
     );
 };
 
+// Brand logos as SVG icons
+const BrandLogo = ({ brand }) => {
+    const logos = {
+        'Glossier': (
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" />
+                <text x="12" y="16" textAnchor="middle" fontSize="10" fill="#0E0F0F" fontWeight="600">G</text>
+            </svg>
+        ),
+        'Notion': (
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+                <text x="12" y="16" textAnchor="middle" fontSize="10" fill="#0E0F0F" fontWeight="600">N</text>
+            </svg>
+        ),
+        'Lululemon': (
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 10 L12 16 L16 10" stroke="#0E0F0F" strokeWidth="2" fill="none" />
+            </svg>
+        ),
+        'Canva': (
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" />
+                <text x="12" y="16" textAnchor="middle" fontSize="10" fill="#0E0F0F" fontWeight="600">C</text>
+            </svg>
+        ),
+        'Spotify': (
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M7 10 Q12 8 17 10" stroke="#0E0F0F" strokeWidth="1.5" fill="none" />
+                <path d="M8 13 Q12 11 16 13" stroke="#0E0F0F" strokeWidth="1.5" fill="none" />
+                <path d="M9 16 Q12 14 15 16" stroke="#0E0F0F" strokeWidth="1.5" fill="none" />
+            </svg>
+        )
+    };
+    return <div className="brand-logo-icon">{logos[brand] || logos['Glossier']}</div>;
+};
+
+// Category filters
+const categories = ['All', 'Beauty', 'Fashion', 'Lifestyle', 'Fitness', 'Productivity', 'Design'];
+
 // Open Deals data
 const openDeals = [
     {
         id: 1,
         brand: 'Glossier',
-        logo: 'G',
         category: 'Beauty',
         platform: 'TikTok',
         format: '1 video',
-        description: 'Looking for creators to feature our Summer Skin Tint. Focus on natural lighting, minimal makeup, and GRWM-style content.',
+        description: 'Looking for creators to feature our Summer Skin Tint. Focus on natural lighting and GRWM-style content.',
         deliverable: '1 TikTok (15–30s)',
         deliverableNote: 'Usage + mention in first 5 seconds',
-        timeline: 'Post within 7 days of product arrival',
+        timeline: 'Post within 7 days',
         budgetRange: '$500 – $1,000',
         aiFit: 4,
         isNew: true
@@ -59,7 +98,6 @@ const openDeals = [
     {
         id: 2,
         brand: 'Notion',
-        logo: 'N',
         category: 'Productivity',
         platform: 'TikTok',
         format: '1 video',
@@ -74,7 +112,6 @@ const openDeals = [
     {
         id: 3,
         brand: 'Lululemon',
-        logo: 'L',
         category: 'Fitness',
         platform: 'TikTok',
         format: '1 clip',
@@ -89,7 +126,6 @@ const openDeals = [
     {
         id: 4,
         brand: 'Canva',
-        logo: 'C',
         category: 'Design',
         platform: 'TikTok',
         format: '1 video',
@@ -104,8 +140,7 @@ const openDeals = [
     {
         id: 5,
         brand: 'Spotify',
-        logo: 'S',
-        category: 'Music',
+        category: 'Lifestyle',
         platform: 'Instagram',
         format: '1 Reel',
         description: 'Create a "day in my life" Reel featuring Spotify playlists and listening moments.',
@@ -118,10 +153,8 @@ const openDeals = [
     }
 ];
 
-const filterOptions = ['All', 'TikTok', 'Instagram', 'High Fit', 'New'];
-
 export default function Discovery({ onSelectCampaign }) {
-    const [activeFilter, setActiveFilter] = useState('All');
+    const [activeCategory, setActiveCategory] = useState('All');
     const [showContent, setShowContent] = useState(false);
     const [expandedCard, setExpandedCard] = useState(null);
 
@@ -131,33 +164,35 @@ export default function Discovery({ onSelectCampaign }) {
     }, []);
 
     const filteredDeals = openDeals.filter(deal => {
-        if (activeFilter === 'All') return true;
-        if (activeFilter === 'TikTok') return deal.platform === 'TikTok';
-        if (activeFilter === 'Instagram') return deal.platform === 'Instagram';
-        if (activeFilter === 'High Fit') return deal.aiFit >= 4;
-        if (activeFilter === 'New') return deal.isNew;
-        return true;
+        if (activeCategory === 'All') return true;
+        return deal.category === activeCategory;
     });
 
     const handleCardClick = (deal) => {
-        if (expandedCard === deal.id) {
-            setExpandedCard(null);
-        } else {
-            setExpandedCard(deal.id);
-        }
+        setExpandedCard(expandedCard === deal.id ? null : deal.id);
     };
 
     return (
         <div className="page discovery">
-            <TopBar title="Discover" showBack={false} />
+            {/* Left-aligned page header */}
+            <header className={`page-header ${showContent ? 'animate-in' : ''}`}>
+                <h1 className="page-title">Discover</h1>
+                <p className="page-subtitle">Campaigns matched to you</p>
+            </header>
 
-            {/* Filters */}
-            <div className={`discover-filters ${showContent ? 'animate-in' : ''}`}>
-                <FilterChips
-                    options={filterOptions}
-                    activeOption={activeFilter}
-                    onSelect={setActiveFilter}
-                />
+            {/* Category filter capsules */}
+            <div className={`category-filters ${showContent ? 'animate-in' : ''}`}>
+                <div className="category-scroll">
+                    {categories.map((cat) => (
+                        <button
+                            key={cat}
+                            className={`category-capsule ${activeCategory === cat ? 'active' : ''}`}
+                            onClick={() => setActiveCategory(cat)}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Deal Cards */}
@@ -172,7 +207,7 @@ export default function Discovery({ onSelectCampaign }) {
                         {/* Card Header */}
                         <div className="deal-header">
                             <div className="deal-brand-info">
-                                <div className="brand-logo">{deal.logo}</div>
+                                <BrandLogo brand={deal.brand} />
                                 <div className="brand-details">
                                     <h3 className="brand-name">{deal.brand}</h3>
                                     <div className="brand-meta">
@@ -182,8 +217,6 @@ export default function Discovery({ onSelectCampaign }) {
                                             <PlatformIcon platform={deal.platform} />
                                             {deal.platform}
                                         </span>
-                                        <span className="separator">•</span>
-                                        <span className="format">{deal.format}</span>
                                     </div>
                                 </div>
                             </div>

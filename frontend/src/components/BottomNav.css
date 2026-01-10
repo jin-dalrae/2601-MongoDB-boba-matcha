@@ -1,5 +1,5 @@
 /* ========================================
-   FLOATING CAPSULE NAVIGATION - Refined
+   FLOATING CAPSULE NAVIGATION - Enhanced
    ======================================== */
 
 .floating-nav {
@@ -9,8 +9,8 @@
     transform: translateX(-50%);
     width: 100%;
     max-width: 430px;
-    padding: var(--spacing-lg) var(--spacing-xl);
-    padding-bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom, 24px));
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    padding-bottom: calc(var(--spacing-xl) + env(safe-area-inset-bottom, 28px));
     display: flex;
     justify-content: center;
     z-index: 100;
@@ -22,44 +22,41 @@
     align-items: center;
     justify-content: space-around;
     width: 100%;
-    max-width: 320px;
-    height: 56px;
-    padding: 0 var(--spacing-lg);
-    background: rgba(18, 20, 20, 0.92);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border-radius: 28px;
-    border: 1px solid rgba(159, 232, 112, 0.12);
+    max-width: 300px;
+    height: 64px;
+    padding: 0 var(--spacing-xl);
+    background: rgba(14, 15, 15, 0.88);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border-radius: 32px;
+    border: 1px solid rgba(159, 232, 112, 0.15);
     box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.5),
-        0 4px 12px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04),
-        inset 0 0 0 1px rgba(159, 232, 112, 0.06);
+        0 -4px 24px rgba(0, 0, 0, 0.3),
+        0 16px 48px rgba(0, 0, 0, 0.5),
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 0 0 1px rgba(159, 232, 112, 0.08);
     pointer-events: auto;
-    transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .floating-nav.pressed .nav-pill {
-    transform: scale(0.98);
-    box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.4),
-        0 2px 8px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transform: scale(0.97);
 }
 
 .nav-item {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 52px;
-    height: 44px;
+    width: 56px;
+    height: 48px;
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--color-text-muted);
+    color: rgba(124, 132, 129, 0.8);
     position: relative;
-    border-radius: 22px;
-    transition: all 0.24s ease-out;
+    border-radius: 24px;
+    transition: all 0.28s ease-out;
 }
 
 .nav-item:hover {
@@ -71,7 +68,7 @@
 }
 
 .nav-item:active {
-    transform: scale(0.92);
+    transform: scale(0.88);
 }
 
 .nav-icon {
@@ -79,41 +76,57 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    transition: transform 0.24s ease-out;
+    transition: transform 0.28s ease-out;
 }
 
 .nav-item.active .nav-icon {
-    transform: scale(1.15);
+    transform: scale(1.12);
 }
 
-/* Green halo behind active icon */
+/* Static premium glow for active icon */
 .icon-glow {
     position: absolute;
     inset: -12px;
     background: radial-gradient(circle,
             rgba(159, 232, 112, 0.25) 0%,
-            rgba(159, 232, 112, 0.08) 40%,
             transparent 70%);
     border-radius: 50%;
-    animation: halo-pulse 2.5s ease-in-out infinite;
+    opacity: 0.8;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Shimmer effect on state change */
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(159, 232, 112, 0.2) 50%,
+            transparent 100%);
+    border-radius: 24px;
+    animation: shimmerIn 0.4s ease-out;
     pointer-events: none;
 }
 
-@keyframes halo-pulse {
-
-    0%,
-    100% {
-        opacity: 0.7;
-        transform: scale(1);
+@keyframes shimmerIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-100%);
     }
 
     50% {
-        opacity: 0.4;
-        transform: scale(1.08);
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
     }
 }
 
-/* Remove any dot indicators - clean active state only */
+/* Remove dot indicator */
 .nav-item.active::after {
     display: none;
 }

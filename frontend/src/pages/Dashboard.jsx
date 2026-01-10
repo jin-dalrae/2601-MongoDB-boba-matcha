@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import MatchaLogo from '../components/MatchaLogo';
 import StatusIndicator from '../components/StatusIndicator';
+import TopBar from '../components/TopBar';
 import './Dashboard.css';
 
 // Earnings data
@@ -109,16 +110,7 @@ export default function Dashboard() {
     return (
         <div className="page dashboard">
             {/* Header with Logo */}
-            <header className={`dashboard-header ${showContent ? 'animate-in' : ''}`}>
-                <MatchaLogo size={32} />
-                <button className="notification-btn">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
-                    <span className="notification-badge">3</span>
-                </button>
-            </header>
+            <TopBar showAvatar={true} showNotification={true} />
 
             {/* Agent Status Bar */}
             <div className={`agent-status-bar ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '40ms' }}>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import StatusIndicator from '../components/StatusIndicator';
+import NegotiationModal from '../components/NegotiationModal';
 import './Deals.css';
 
 // Deal states
@@ -50,6 +51,7 @@ const actionRequired = [
 
 export default function Deals({ onBack }) {
     const [showContent, setShowContent] = useState(false);
+    const [negotiatingDeal, setNegotiatingDeal] = useState(null);
 
     useEffect(() => {
         const timer = setTimeout(() => setShowContent(true), 100);
@@ -65,6 +67,10 @@ export default function Deals({ onBack }) {
             }).format(amount);
         }
         return amount;
+    };
+
+    const handleStartNegotiation = (deal) => {
+        setNegotiatingDeal(deal);
     };
 
     return (
@@ -106,8 +112,14 @@ export default function Deals({ onBack }) {
                                     </div>
                                 </div>
                                 <div className="deal-actions">
-                                    <button className="btn btn-primary">Accept</button>
-                                    <button className="btn btn-secondary">Adjust</button>
+                                    <button
+                                        className="btn btn-primary interaction-press"
+                                        onClick={() => handleStartNegotiation(deal)}
+                                    >
+                                        Start Bidding
+                                    </button>
+                                    <button className="btn btn-secondary interaction-press">Adjust</button>
+                                    <div style={{ flex: 1 }}></div>
                                     <button className="btn-text">Decline</button>
                                 </div>
                             </div>
@@ -155,8 +167,9 @@ export default function Deals({ onBack }) {
 
                                 {deal.status === 'counter' && (
                                     <div className="deal-actions">
-                                        <button className="btn btn-primary">Accept</button>
-                                        <button className="btn btn-secondary">Counter</button>
+                                        <button className="btn btn-primary interaction-press">Accept</button>
+                                        <button className="btn btn-secondary interaction-press">Counter</button>
+                                        <div style={{ flex: 1 }}></div>
                                         <button className="btn-text">Decline</button>
                                     </div>
                                 )}
@@ -183,7 +196,7 @@ export default function Deals({ onBack }) {
                                     </div>
                                 </div>
                                 <p className="action-issue">{deal.issue}</p>
-                                <button className="btn btn-primary btn-full">
+                                <button className="btn btn-primary btn-full interaction-press">
                                     Respond via agent
                                 </button>
                             </div>
@@ -191,6 +204,13 @@ export default function Deals({ onBack }) {
                     </div>
                 </section>
             )}
+
+            {/* Negotiation Flow */}
+            <NegotiationModal
+                isOpen={!!negotiatingDeal}
+                campaign={negotiatingDeal}
+                onClose={() => setNegotiatingDeal(null)}
+            />
         </div>
     );
 }

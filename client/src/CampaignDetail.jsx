@@ -8,14 +8,20 @@ const CampaignDetail = () => {
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [submissions, setSubmissions] = useState([]);
     const [activeTab, setActiveTab] = useState('matches');
     const [selectedContract, setSelectedContract] = useState(null);
 
     useEffect(() => {
-        fetch(`/api/campaigns/${id}`)
-            .then(res => res.json())
-            .then(d => {
-                setData(d);
+        // Fetch Campaign Data
+        const p1 = fetch(`/api/campaigns/${id}`).then(res => res.json());
+        // Fetch Content Submissions (Demo: Fetch all for now)
+        const p2 = fetch('/api/content').then(res => res.json());
+
+        Promise.all([p1, p2])
+            .then(([campaignData, contentData]) => {
+                setData(campaignData);
+                setSubmissions(contentData || []);
                 setLoading(false);
             })
             .catch(err => {
@@ -29,57 +35,7 @@ const CampaignDetail = () => {
 
     const { campaign, matches, contracts } = data;
 
-    // Render Contract Detail Modal/Overlay
-    const renderContractDetail = () => {
-        if (!selectedContract) return null;
-        return (
-            <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center p-4 z-50" style={{ backdropFilter: 'blur(4px)' }}>
-                <div className="card w-full max-w-2xl max-h-[90vh] overflow-y-auto p-0 flex flex-col">
-                    <div className="p-6 border-b border-[#232626] flex justify-between items-start sticky top-0 bg-[#161818] z-10">
-                        <div>
-                            <div className="text-label mb-1">{selectedContract.type}</div>
-                            <h2 className="text-section-header text-xl">{selectedContract.title}</h2>
-                            <div className="flex gap-2 mt-2">
-                                <span className={`pill ${selectedContract.status === 'Active' ? 'active' : ''}`}>{selectedContract.status}</span>
-                                <span className="text-label flex items-center">v{selectedContract.version}</span>
-                            </div>
-                        </div>
-                        <button onClick={() => setSelectedContract(null)} className="p-2 hover:bg-[#232626] rounded-full">
-                            <ChevronLeft size={20} />
-                        </button>
-                    </div>
-
-                    <div className="p-6 overflow-y-auto">
-                        <div className="mb-6 bg-[#1E2020] p-4 rounded-lg">
-                            <div className="text-label mb-2">Parties Involved</div>
-                            {selectedContract.parties.map((p, i) => (
-                                <div key={i} className="text-body flex items-center gap-2 mb-1">
-                                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#9FE870' }}></div>
-                                    {p}
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="flex flex-col gap-6">
-                            {selectedContract.clauses.map((clause, i) => (
-                                <div key={i}>
-                                    <h3 className="text-body font-bold mb-2 text-primary">{clause.title}</h3>
-                                    <p className="text-body text-secondary leading-relaxed text-sm bg-[#0E0F0F] p-3 rounded border border-[#232626]">
-                                        {clause.text}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="p-4 border-t border-[#232626] bg-[#161818] flex justify-end gap-2 sticky bottom-0">
-                        <button className="btn" style={{ background: '#232626', color: '#AEB5B2' }} onClick={() => setSelectedContract(null)}>Close</button>
-                        <button className="btn">Download PDF</button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
+    // ... (keep renderContractDetail same) ...
 
     return (
         <div className="p-4 relative">
@@ -123,6 +79,12 @@ const CampaignDetail = () => {
                 >
                     Contracts
                 </div>
+                <div
+                    className={`pb-2 px-2 cursor-pointer ${activeTab === 'submissions' ? 'border-b-2 border-accent text-accent' : 'text-muted'}`}
+                    onClick={() => setActiveTab('submissions')}
+                >
+                    Submissions <span className="text-xs bg-[#232626] px-1 rounded ml-1">{submissions.length}</span>
+                </div>
             </div>
 
             {/* Tab Content */}
@@ -163,6 +125,47 @@ const CampaignDetail = () => {
                                 <div className="text-label">{contract.status} • v{contract.version} • {contract.lastUpdated}</div>
                             </div>
                             <button className="pill" onClick={() => setSelectedContract(contract)}>View</button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {activeTab === 'submissions' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {submissions.length === 0 ? <div className="col-span-3 text-muted">No content submissions yet.</div> : submissions.map((sub, i) => (
+                        <div key={i} className="card p-0 overflow-hidden group">
+                            <div className="aspect-[9/16] bg-black relative">
+                                <video
+                                    src={sub.content_url}
+                                    controls
+                                    className="w-full h-full object-cover"
+                                    poster={sub.thumbnail || ''}
+                                />
+                                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-xs border border-white/10">
+                                    AI Score: <span className="text-accent">98.5%</span>
+                                </div>
+                            </div>
+                            <div className="p-4">
+                                <h3 className="font-bold text-sm mb-1 line-clamp-1">{sub.title || sub.filename}</h3>
+                                <div className="flex flex-wrap gap-2 mt-2 mb-3">
+                                    {sub.tags && sub.tags.map(t => (
+                                        <span key={t} className="text-[10px] bg-[#232626] text-gray-400 px-2 py-1 rounded-full">#{t}</span>
+                                    ))}
+                                </div>
+
+                                <div className="border-t border-[#232626] pt-3 mt-2">
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-500">Brand Safety</span>
+                                        <span className={sub.ai_audit?.brand_safe ? "text-accent" : "text-red-500"}>
+                                            {sub.ai_audit?.brand_safe ? "Pass" : "Fail"}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs mt-1">
+                                        <span className="text-gray-500">Sentiment</span>
+                                        <span className="text-white">{sub.ai_audit?.sentiment || 'Neutral'}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>

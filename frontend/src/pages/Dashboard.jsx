@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import MatchaLogo from '../components/MatchaLogo';
 import StatusIndicator from '../components/StatusIndicator';
 import TopBar from '../components/TopBar';
+import SubmitContentModal from '../components/SubmitContentModal';
 import './Dashboard.css';
 
 // Earnings data
@@ -93,6 +94,7 @@ function useAnimatedCounter(target, duration = 1000) {
 export default function Dashboard() {
     const animatedTotal = useAnimatedCounter(earningsData.totalEarned, 1200);
     const [showContent, setShowContent] = useState(false);
+    const [showSubmitModal, setShowSubmitModal] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => setShowContent(true), 100);
@@ -242,10 +244,18 @@ export default function Dashboard() {
 
             {/* Primary Action */}
             <section className={`dashboard-section action-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '280ms' }}>
-                <button className="btn btn-primary btn-full">
+                <button
+                    className="btn btn-primary btn-full interaction-press"
+                    onClick={() => setShowSubmitModal(true)}
+                >
                     Submit Content
                 </button>
             </section>
+
+            <SubmitContentModal
+                isOpen={showSubmitModal}
+                onClose={() => setShowSubmitModal(false)}
+            />
         </div>
     );
 }

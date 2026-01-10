@@ -37,25 +37,14 @@ const MOCK_NOTIFICATIONS = [
 export default function NotificationModal({ isOpen, onClose }) {
     const [expandedId, setExpandedId] = useState(null);
 
-    // Don't render if not open (or handle via CSS opacity/pointer-events if we want animate out)
-    // For simplicity with the slide animation, we'll keep it mounted but hidden or conditionally render in parent
-    if (!isOpen) return null;
-
-    const toggleExpand = (id) => {
-        setExpandedId(expandedId === id ? null : id);
-    };
-
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-center" onClick={e => e.stopPropagation()}>
+        <div className={`notification-modal-wrapper ${isOpen ? 'open' : ''}`}>
+            <div className="slider-overlay" onClick={onClose} />
+            <div className="slider-content">
+                <div className="slider-handle" />
                 <div className="notification-header">
                     <h2 className="text-section-header">Notifications</h2>
-                    <button className="close-btn" onClick={onClose}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+                    <button className="close-btn" onClick={onClose}>Done</button>
                 </div>
 
                 <div className="notification-list">

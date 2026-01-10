@@ -1,156 +1,144 @@
 /* ========================================
-   ONBOARDING STYLES - Enhanced
+   ONBOARDING - Calm & Breathable
    ======================================== */
 
-/* Base Onboarding Screen */
-.onboarding-screen {
-    min-height: 100vh;
-    min-height: 100dvh;
+.onboarding-flow {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
     background-color: var(--color-bg-app);
-    padding: var(--page-padding);
+}
+
+.onboarding-step {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    pointer-events: none;
+}
+
+.onboarding-step.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+.onboarding-step.exited {
+    opacity: 0;
+    transform: translateX(-30%);
+}
+
+.onboarding-step.waiting {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+/* ========================================
+   SCREEN LAYOUT - With Safe Area
+   ======================================== */
+
+.onboarding-screen {
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--page-padding);
+    padding-top: calc(var(--safe-area-top) + var(--spacing-2xl));
+    padding-bottom: calc(var(--safe-area-bottom) + var(--spacing-xl));
+    background-color: var(--color-bg-app);
 }
 
 .onboarding-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    max-width: 400px;
-    margin: 0 auto;
-    width: 100%;
+    gap: var(--spacing-3xl);
 }
 
-.onboarding-content.centered {
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-/* Header with Back Button */
-.onboarding-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--spacing-lg) 0;
-    margin-bottom: var(--spacing-xl);
-}
-
-.back-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-divider-subtle);
-    color: var(--color-text-primary);
-    cursor: pointer;
-    margin-left: -8px;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-}
-
-.back-btn:hover {
-    background-color: var(--color-bg-card-elevated);
-    border-color: var(--color-divider);
-}
-
-/* Step Indicator */
-.step-indicator {
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-.step-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--color-divider);
-    transition: all 0.3s ease;
-}
-
-.step-dot.active {
-    background: linear-gradient(135deg, var(--color-primary) 0%, #8AD962 100%);
-    width: 24px;
-    border-radius: 4px;
-    box-shadow: 0 0 12px var(--color-primary-glow);
-}
-
-.step-dot.completed {
-    background-color: var(--color-primary);
+.onboarding-footer {
+    padding-top: var(--spacing-2xl);
 }
 
 /* ========================================
-   ROLE SELECTION (Screen 1)
+   LOGO SECTION
    ======================================== */
 
-.role-selection .logo-section {
+.logo-section {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-3xl);
+    justify-content: center;
+    padding-top: var(--spacing-3xl);
+    padding-bottom: var(--spacing-lg);
 }
 
-.welcome-text {
-    margin-bottom: var(--spacing-2xl);
+.platform-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-divider-subtle);
+}
+
+.platform-logo.tiktok {
+    color: var(--color-text-primary);
+}
+
+/* ========================================
+   HEADING SECTION
+   ======================================== */
+
+.heading-section {
+    text-align: center;
+    padding: 0 var(--spacing-lg);
 }
 
 .onboarding-title {
-    font-size: 24px;
-    font-weight: var(--weight-semibold);
+    font-size: 26px;
+    font-weight: var(--weight-bold);
     color: var(--color-text-primary);
-    margin-bottom: var(--spacing-sm);
-    line-height: 1.25;
+    margin-bottom: var(--spacing-md);
+    letter-spacing: -0.5px;
 }
 
 .onboarding-subtitle {
     font-size: var(--text-body);
-    color: var(--color-text-secondary);
-    line-height: 1.4;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    max-width: 280px;
+    margin: 0 auto;
 }
 
-/* Role Cards - Enhanced */
+/* ========================================
+   ROLE CARDS
+   ======================================== */
+
 .role-cards {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
-    width: 100%;
-    margin-bottom: var(--spacing-2xl);
+    gap: var(--spacing-lg);
+    padding: 0 var(--spacing-sm);
 }
 
 .role-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-xl);
-    background: linear-gradient(135deg,
+    gap: var(--spacing-md);
+    padding: var(--spacing-2xl) var(--spacing-xl);
+    background: linear-gradient(145deg,
             var(--color-bg-card) 0%,
             var(--color-bg-card-elevated) 100%);
-    border: 1px solid var(--color-divider-subtle);
-    border-radius: var(--radius-card);
+    border: 1.5px solid var(--color-divider-subtle);
+    border-radius: 24px;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.28s ease-out;
+    font-family: var(--font-ui);
     text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.role-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle,
-            rgba(159, 232, 112, 0.08) 0%,
-            transparent 60%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
 }
 
 .role-card:hover {
@@ -158,124 +146,76 @@
     transform: translateY(-2px);
 }
 
-.role-card:hover::before {
-    opacity: 1;
-}
-
 .role-card.selected {
-    border: 1px solid transparent;
-    background:
-        linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-bg-card-elevated) 100%) padding-box,
-        linear-gradient(135deg, var(--color-primary) 0%, rgba(159, 232, 112, 0.4) 100%) border-box;
-    transform: translateY(-2px);
-}
-
-.role-card.selected::before {
-    opacity: 1;
-    background: radial-gradient(circle at top right,
-            rgba(159, 232, 112, 0.12) 0%,
-            transparent 60%);
+    border-color: var(--color-primary);
+    background: linear-gradient(145deg,
+            rgba(159, 232, 112, 0.04) 0%,
+            var(--color-bg-card-elevated) 100%);
+    box-shadow: 0 0 24px rgba(159, 232, 112, 0.08);
 }
 
 .role-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg,
-            rgba(159, 232, 112, 0.1) 0%,
-            rgba(159, 232, 112, 0.05) 100%);
-    color: var(--color-primary);
-    margin-bottom: var(--spacing-sm);
-    transition: all 0.25s ease;
+    background: var(--color-bg-app);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    transition: color 0.24s ease-out;
 }
 
 .role-card.selected .role-icon {
-    background: linear-gradient(135deg,
-            rgba(159, 232, 112, 0.2) 0%,
-            rgba(159, 232, 112, 0.1) 100%);
-    box-shadow: 0 0 20px var(--color-primary-glow);
+    color: var(--color-primary);
 }
 
-.role-label {
+.role-name {
     font-size: var(--text-section-header);
     font-weight: var(--weight-semibold);
     color: var(--color-text-primary);
 }
 
-.role-description {
+.role-desc {
     font-size: var(--text-meta);
     color: var(--color-text-muted);
+    line-height: 1.4;
 }
 
 /* ========================================
-   ACCOUNT SETUP (Screen 2)
+   INPUT SECTION
    ======================================== */
 
-.account-setup .onboarding-title {
-    margin-bottom: var(--spacing-lg);
-}
-
-.onboarding-explanation {
-    font-size: var(--text-body);
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-    margin-bottom: var(--spacing-2xl);
-}
-
-.setup-form {
-    width: 100%;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.input-group {
-    margin-bottom: var(--spacing-2xl);
-}
-
-.input-label {
-    display: block;
-    font-size: var(--text-meta);
-    font-weight: var(--weight-medium);
-    color: var(--color-text-muted);
-    margin-bottom: var(--spacing-sm);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.input-section {
+    padding: 0 var(--spacing-sm);
 }
 
 .input-wrapper {
     display: flex;
     align-items: center;
-    background: linear-gradient(135deg,
-            var(--color-bg-card) 0%,
-            var(--color-bg-card-elevated) 100%);
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background: var(--color-bg-card);
     border: 1px solid var(--color-divider-subtle);
-    border-radius: var(--radius-button);
-    padding: 0 var(--spacing-lg);
-    transition: all 0.25s ease;
+    border-radius: var(--radius-card);
+    transition: border-color 0.18s ease-out;
 }
 
-.input-group.focused .input-wrapper {
+.input-wrapper:focus-within {
     border-color: var(--color-primary);
-    box-shadow: 0 0 16px var(--color-primary-glow);
 }
 
 .input-prefix {
-    font-size: var(--text-body);
+    font-size: var(--text-section-header);
     color: var(--color-text-muted);
-    margin-right: var(--spacing-xs);
 }
 
 .text-input {
     flex: 1;
-    padding: var(--spacing-lg) 0;
     background: none;
     border: none;
     font-family: var(--font-ui);
-    font-size: var(--text-body);
+    font-size: var(--text-section-header);
     color: var(--color-text-primary);
     outline: none;
 }
@@ -284,41 +224,92 @@
     color: var(--color-text-muted);
 }
 
-.trust-message {
-    font-size: var(--text-meta);
+/* ========================================
+   REASSURANCE
+   ======================================== */
+
+.reassurance {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
     color: var(--color-text-muted);
+    font-size: var(--text-meta);
     text-align: center;
-    margin-top: var(--spacing-lg);
+}
+
+.reassurance svg {
+    flex-shrink: 0;
+    opacity: 0.6;
 }
 
 /* ========================================
-   DATA LOADING (Screen 3)
+   DATA SYNC SCREEN
    ======================================== */
 
-.data-loading {
-    padding: var(--page-padding);
+.data-sync {
+    justify-content: center;
+    align-items: center;
 }
 
-.loading-logo {
-    margin-bottom: var(--spacing-3xl);
+.sync-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-3xl);
 }
 
-.loading-text {
-    margin-bottom: var(--spacing-2xl);
+.sync-logo {
+    animation: float 3s ease-in-out infinite;
 }
 
-.loading-title {
-    font-size: 22px;
-    font-weight: var(--weight-semibold);
-    color: var(--color-text-primary);
-    margin-bottom: var(--spacing-md);
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
 }
 
-.loading-message {
+.sync-dots {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-lavender);
+    animation: dotPulse 1.2s ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+}
+
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+.sync-status {
     font-size: var(--text-body);
-    color: var(--color-lavender);
-    min-height: 20px;
-    animation: fadeInUp 0.4s ease;
+    color: var(--color-text-secondary);
+    text-align: center;
+    min-height: 24px;
+    animation: fadeInUp 0.4s ease-out;
 }
 
 @keyframes fadeInUp {
@@ -333,153 +324,72 @@
     }
 }
 
-/* Progress Bar - Enhanced */
-.progress-container {
-    width: 100%;
-    max-width: 200px;
-}
-
-.progress-bar {
-    height: 4px;
-    background-color: var(--color-divider);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--color-lavender) 0%, var(--color-primary) 100%);
-    border-radius: 2px;
-    transition: width 0.1s linear;
-    box-shadow: 0 0 12px var(--color-lavender-glow);
-}
-
 /* ========================================
-   CONNECT BANK (Screen 4)
+   SUCCESS SCREEN
    ======================================== */
 
-.connect-bank .feature-icon {
-    display: flex;
-    align-items: center;
+.success-screen {
     justify-content: center;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: linear-gradient(135deg,
-            rgba(159, 232, 112, 0.15) 0%,
-            rgba(159, 232, 112, 0.05) 100%);
-    margin-bottom: var(--spacing-xl);
-    box-shadow: 0 0 32px var(--color-primary-glow);
+    align-items: center;
 }
 
-.connect-bank .onboarding-title {
-    margin-bottom: var(--spacing-md);
-}
-
-.bank-actions {
-    width: 100%;
-    margin-top: auto;
-    padding-top: var(--spacing-2xl);
-}
-
-.btn-text {
-    display: block;
-    width: 100%;
-    padding: var(--spacing-md);
-    background: none;
-    border: none;
-    font-family: var(--font-ui);
-    font-size: var(--text-body);
-    font-weight: var(--weight-medium);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: color 0.2s ease;
+.success-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-2xl);
     text-align: center;
+    animation: successPop 0.5s ease-out;
 }
 
-.btn-text:hover {
+@keyframes successPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.success-icon {
+    animation: checkDraw 0.6s ease-out 0.2s both;
+}
+
+@keyframes checkDraw {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.success-title {
+    font-size: 24px;
+    font-weight: var(--weight-bold);
     color: var(--color-text-primary);
 }
 
-.skip-btn {
-    margin-top: var(--spacing-md);
-}
-
-.security-note {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    padding-top: var(--spacing-xl);
-    font-size: var(--text-meta);
+.success-subtitle {
+    font-size: var(--text-body);
     color: var(--color-text-muted);
 }
 
 /* ========================================
-   COMPLETION (Screen 5)
+   BUTTON DISABLED STATE
    ======================================== */
 
-.completion .success-icon {
-    position: relative;
-    margin-bottom: var(--spacing-3xl);
-}
-
-.success-checkmark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--color-salmon) 0%, #FF9A8A 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: checkmark-pop 0.5s ease 0.3s both;
-    box-shadow: 0 0 24px var(--color-salmon-glow);
-}
-
-@keyframes checkmark-pop {
-    from {
-        transform: translate(-50%, -50%) scale(0);
-        opacity: 0;
-    }
-
-    50% {
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-
-    to {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
-}
-
-.completion-text {
-    margin-bottom: var(--spacing-2xl);
-}
-
-.completion .onboarding-title {
-    margin-bottom: var(--spacing-md);
-}
-
-.completion .onboarding-subtitle {
-    max-width: 280px;
-}
-
-/* ========================================
-   SHARED ONBOARDING CTA
-   ======================================== */
-
-.onboarding-cta {
-    margin-top: auto;
-    padding: var(--spacing-lg) var(--spacing-xl);
-    font-size: 16px;
-}
-
-.onboarding-cta:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none;
+.btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
 }

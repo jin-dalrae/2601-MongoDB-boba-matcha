@@ -1,17 +1,18 @@
 /* ========================================
-   DEALS PAGE - Refined with Glow
+   DEALS PAGE - Calm & Breathable
    ======================================== */
 
 .deals-page {
-    padding-top: 0;
+    padding-top: var(--safe-area-top);
 }
 
 /* Left-aligned page header */
 .page-header {
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+    padding-top: var(--spacing-sm);
     opacity: 0;
     transform: translateY(12px);
-    transition: opacity 0.32s ease-out, transform 0.32s ease-out;
+    transition: opacity 0.36s ease-out, transform 0.36s ease-out;
 }
 
 .page-header.animate-in {
@@ -20,10 +21,10 @@
 }
 
 .page-title {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: var(--weight-bold);
     color: var(--color-text-primary);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
     letter-spacing: -0.5px;
 }
 
@@ -34,10 +35,10 @@
 }
 
 .deals-section {
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: var(--spacing-section);
     opacity: 0;
     transform: translateY(16px);
-    transition: opacity 0.32s ease-out, transform 0.32s ease-out;
+    transition: opacity 0.36s ease-out, transform 0.36s ease-out;
     transition-delay: var(--delay, 0ms);
 }
 
@@ -50,7 +51,7 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
 }
 
 .section-title {
@@ -75,7 +76,7 @@
 .deals-list {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-card-gap);
 }
 
 /* ========================================
@@ -87,11 +88,11 @@
             var(--color-bg-card) 0%,
             var(--color-bg-card-elevated) 100%);
     border-radius: var(--radius-card);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-card-padding);
     border: 1px solid var(--color-divider-subtle);
     position: relative;
     overflow: hidden;
-    animation: staggerFadeIn 0.32s ease-out both;
+    animation: staggerFadeIn 0.36s ease-out both;
     animation-delay: var(--stagger, 0ms);
 }
 
@@ -111,7 +112,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
 }
 
 .deal-info {
@@ -122,7 +123,7 @@
     font-size: var(--text-body);
     font-weight: var(--weight-semibold);
     color: var(--color-text-primary);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
 .deal-campaign {
@@ -141,34 +142,17 @@
 
 .deal-card.ai-suggested {
     background: linear-gradient(145deg,
-            rgba(198, 184, 255, 0.06) 0%,
+            rgba(198, 184, 255, 0.05) 0%,
             var(--color-bg-card-elevated) 100%);
-    border: 1px solid rgba(198, 184, 255, 0.25);
-    box-shadow:
-        0 0 0 1px rgba(198, 184, 255, 0.08),
-        0 0 32px rgba(198, 184, 255, 0.1),
-        0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-.deal-card.ai-suggested::before {
-    content: '';
-    position: absolute;
-    top: -40%;
-    right: -40%;
-    width: 80%;
-    height: 80%;
-    background: radial-gradient(circle,
-            rgba(198, 184, 255, 0.12) 0%,
-            transparent 60%);
-    pointer-events: none;
+    border: 1px solid rgba(198, 184, 255, 0.2);
 }
 
 .ai-match {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: rgba(198, 184, 255, 0.12);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: rgba(198, 184, 255, 0.1);
     border-radius: var(--radius-card-md);
 }
 
@@ -186,10 +170,10 @@
 }
 
 .deal-suggestion {
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
     background: rgba(255, 255, 255, 0.02);
     border-radius: var(--radius-card-md);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
 }
 
 .suggestion-row {
@@ -223,15 +207,14 @@
    ======================================== */
 
 .deal-card.negotiation.counter {
-    border-color: rgba(242, 201, 76, 0.4);
-    box-shadow: 0 0 24px rgba(242, 201, 76, 0.08);
+    border-color: rgba(242, 201, 76, 0.25);
 }
 
 .negotiation-status {
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
     background: rgba(255, 255, 255, 0.02);
     border-radius: var(--radius-card-md);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
 }
 
 .bid-row {
@@ -267,10 +250,10 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: rgba(198, 184, 255, 0.08);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: rgba(198, 184, 255, 0.06);
     border-radius: var(--radius-card-md);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
     font-size: var(--text-meta);
     color: var(--color-lavender);
 }
@@ -280,16 +263,15 @@
    ======================================== */
 
 .deal-card.action-required {
-    border-color: rgba(235, 87, 87, 0.4);
-    box-shadow: 0 0 24px rgba(235, 87, 87, 0.08);
+    border-color: rgba(235, 87, 87, 0.25);
 }
 
 .action-issue {
     font-size: var(--text-body);
     color: var(--color-text-secondary);
     line-height: 1.5;
-    margin-bottom: var(--spacing-md);
-    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-lg);
     background: rgba(255, 255, 255, 0.02);
     border-radius: var(--radius-card-md);
     border-left: 3px solid var(--color-warning);
@@ -306,7 +288,7 @@
 
 .deal-actions .btn {
     flex: 1;
-    padding: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
 }
 
 .btn-text {
@@ -316,7 +298,7 @@
     font-size: var(--text-meta);
     font-weight: var(--weight-medium);
     color: var(--color-text-muted);
-    padding: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
     cursor: pointer;
     transition: color 0.18s ease-out;
     flex: 0.7;

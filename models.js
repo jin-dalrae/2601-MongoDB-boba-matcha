@@ -153,7 +153,7 @@ const SharedMemory = mongoose.model('Shared_Memory', sharedMemorySchema);
 const AgentLog = mongoose.model('Agent_Log', agentLogSchema);
 
 const Campaign = mongoose.model('Campaign', campaignSchema);
-const AutoBid = mongoose.model('Auto_Bid', autoBidSchema); // formerly Proposal
+const AutoBid = mongoose.model('AutoBid', autoBidSchema); // formerly Proposal
 
 const NegotiationLog = mongoose.model('Negotiation_Log', negotiationLogSchema);
 const Contract = mongoose.model('Contract', contractSchema);

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { User, Loader } from 'lucide-react';
+import { User, Loader, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetch('http://localhost:3000/api/dashboard')
@@ -25,7 +27,7 @@ const Dashboard = () => {
     const pct = (advertiser.spent / advertiser.budget) * 100;
 
     return (
-        <div className="p-4">
+        <div className="p-4 page-container">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-page-title text-accent">Dashboard</h1>
@@ -35,7 +37,7 @@ const Dashboard = () => {
             </div>
 
             {/* Primary Card: Budget */}
-            <div className="card">
+            <div className="card mb-6">
                 <div className="flex justify-between items-center mb-4">
                     <span className="text-section-header">Total Budget</span>
                     <span className="text-label">${advertiser.budget.toLocaleString()}</span>
@@ -53,32 +55,51 @@ const Dashboard = () => {
                 </div>
 
                 <div className="progress-bar-bg">
-                    <div className="progress-bar-fill" style={{ width: `${pct}% ` }}></div>
+                    <div className="progress-bar-fill" style={{ width: `${pct}%` }}></div>
                 </div>
+            </div>
+
+            {/* Actions */}
+            <div className="mb-6">
+                <button
+                    onClick={() => navigate('/create-campaign')}
+                    className="w-full bg-[#1E1E1E] border border-accent/20 text-accent py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-accent/10 transition-colors"
+                >
+                    <Plus size={20} />
+                    <span>Create New Campaign</span>
+                </button>
             </div>
 
             {/* Second Section: Campaign Status */}
             <div className="mb-6">
-                <h2 className="text-section-header mb-4">Campaign Status</h2>
-                <div className="flex flex-col gap-2 grid-cols-1 md:grid-cols-2">
-                    {campaigns.map(c => (
-                        <div key={c.id} className="card p-2 flex justify-between items-center" style={{ marginBottom: 0 }}>
-                            <div>
-                                <div style={{ fontWeight: 600, marginBottom: 4 }}>{c.name}</div>
-                                <div className="text-label text-muted">{c.creators} creators involved</div>
+                <h2 className="text-section-header mb-4">Active Campaigns</h2>
+                <div className="flex flex-col gap-3">
+                    {campaigns.length === 0 ? (
+                        <div className="text-muted text-center py-4">No active campaigns</div>
+                    ) : (
+                        campaigns.map(c => (
+                            <div
+                                key={c.id}
+                                className="card p-3 flex justify-between items-center cursor-pointer hover:border-accent/50 transition-colors"
+                                onClick={() => navigate(`/campaigns/${c.id}`)}
+                            >
+                                <div>
+                                    <div className="font-semibold text-white mb-1">{c.name}</div>
+                                    <div className="text-xs text-muted">{c.creators} creators involved</div>
+                                </div>
+                                <div className="flex flex-col items-end gap-1">
+                                    <span className={`pill ${c.status === 'Matching' ? 'active' : ''}`}>{c.status}</span>
+                                    <span className="text-label text-muted">${c.spent} spent</span>
+                                </div>
                             </div>
-                            <div className="flex flex-col items-end gap-2">
-                                <span className={`pill ${c.status === 'Matching' ? 'active' : ''} `}>{c.status}</span>
-                                <span className="text-label text-muted">${c.spent} spent</span>
-                            </div>
-                        </div>
-                    ))}
+                        ))
+                    )}
                 </div>
             </div>
 
             {/* Third Section: Agent Activity */}
             <div>
-                <h2 className="text-section-header mb-4">Agent Activity</h2>
+                <h2 className="text-section-header mb-4">Recent Activity</h2>
                 <div className="card" style={{ padding: '8px 16px' }}>
                     {agentActivity.map((log, idx) => (
                         <div key={log.id}>

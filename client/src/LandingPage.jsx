@@ -1,183 +1,173 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Layers, Rocket, ArrowRight, Zap, Shield, DollarSign } from 'lucide-react';
+import { ArrowRight, Play, Star } from 'lucide-react';
+
+// Hardcoded paths to our local seeded videos for the marquee background
+const VIDEO_PATHS = [
+    "/videos/v15044gf0000d4r0q87og65opbb0e2kg.MP4",
+    "/videos/v15044gf0000d4thr1vog65r1fgmtdi0.MP4",
+    "/videos/v15044gf0000d504utfog65vf158i3d0.MP4",
+    "/videos/v15044gf0000d507847og65hqin6u2n0.MP4",
+    "/videos/v15044gf0000d55cqdvog65l9rkeu560.MP4",
+    "/videos/v15044gf0000d59cppvog65omdf7bqk0.MP4",
+    "/videos/v15044gf0000d5cnpjvog65vm2j05ec0.MP4",
+    "/videos/v15044gf0000d5dv94vog65vaiv83nb0.MP4"
+];
 
 const LandingPage = () => {
     const navigate = useNavigate();
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-        const handleMouseMove = (e) => {
-            setMousePos({ x: e.clientX, y: e.clientY });
-        };
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
-
-    // Staggered animation styles
-    const getDelay = (idx) => ({
-        opacity: mounted ? 1 : 0,
-        transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-        transition: `all 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.1}s`
-    });
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white overflow-hidden relative selection:bg-[#9FE870] selection:text-black">
+        <div className="relative min-h-screen w-full overflow-hidden bg-[#F3F4F6] font-[Inter]">
 
-            {/* CSS for animations */}
-            <style>{`
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-10px); }
-                }
-                .float-slow { animation: float 6s ease-in-out infinite; }
-                .float-medium { animation: float 5s ease-in-out infinite 0.5s; }
-                .float-fast { animation: float 4s ease-in-out infinite 1s; }
-            `}</style>
-
-            {/* Animated Background Gradient */}
-            <div
-                className="pointer-events-none fixed inset-0 transition-opacity duration-300"
-                style={{
-                    background: `radial-gradient(800px circle at ${mousePos.x}px ${mousePos.y}px, rgba(159,232,112,0.04), transparent 40%)`
-                }}
-            />
-
-            {/* Grid Pattern Overlay */}
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDBoNjB2NjBIMHoiLz48cGF0aCBkPSJNNjAgMEgwdjYwaDYwVjB6bS0xIDFIOXY1OGg1OFYxeiIgZmlsbD0iIzE1MTUxNSIvPjwvZz48L3N2Zz4=')] opacity-30" />
-
-            {/* Floating Orbs */}
-            <div className="absolute top-20 left-10 w-72 h-72 bg-[#9FE870] rounded-full blur-[140px] opacity-20 animate-pulse" />
-            <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#5BC299] rounded-full blur-[160px] opacity-15 animate-pulse" style={{ animationDelay: '1s' }} />
-            <div className="absolute top-1/2 left-1/2 w-[800px] h-[800px] bg-gradient-to-r from-[#9FE870] to-[#5BC299] rounded-full blur-[250px] opacity-5 -translate-x-1/2 -translate-y-1/2" />
-
-            {/* Navigation */}
-            <nav className="relative z-10 p-6 flex justify-between items-center max-w-7xl mx-auto" style={getDelay(0)}>
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#9FE870] to-[#5BC299] rounded-lg flex items-center justify-center">
-                        <span className="text-black font-bold text-sm">M</span>
+            {/* Background Video Marquee */}
+            {/* We create a tilted, scrolling grid of videos to match the reference vibe */}
+            <div className="absolute inset-0 z-0 overflow-hidden opacity-90 pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] flex gap-6 rotate-[-6deg] opacity-60 grayscale-[30%] blur-[1px]">
+                    {/* Column 1 - Slow Scroll Up */}
+                    <div className="flex flex-col gap-6 w-1/4 animate-marquee-up-slow">
+                        {[...VIDEO_PATHS, ...VIDEO_PATHS].map((src, i) => (
+                            <div key={`c1-${i}`} className="w-full aspect-[9/16] bg-black rounded-xl overflow-hidden shadow-lg border-4 border-white/50">
+                                <video src={src} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                            </div>
+                        ))}
                     </div>
-                    <span className="text-xl font-bold tracking-tight">Matcha</span>
+                    {/* Column 2 - Scroll Down */}
+                    <div className="flex flex-col gap-6 w-1/4 animate-marquee-down">
+                        {[...VIDEO_PATHS.reverse(), ...VIDEO_PATHS].map((src, i) => (
+                            <div key={`c2-${i}`} className="w-full aspect-[9/16] bg-black rounded-xl overflow-hidden shadow-lg border-4 border-white/50">
+                                <video src={src} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                            </div>
+                        ))}
+                    </div>
+                    {/* Column 3 - Scroll Up Fast */}
+                    <div className="flex flex-col gap-6 w-1/4 animate-marquee-up">
+                        {[...VIDEO_PATHS, ...VIDEO_PATHS].map((src, i) => (
+                            <div key={`c3-${i}`} className="w-full aspect-[9/16] bg-black rounded-xl overflow-hidden shadow-lg border-4 border-white/50">
+                                <video src={src} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                            </div>
+                        ))}
+                    </div>
+                    {/* Column 4 - Scroll Down Slow */}
+                    <div className="flex flex-col gap-6 w-1/4 animate-marquee-down-slow">
+                        {[...VIDEO_PATHS.reverse(), ...VIDEO_PATHS].map((src, i) => (
+                            <div key={`c4-${i}`} className="w-full aspect-[9/16] bg-black rounded-xl overflow-hidden shadow-lg border-4 border-white/50">
+                                <video src={src} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
+            </div>
+
+            {/* Gradient Overlay for Readability */}
+            <div className="absolute inset-0 z-10 bg-gradient-to-r from-white via-white/80 to-transparent w-full h-full pointer-events-none" />
+
+            {/* Main Content Container */}
+            <div className="relative z-20 container mx-auto px-6 min-h-screen flex items-center">
+
+                {/* Glassmorphism Hero Card */}
+                <div className="max-w-xl bg-white/40 backdrop-blur-2xl border border-white/60 p-10 rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.05)] animate-fade-in-up">
+
+                    {/* Badge */}
+                    <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold tracking-wide uppercase">
+                        <Star size={12} fill="currentColor" />
+                        AI-Powered Marketplace
+                    </div>
+
+                    <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-[1.1] tracking-tight">
+                        The future of <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                            effortless deals.
+                        </span>
+                    </h1>
+
+                    <p className="text-lg text-slate-600 mb-8 leading-relaxed font-medium">
+                        Matcha is your autonomous AI agent for brand deals.
+                        Plan, negotiate, and get paid in stablecoins instantly.
+                        Zero friction.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                        <button
+                            onClick={() => navigate('/signup/creator')}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                        >
+                            Get Started Free <ArrowRight size={18} />
+                        </button>
+                        <button
+                            onClick={() => navigate('/signup/advertiser')}
+                            className="bg-white hover:bg-slate-50 text-slate-700 font-semibold py-3 px-8 rounded-full border border-slate-200 shadow-sm transition-all hover:rotate-1 flex items-center justify-center gap-2"
+                        >
+                            View Demo <Play size={18} className="fill-slate-700" />
+                        </button>
+                    </div>
+
+                    {/* Social Proof */}
+                    <div className="flex items-center gap-4 pt-6 border-t border-slate-200/60">
+                        <div className="flex -space-x-3">
+                            <img src="https://i.pravatar.cc/100?img=1" alt="User" className="w-10 h-10 rounded-full border-2 border-white" />
+                            <img src="https://i.pravatar.cc/100?img=5" alt="User" className="w-10 h-10 rounded-full border-2 border-white" />
+                            <img src="https://i.pravatar.cc/100?img=3" alt="User" className="w-10 h-10 rounded-full border-2 border-white" />
+                            <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">+2k</div>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="flex text-yellow-500 text-xs mb-0.5">
+                                <Star size={12} fill="currentColor" />
+                                <Star size={12} fill="currentColor" />
+                                <Star size={12} fill="currentColor" />
+                                <Star size={12} fill="currentColor" />
+                                <Star size={12} fill="currentColor" />
+                            </div>
+                            <span className="text-xs font-medium text-slate-500">Loved by 10,000+ creators</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            {/* Navbar (Absolute) */}
+            <nav className="absolute top-0 left-0 right-0 z-50 px-6 py-6 flex justify-between items-center max-w-7xl mx-auto">
+                <div className="flex items-center gap-2 bg-white/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/40 shadow-sm">
+                    <div className="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center">
+                        <span className="text-white font-bold text-xs">M</span>
+                    </div>
+                    <span className="font-bold text-slate-800 tracking-tight">Matcha</span>
+                </div>
+
+                <div className="hidden md:flex gap-8 text-sm font-medium text-slate-600 bg-white/50 backdrop-blur-md px-6 py-2 rounded-full border border-white/40 shadow-sm">
+                    <a href="#" className="hover:text-indigo-600 transition-colors">Features</a>
+                    <a href="#" className="hover:text-indigo-600 transition-colors">How it Works</a>
+                    <a href="#" className="hover:text-indigo-600 transition-colors">Pricing</a>
+                </div>
+
                 <div className="flex gap-3">
-                    <button className="text-sm font-medium text-gray-400 hover:text-white transition-colors px-4 py-2">Log In</button>
-                    <button className="text-sm font-medium bg-white/5 backdrop-blur-md text-white px-4 py-2 rounded-full border border-white/10 hover:bg-white/10 transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-                        Get Started
-                    </button>
+                    <button className="text-sm font-medium text-slate-600 hover:text-slate-900 bg-white/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/40 shadow-sm transition-all hover:bg-white">Log in</button>
+                    <button className="text-sm font-semibold text-white bg-slate-900 hover:bg-black px-4 py-2 rounded-full shadow-lg transition-all hover:scale-105">Get App</button>
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <main className="relative z-10 flex flex-col items-center text-center px-4 pt-20 pb-32">
+            {/* CSS for Scrolling Marquee */}
+            <style>{`
+                @keyframes scrollUp {
+                    0% { transform: translateY(0); }
+                    100% { transform: translateY(-50%); }
+                }
+                @keyframes scrollDown {
+                    0% { transform: translateY(-50%); }
+                    100% { transform: translateY(0); }
+                }
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-marquee-up { animation: scrollUp 40s linear infinite; }
+                .animate-marquee-up-slow { animation: scrollUp 60s linear infinite; }
+                .animate-marquee-down { animation: scrollDown 45s linear infinite; }
+                .animate-marquee-down-slow { animation: scrollDown 65s linear infinite; }
+                .animate-fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+            `}</style>
 
-                {/* Badge */}
-                <div style={getDelay(1)} className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-[#9FE870]/30 bg-[#9FE870]/5 backdrop-blur-sm">
-                    <Zap size={14} className="text-[#9FE870]" />
-                    <span className="text-[#9FE870] text-xs font-medium tracking-wide uppercase">AI-Powered Ad Marketplace</span>
-                </div>
-
-                {/* Main Headline */}
-                <h1 style={getDelay(2)} className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight leading-[1.1] max-w-5xl">
-                    Where AI Negotiates.
-                    <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#9FE870] via-[#7DD87F] to-[#5BC299]">
-                        Creators Create.
-                    </span>
-                </h1>
-
-                {/* Subtitle */}
-                <p style={getDelay(3)} className="text-gray-400 text-lg md:text-xl max-w-2xl mb-16 leading-relaxed">
-                    Matcha automates brand-creator deals with autonomous agents.
-                    Advertisers get performance. Creators get instant stablecoin payouts via <span className="text-[#9FE870] font-medium">x402 protocol</span>.
-                </p>
-
-                {/* Role Selection Cards */}
-                <div style={getDelay(4)} className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-
-                    {/* Advertiser Card */}
-                    <div
-                        className="group relative overflow-hidden bg-gradient-to-b from-[#161616] to-[#0E0E0E] border border-[#252525] p-8 rounded-3xl text-left cursor-pointer transition-all duration-500 hover:border-[#9FE870]/50 hover:shadow-[0_0_60px_rgba(159,232,112,0.1)] hover:-translate-y-2"
-                        onClick={() => navigate('/signup/advertiser')}
-                    >
-                        {/* Shimmer Effect on Hover */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out" />
-
-                        {/* Glow Effect */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#9FE870] opacity-0 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:opacity-20 transition-opacity duration-500"></div>
-
-                        <div className="relative z-10">
-                            <div className="mb-6 w-14 h-14 bg-gradient-to-br from-[#232323] to-[#1A1A1A] border border-[#333] rounded-2xl flex items-center justify-center group-hover:border-[#9FE870]/50 group-hover:shadow-[0_0_20px_rgba(159,232,112,0.2)] transition-all duration-300">
-                                <Layers size={24} className="text-[#9FE870]" />
-                            </div>
-
-                            <h3 className="text-2xl font-bold mb-3">I'm an Advertiser</h3>
-                            <p className="text-gray-400 mb-8 leading-relaxed">Launch campaigns, set your rules, and let AI agents negotiate the best deals for your brand.</p>
-
-                            <div className="flex items-center gap-2 text-[#9FE870] font-medium group-hover:gap-3 transition-all duration-300">
-                                Start Campaign <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Creator Card */}
-                    <div
-                        className="group relative overflow-hidden bg-gradient-to-b from-[#161616] to-[#0E0E0E] border border-[#252525] p-8 rounded-3xl text-left cursor-pointer transition-all duration-500 hover:border-[#5BC299]/50 hover:shadow-[0_0_60px_rgba(91,194,153,0.1)] hover:-translate-y-2"
-                        onClick={() => navigate('/signup/creator')}
-                    >
-                        {/* Shimmer */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out" />
-
-                        {/* Glow Effect */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#5BC299] opacity-0 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:opacity-20 transition-opacity duration-500"></div>
-
-                        <div className="relative z-10">
-                            <div className="mb-6 w-14 h-14 bg-gradient-to-br from-[#232323] to-[#1A1A1A] border border-[#333] rounded-2xl flex items-center justify-center group-hover:border-[#5BC299]/50 group-hover:shadow-[0_0_20px_rgba(91,194,153,0.2)] transition-all duration-300">
-                                <Rocket size={24} className="text-[#5BC299]" />
-                            </div>
-
-                            <h3 className="text-2xl font-bold mb-3">I'm a Creator</h3>
-                            <p className="text-gray-400 mb-8 leading-relaxed">Connect your socials, get matched automatically, and receive instant stablecoin payouts.</p>
-
-                            <div className="flex items-center gap-2 text-[#5BC299] font-medium group-hover:gap-3 transition-all duration-300">
-                                Join Network <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                {/* Features Strip */}
-                <div style={getDelay(5)} className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl w-full">
-                    <div className="flex flex-col items-center text-center float-slow">
-                        <div className="w-12 h-12 rounded-full bg-[#9FE870]/10 flex items-center justify-center mb-4 transition-transform hover:scale-110">
-                            <Zap size={20} className="text-[#9FE870]" />
-                        </div>
-                        <h4 className="font-semibold mb-1">AI Negotiation</h4>
-                        <p className="text-sm text-gray-500">Autonomous agents handle all deal-making</p>
-                    </div>
-                    <div className="flex flex-col items-center text-center float-medium">
-                        <div className="w-12 h-12 rounded-full bg-[#5BC299]/10 flex items-center justify-center mb-4 transition-transform hover:scale-110">
-                            <DollarSign size={20} className="text-[#5BC299]" />
-                        </div>
-                        <h4 className="font-semibold mb-1">Instant Payouts</h4>
-                        <p className="text-sm text-gray-500">USDC payments via x402 protocol</p>
-                    </div>
-                    <div className="flex flex-col items-center text-center float-fast">
-                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 transition-transform hover:scale-110">
-                            <Shield size={20} className="text-white" />
-                        </div>
-                        <h4 className="font-semibold mb-1">On-Chain Audit</h4>
-                        <p className="text-sm text-gray-500">Transparent performance verification</p>
-                    </div>
-                </div>
-            </main>
-
-            {/* Footer */}
-            <footer style={getDelay(6)} className="relative z-10 p-8 text-center border-t border-[#1A1A1A]">
-                <span className="text-gray-600 text-sm hover:text-gray-400 transition-colors cursor-pointer">&copy; 2026 Matcha Protocol. Built for the Agentic Web.</span>
-            </footer>
         </div>
     );
 };

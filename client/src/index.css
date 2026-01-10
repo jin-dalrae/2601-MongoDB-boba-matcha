@@ -6,20 +6,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Gluten:wght@700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Color System */
-  --color-bg-primary: #0E0F0F;
-  --color-bg-card: #161818;
-  --color-accent-primary: #9FE870;
-  /* Matcha Green */
-  --color-accent-muted-yellow: #E8D070;
-  --color-accent-muted-red: #E87070;
+  /* Color System - Light Mode Default */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-card: #F9FAFB;
+  --color-accent-primary: #4F46E5;
+  /* Indigo-600 */
+  /* Matcha Green - keep as accent */
+  --color-accent-brand: #9FE870;
 
-  --color-divider: #232626;
+  --color-divider: #E5E7EB;
 
-  --color-text-primary: #F5F7F6;
-  --color-text-secondary: #AEB5B2;
-  --color-text-muted: #7C8481;
-  --color-text-inverse: #0E0F0F;
+  --color-text-primary: #111827;
+  --color-text-secondary: #4B5563;
+  --color-text-muted: #9CA3AF;
+  --color-text-inverse: #FFFFFF;
 
   /* Spacing & Layout */
   --grid-unit: 8px;

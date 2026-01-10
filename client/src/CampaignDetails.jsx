@@ -84,16 +84,31 @@ const CampaignDetails = () => {
                         <div className="space-y-3">
                             {bids.slice(0, 5).map((bid, idx) => (
                                 <div key={bid._id}
-                                    className={`p-3 rounded cursor-pointer border ${selectedBid?._id === bid._id ? 'border-accent bg-[#2A302C]' : 'border-transparent bg-[#121212]'}`}
+                                    className={`p-3 rounded cursor-pointer border transition-colors ${selectedBid?._id === bid._id ? 'border-accent bg-[#2A302C]' : 'border-transparent bg-[#121212] hover:bg-[#1A1D1E]'}`}
                                     onClick={() => setSelectedBid(bid)}
                                 >
                                     <div className="flex justify-between items-center mb-1">
                                         <span className="font-bold text-white">{bid.creatorId?.name || 'Creator'}</span>
                                         <span className="text-accent font-mono">${bid.current_bid}</span>
                                     </div>
-                                    <div className="text-xs text-muted flex gap-2">
-                                        <span>{bid.profileStats?.followers.toLocaleString()} Following</span>
-                                        <span>{bid.profileStats?.engagement} Eng.</span>
+                                    <div className="text-sm text-gray-400 italic mb-2 line-clamp-2">"{bid.pitch || 'No pitch provided'}"</div>
+
+                                    <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-muted">
+                                        <div className="flex justify-between">
+                                            <span>Followers:</span>
+                                            <span className="text-white">{bid.profileStats?.followers.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Engagement:</span>
+                                            <span className="text-white">{bid.profileStats?.engagement}</span>
+                                        </div>
+                                        <div className="flex justify-between col-span-2 border-t border-gray-800 pt-1 mt-1">
+                                            <span>Category:</span>
+                                            <span className="text-accent">{bid.profileStats?.product_category}</span>
+                                        </div>
+                                        <div className="col-span-2 text-[10px] text-gray-500 truncate">
+                                            Audience: {bid.profileStats?.target_audience}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

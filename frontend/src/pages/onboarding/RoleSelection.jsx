@@ -54,9 +54,8 @@ export default function RoleSelection({ onContinue }) {
                 <button
                     className="btn btn-primary btn-full onboarding-cta"
                     onClick={() => onContinue(selectedRole)}
-                    disabled={selectedRole !== 'creator'}
                 >
-                    Continue as Creator
+                    Continue as {selectedRole === 'creator' ? 'Creator' : 'Advertiser'}
                 </button>
             </div>
         </div>

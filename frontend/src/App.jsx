@@ -17,6 +17,9 @@ export default function App() {
 
   useEffect(() => {
     // Check if user has completed onboarding
+    // FORCE RESET for demo:
+    localStorage.removeItem('matcha_onboarding_complete');
+
     const onboardingComplete = localStorage.getItem('matcha_onboarding_complete');
     if (!onboardingComplete) {
       setShowOnboarding(true);

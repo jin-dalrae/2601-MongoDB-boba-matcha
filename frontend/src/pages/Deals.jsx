@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import StatusIndicator from '../components/StatusIndicator';
 import NegotiationModal from '../components/NegotiationModal';
 import NegotiationResult from '../components/NegotiationResult';
+import ContractModal from '../components/ContractModal';
+import SubmitContentModal from '../components/SubmitContentModal';
 import './Deals.css';
 
 // Deal states
@@ -53,13 +55,26 @@ const actionRequired = [
 export default function Deals({ onBack, activeDeal }) {
     const [showContent, setShowContent] = useState(false);
 
-    // Track confirmed deals
-    const [confirmedDeals, setConfirmedDeals] = useState([]);
+    // Track confirmed deals - Initialize with Mock Data for Demo
+    const [confirmedDeals, setConfirmedDeals] = useState([
+        {
+            id: 101,
+            brand: 'Glossier',
+            campaign: 'Summer Skin Tint',
+            finalPrice: 850,
+            timeLeft: 28 * 60 + 15, // ~28 mins left
+            status: 'confirmed_pending',
+            deliverable: '1 TikTok Video',
+            confirmedAt: Date.now()
+        }
+    ]);
 
     // Lists state
     const [suggestedDeals, setSuggestedDeals] = useState(aiSuggested);
     const [negotiatingDeals, setNegotiatingDeals] = useState(inNegotiation);
     const [negotiatingDeal, setNegotiatingDeal] = useState(null);
+    const [viewingContract, setViewingContract] = useState(null);
+    const [submittingDeal, setSubmittingDeal] = useState(null);
     const [resultData, setResultData] = useState(null); // { status: 'success'|'failure', deal: ... }
 
     // Initial load animation
@@ -95,10 +110,25 @@ export default function Deals({ onBack, activeDeal }) {
     }, [activeDeal]); // Run when activeDeal changes
 
     const formatCurrency = (amount) => {
-        // ... (rest is same helper)
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
     };
 
-    // ... (timer logic) ...
+    const formatTime = (seconds) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    };
+
+    // Timer for active deals
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setConfirmedDeals(prev => prev.map(deal => ({
+                ...deal,
+                timeLeft: deal.timeLeft > 0 ? deal.timeLeft - 1 : 0
+            })));
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     // ... (remove dealUpdates Map, use state directly)
 
@@ -208,6 +238,20 @@ export default function Deals({ onBack, activeDeal }) {
                                         disabled={deal.timeLeft === 0}
                                     >
                                         Cancel Deal
+                                    </button>
+                                </div>
+                                <div className="deal-actions mt-3 pt-3 border-t border-white-10 flex gap-2">
+                                    <button
+                                        className="btn btn-secondary flex-1"
+                                        onClick={() => setViewingContract(deal)}
+                                    >
+                                        View Contract
+                                    </button>
+                                    <button
+                                        className="btn btn-primary flex-1"
+                                        onClick={() => setSubmittingDeal(deal)}
+                                    >
+                                        Submit Content
                                     </button>
                                 </div>
                             </div>
@@ -399,6 +443,21 @@ export default function Deals({ onBack, activeDeal }) {
                     onClose={handleResultClose}
                 />
             )}
+
+            <ContractModal
+                isOpen={!!viewingContract}
+                deal={viewingContract}
+                onClose={() => setViewingContract(null)}
+                onCancel={(id) => {
+                    handleCancelDeal(id);
+                    setViewingContract(null);
+                }}
+            />
+
+            <SubmitContentModal
+                isOpen={!!submittingDeal}
+                onClose={() => setSubmittingDeal(null)}
+            />
         </div>
     );
 }

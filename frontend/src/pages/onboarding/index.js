@@ -1,5 +1,5 @@
 // Export the enhanced onboarding flow
-export { OnboardingFlow } from './index.jsx';
+export { default as OnboardingFlow } from './OnboardingFlow';
 export { default as RoleSelection } from './RoleSelection';
 export { default as AccountSetup } from './AccountSetup';
 export { default as DataLoading } from './DataLoading';

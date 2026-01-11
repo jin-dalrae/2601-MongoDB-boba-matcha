@@ -29,31 +29,27 @@ export default function DataLoading({ onComplete }) {
             });
         }, 80);
 
-        // Complete after ~8 seconds
-        const completeTimeout = setTimeout(() => {
-            onComplete?.();
-        }, 8000);
-
         return () => {
             clearInterval(messageInterval);
             clearInterval(progressInterval);
-            clearTimeout(completeTimeout);
         };
-    }, [onComplete]);
+    }, []);
 
     return (
         <div className="onboarding-screen data-loading">
             <div className="onboarding-content centered">
                 {/* Animated Logo - AI Working state */}
                 <div className="loading-logo">
-                    <MatchaLogo size={72} isWorking={true} />
+                    <MatchaLogo size={72} isWorking={progress < 100} />
                 </div>
 
                 {/* Loading Text */}
                 <div className="loading-text">
-                    <h2 className="loading-title">Setting up your agent</h2>
-                    <p className="loading-message" key={messageIndex}>
-                        {loadingMessages[messageIndex]}
+                    <h2 className="loading-title">
+                        {progress < 100 ? "Setting up your agent" : "Analysis Complete"}
+                    </h2>
+                    <p className="loading-message">
+                        {progress < 100 ? loadingMessages[messageIndex] : "Your agent is ready to negotiate on your behalf."}
                     </p>
                 </div>
 
@@ -65,6 +61,16 @@ export default function DataLoading({ onComplete }) {
                             style={{ width: `${progress}%` }}
                         />
                     </div>
+                </div>
+
+                {/* Manual Continue Button */}
+                <div className={`fade-in ${progress === 100 ? 'visible' : 'hidden'}`} style={{ marginTop: '2rem', width: '100%', opacity: progress === 100 ? 1 : 0, transition: 'opacity 0.5s' }}>
+                    <button
+                        className="btn btn-primary btn-full"
+                        onClick={onComplete}
+                    >
+                        Continue
+                    </button>
                 </div>
             </div>
         </div>

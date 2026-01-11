@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import GradientLoader from './GradientLoader';
 import './SubmitContentModal.css';
 
 export default function SubmitContentModal({ isOpen, onClose }) {
@@ -78,15 +79,18 @@ export default function SubmitContentModal({ isOpen, onClose }) {
 
                 {status === 'assessing' && (
                     <div className="assessing-view fade-in">
-                        <div className="radar-spinner">
-                            <div className="radar-sweep"></div>
-                        </div>
-                        <h3 className="assessing-title">AI Assessing...</h3>
-                        <p className="assessing-desc">Verifying content format and brand safety.</p>
+                        <GradientLoader size={140} className="mb-8" />
+                        <h3 className="assessing-title">Processing...</h3>
+                        <p className="assessing-desc">
+                            Our AI agents are working on this.
+                            <br />
+                            You don’t need to take any action.
+                        </p>
 
                         <div className="progress-bar-container">
                             <div className="progress-bar" style={{ width: `${progress}%` }}></div>
                         </div>
+                        <span className="progress-text">ai_agent_v2.process()</span>
                     </div>
                 )}
 

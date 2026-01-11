@@ -1,16 +1,3 @@
-import { useState } from 'react';
-import TopBar from '../components/TopBar';
-import FilterChips from '../components/FilterChips';
-import CampaignCard from '../components/CampaignCard';
-import './Discovery.css';
-
-const categoryFilters = [
-    { value: 'all', label: 'All', hasDropdown: false },
-    { value: 'category', label: 'Category', hasDropdown: true },
-    { value: 'platform', label: 'Platform', hasDropdown: true },
-    { value: 'budget', label: 'Budget', hasDropdown: true },
-];
-
 import { useState, useEffect } from 'react';
 import TopBar from '../components/TopBar';
 import FilterChips from '../components/FilterChips';
@@ -66,12 +53,11 @@ export default function Discovery({ onSelectCampaign }) {
                     {campaigns.map((campaign) => (
                         <div key={campaign._id} className="relative">
                             <CampaignCard
-                                brand={campaign.title} // Mapping title to brand for existing card
+                                brand={campaign.title}
                                 summary={campaign.product_info?.description || 'No description'}
                                 budgetRange={`$${campaign.budget_limit}`}
                                 onClick={() => onSelectCampaign?.(campaign)}
                             />
-                            {/* Overlay Deadline Badge */}
                             <div style={{ position: 'absolute', top: 10, right: 10, background: '#00000080', padding: '4px 8px', borderRadius: 4, fontSize: 10, color: '#9FE870', backdropFilter: 'blur(4px)' }}>
                                 {getTimeLeft(campaign.deadline)}
                             </div>

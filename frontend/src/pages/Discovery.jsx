@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Discovery.css';
 
 // Platform icons
@@ -156,7 +157,8 @@ const openDeals = [
 import GradientLoader from '../components/GradientLoader';
 import '../components/NegotiationModal.css'; // Reuse modal styles
 
-export default function Discovery({ onSelectCampaign }) {
+export default function Discovery() {
+    const navigate = useNavigate();
     const [activeCategory, setActiveCategory] = useState('All');
     const [showContent, setShowContent] = useState(false);
     const [expandedCard, setExpandedCard] = useState(null);
@@ -182,7 +184,9 @@ export default function Discovery({ onSelectCampaign }) {
 
         // Simulate "Processing..." delay before redirecting
         setTimeout(() => {
-            onSelectCampaign?.(deal);
+            // Store selected campaign in sessionStorage for Deals component
+            sessionStorage.setItem('selectedCampaign', JSON.stringify(deal));
+            navigate(`/creator/deals/${deal.id}`);
             // We don't need to clear processingDeal here because the component unmounts/switches view
         }, 2000);
     };

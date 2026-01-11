@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom';
 import BottomNav from './components/BottomNav';
+import AdvertiserNav from './components/AdvertiserNav';
 import Dashboard from './pages/Dashboard';
 import Discovery from './pages/Discovery';
 import Deals from './pages/Deals';
@@ -7,13 +9,21 @@ import ActiveCampaigns from './pages/ActiveCampaigns';
 import Profile from './pages/Profile';
 import Loading from './pages/Loading';
 import { OnboardingFlow } from './pages/onboarding';
+import AdvertiserDashboard from './pages/advertiser/AdvertiserDashboard';
+import AdvertiserCampaigns from './pages/advertiser/AdvertiserCampaigns';
+import AdvertiserShortlist from './pages/advertiser/AdvertiserShortlist';
 import './index.css';
 
-export default function App() {
+// Legacy route redirect component
+function LegacyDealsRedirect() {
+  const { campaignId } = useParams();
+  return <Navigate to={`/creator/deals/${campaignId}`} replace />;
+}
+
+function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [activeTab, setActiveTab] = useState('home');
-  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
     // Check if user has completed onboarding
@@ -23,6 +33,8 @@ export default function App() {
     const onboardingComplete = localStorage.getItem('matcha_onboarding_complete');
     if (!onboardingComplete) {
       setShowOnboarding(true);
+      setIsLoading(false);
+    } else {
       setIsLoading(false);
     }
   }, []);
@@ -36,16 +48,6 @@ export default function App() {
     setShowOnboarding(false);
   };
 
-  const handleSelectCampaign = (campaign) => {
-    setSelectedCampaign(campaign);
-    setActiveTab('bidding');
-  };
-
-  const handleBackFromBidding = () => {
-    setSelectedCampaign(null);
-    setActiveTab('campaigns');
-  };
-
   // Show onboarding for new users
   if (showOnboarding) {
     return <OnboardingFlow onComplete={handleOnboardingComplete} />;
@@ -56,29 +58,41 @@ export default function App() {
     return <Loading onComplete={handleLoadingComplete} />;
   }
 
-  const renderPage = () => {
-    switch (activeTab) {
-      case 'home':
-        return <Dashboard />;
-      case 'campaigns':
-        return <Discovery onSelectCampaign={handleSelectCampaign} />;
-      case 'bidding':
-        return selectedCampaign ? (
-          <Deals onBack={handleBackFromBidding} activeDeal={selectedCampaign} />
-        ) : (
-          <Deals />
-        );
-      case 'profile':
-        return <Profile />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
+  // Determine if current route is advertiser or creator
+  const isAdvertiserRoute = location.pathname.startsWith('/advertiser');
+  
   return (
     <div className="app">
-      {renderPage()}
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <Routes>
+        {/* Creator Routes */}
+        <Route path="/creator" element={<Dashboard />} />
+        <Route path="/creator/campaigns" element={<Discovery />} />
+        <Route path="/creator/deals" element={<Deals />} />
+        <Route path="/creator/deals/:campaignId" element={<Deals />} />
+        <Route path="/creator/contracts" element={<ActiveCampaigns />} />
+        <Route path="/creator/profile" element={<Profile />} />
+        
+        {/* Advertiser Routes */}
+        <Route path="/advertiser" element={<AdvertiserDashboard />} />
+        <Route path="/advertiser/campaigns" element={<AdvertiserCampaigns />} />
+        <Route path="/advertiser/shortlist" element={<AdvertiserShortlist />} />
+        
+        {/* Legacy routes - redirect to new structure */}
+        <Route path="/campaigns" element={<Navigate to="/creator/campaigns" replace />} />
+        <Route path="/deals" element={<Navigate to="/creator/deals" replace />} />
+        <Route path="/deals/:campaignId" element={<LegacyDealsRedirect />} />
+        <Route path="/contracts" element={<Navigate to="/creator/contracts" replace />} />
+        <Route path="/profile" element={<Navigate to="/creator/profile" replace />} />
+      </Routes>
+      {isAdvertiserRoute ? <AdvertiserNav /> : <BottomNav />}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import StatusIndicator from '../components/StatusIndicator';
 import NegotiationModal from '../components/NegotiationModal';
 import NegotiationResult from '../components/NegotiationResult';
@@ -52,7 +53,9 @@ const actionRequired = [
     }
 ];
 
-export default function Deals({ onBack, activeDeal }) {
+export default function Deals() {
+    const { campaignId } = useParams();
+    const processedCampaignRef = useRef(new Set());
     const [showContent, setShowContent] = useState(false);
 
     // Track confirmed deals - Initialize with Mock Data for Demo
@@ -85,29 +88,57 @@ export default function Deals({ onBack, activeDeal }) {
 
     // Handle incoming deal from Discover (Bidding Started flow)
     useEffect(() => {
-        if (activeDeal) {
-            // Check if it's already in negotiation to avoid dupes
-            const alreadyExists = negotiatingDeals.find(d => d.id === activeDeal.id);
-            const isConfirmed = confirmedDeals.find(d => d.id === activeDeal.id);
-
-            if (!alreadyExists && !isConfirmed) {
-                // Add to negotiation list
-                const newNegotiation = {
-                    ...activeDeal,
-                    yourBid: activeDeal.suggestedBid ? parseInt(activeDeal.suggestedBid.replace(/\D/g, '')) : 600,
-                    brandCounter: null,
-                    status: 'processing', // Initial state
-                    agentInsight: 'AI agents are exchanging terms',
-                    lastUpdate: 'Just now'
-                };
-
-                setNegotiatingDeals(prev => [newNegotiation, ...prev]);
-
-                // Remove from suggested if it was there (matching by ID)
-                setSuggestedDeals(prev => prev.filter(d => d.id !== activeDeal.id));
+        if (campaignId && !processedCampaignRef.current.has(campaignId)) {
+            // Get selected campaign from sessionStorage
+            const selectedCampaignStr = sessionStorage.getItem('selectedCampaign');
+            if (selectedCampaignStr) {
+                try {
+                    const activeDeal = JSON.parse(selectedCampaignStr);
+                    
+                    // Mark as processed
+                    processedCampaignRef.current.add(campaignId);
+                    
+                    // Check both states using functional updates
+                    setNegotiatingDeals(prevNeg => {
+                        const alreadyExists = prevNeg.find(d => d.id === activeDeal.id);
+                        if (alreadyExists) return prevNeg;
+                        
+                        // Check confirmed deals
+                        setConfirmedDeals(prevConfirmed => {
+                            const isConfirmed = prevConfirmed.find(d => d.id === activeDeal.id);
+                            if (isConfirmed) return prevConfirmed;
+                            
+                            // Deal not found in either list, add it
+                            const newNegotiation = {
+                                ...activeDeal,
+                                yourBid: activeDeal.suggestedBid ? parseInt(activeDeal.suggestedBid.replace(/\D/g, '')) : 600,
+                                brandCounter: null,
+                                status: 'processing', // Initial state
+                                agentInsight: 'AI agents are exchanging terms',
+                                lastUpdate: 'Just now'
+                            };
+                            
+                            // Update states (using setTimeout to avoid nested setState issues)
+                            setTimeout(() => {
+                                setNegotiatingDeals(prev => [newNegotiation, ...prev]);
+                                setSuggestedDeals(prev => prev.filter(d => d.id !== activeDeal.id));
+                            }, 0);
+                            
+                            return prevConfirmed;
+                        });
+                        
+                        return prevNeg;
+                    });
+                    
+                    // Clear sessionStorage after processing
+                    sessionStorage.removeItem('selectedCampaign');
+                } catch (e) {
+                    console.error('Error parsing selected campaign:', e);
+                    processedCampaignRef.current.delete(campaignId);
+                }
             }
         }
-    }, [activeDeal]); // Run when activeDeal changes
+    }, [campaignId]); // Run when campaignId changes
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);

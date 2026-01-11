@@ -1,0 +1,39 @@
+/* Advertiser Navigation Styles */
+.advertiser-nav {
+  background-color: var(--color-bg-primary, #0E0F0F);
+  border-top: 1px solid var(--color-divider, #232626);
+  padding: 16px 24px;
+  padding-bottom: 32px; /* iOS home indicator space */
+}
+
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nav-item {
+  color: var(--color-text-muted, #7C8481);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.nav-item.active {
+  color: var(--color-accent-primary, #9FE870);
+}
+
+.nav-item:hover {
+  color: var(--color-text-secondary, #AEB5B2);
+}
+
+.advertiser-nav.pressed .nav-item {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}

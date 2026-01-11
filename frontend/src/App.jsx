@@ -8,6 +8,7 @@ import Deals from './pages/Deals';
 import ActiveCampaigns from './pages/ActiveCampaigns';
 import Profile from './pages/Profile';
 import Loading from './pages/Loading';
+import LandingPage from './pages/LandingPage';
 import { OnboardingFlow } from './pages/onboarding';
 import AdvertiserDashboard from './pages/advertiser/AdvertiserDashboard';
 import AdvertiserCampaigns from './pages/advertiser/AdvertiserCampaigns';
@@ -27,17 +28,17 @@ function AppContent() {
 
   useEffect(() => {
     // Check if user has completed onboarding
-    // FORCE RESET for demo:
-    localStorage.removeItem('matcha_onboarding_complete');
-
+    // Don't force reset - let users access the landing page
     const onboardingComplete = localStorage.getItem('matcha_onboarding_complete');
-    if (!onboardingComplete) {
-      setShowOnboarding(true);
-      setIsLoading(false);
-    } else {
-      setIsLoading(false);
+    if (!onboardingComplete && location.pathname !== '/') {
+      // Only show onboarding if they're trying to access app routes
+      const isAppRoute = location.pathname.startsWith('/creator') || location.pathname.startsWith('/advertiser');
+      if (isAppRoute) {
+        setShowOnboarding(true);
+      }
     }
-  }, []);
+    setIsLoading(false);
+  }, [location.pathname]);
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
@@ -60,10 +61,14 @@ function AppContent() {
 
   // Determine if current route is advertiser or creator
   const isAdvertiserRoute = location.pathname.startsWith('/advertiser');
-  
+  const isLandingPage = location.pathname === '/';
+
   return (
     <div className="app">
       <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* Creator Routes */}
         <Route path="/creator" element={<Dashboard />} />
         <Route path="/creator/campaigns" element={<Discovery />} />
@@ -71,12 +76,12 @@ function AppContent() {
         <Route path="/creator/deals/:campaignId" element={<Deals />} />
         <Route path="/creator/contracts" element={<ActiveCampaigns />} />
         <Route path="/creator/profile" element={<Profile />} />
-        
+
         {/* Advertiser Routes */}
         <Route path="/advertiser" element={<AdvertiserDashboard />} />
         <Route path="/advertiser/campaigns" element={<AdvertiserCampaigns />} />
         <Route path="/advertiser/shortlist" element={<AdvertiserShortlist />} />
-        
+
         {/* Legacy routes - redirect to new structure */}
         <Route path="/campaigns" element={<Navigate to="/creator/campaigns" replace />} />
         <Route path="/deals" element={<Navigate to="/creator/deals" replace />} />
@@ -84,7 +89,7 @@ function AppContent() {
         <Route path="/contracts" element={<Navigate to="/creator/contracts" replace />} />
         <Route path="/profile" element={<Navigate to="/creator/profile" replace />} />
       </Routes>
-      {isAdvertiserRoute ? <AdvertiserNav /> : <BottomNav />}
+      {!isLandingPage && (isAdvertiserRoute ? <AdvertiserNav /> : <BottomNav />)}
     </div>
   );
 }

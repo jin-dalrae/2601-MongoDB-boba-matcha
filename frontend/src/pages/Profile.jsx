@@ -147,8 +147,17 @@ export default function Profile() {
                 </div>
             </section>
 
-            {/* Sign Out */}
+            {/* Sign Out & Debug */}
             <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '300ms' }}>
+                <button
+                    className="btn-secondary btn-full mb-md"
+                    onClick={() => {
+                        localStorage.removeItem('matcha_onboarding_complete');
+                        window.location.reload();
+                    }}
+                >
+                    Reset Onboarding (Debug)
+                </button>
                 <button className="btn-signout">Sign Out</button>
             </section>
         </div>

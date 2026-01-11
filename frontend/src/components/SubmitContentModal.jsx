@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import MatchaLoader from './MatchaLoader';
+import GradientLoader from './GradientLoader';
 import './SubmitContentModal.css';
 
 export default function SubmitContentModal({ isOpen, onClose }) {

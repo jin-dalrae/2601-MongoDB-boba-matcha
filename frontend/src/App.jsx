@@ -61,7 +61,7 @@ export default function App() {
         return <Discovery onSelectCampaign={handleSelectCampaign} />;
       case 'bidding':
         return selectedCampaign ? (
-          <Deals onBack={handleBackFromBidding} />
+          <Deals onBack={handleBackFromBidding} activeDeal={selectedCampaign} />
         ) : (
           <Deals />
         );

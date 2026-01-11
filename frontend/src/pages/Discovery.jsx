@@ -153,10 +153,14 @@ const openDeals = [
     }
 ];
 
+import GradientLoader from '../components/GradientLoader';
+import '../components/NegotiationModal.css'; // Reuse modal styles
+
 export default function Discovery({ onSelectCampaign }) {
     const [activeCategory, setActiveCategory] = useState('All');
     const [showContent, setShowContent] = useState(false);
     const [expandedCard, setExpandedCard] = useState(null);
+    const [processingDeal, setProcessingDeal] = useState(null);
 
     useEffect(() => {
         const timer = setTimeout(() => setShowContent(true), 100);
@@ -170,6 +174,17 @@ export default function Discovery({ onSelectCampaign }) {
 
     const handleCardClick = (deal) => {
         setExpandedCard(expandedCard === deal.id ? null : deal.id);
+    };
+
+    const handleStartBidding = (e, deal) => {
+        e.stopPropagation();
+        setProcessingDeal(deal);
+
+        // Simulate "Processing..." delay before redirecting
+        setTimeout(() => {
+            onSelectCampaign?.(deal);
+            // We don't need to clear processingDeal here because the component unmounts/switches view
+        }, 2000);
     };
 
     return (
@@ -253,10 +268,7 @@ export default function Discovery({ onSelectCampaign }) {
                         {expandedCard === deal.id && (
                             <button
                                 className="btn btn-primary btn-full deal-action"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onSelectCampaign?.(deal);
-                                }}
+                                onClick={(e) => handleStartBidding(e, deal)}
                             >
                                 Start Bidding
                             </button>
@@ -264,6 +276,23 @@ export default function Discovery({ onSelectCampaign }) {
                     </div>
                 ))}
             </div>
+
+            {/* Processing Modal Overlay */}
+            {processingDeal && (
+                <div className="modal-overlay">
+                    <div className="modal-center negotiation-slide-up">
+                        <div className="modal-icon-header">
+                            <GradientLoader size={120} />
+                        </div>
+                        <h2 className="modal-title">Processing...</h2>
+                        <p className="modal-desc">
+                            Your AI agent is negotiating on your behalf.
+                            <br />
+                            This may take up to 24 hours.
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import StatusIndicator from '../components/StatusIndicator';
 import NegotiationModal from '../components/NegotiationModal';
+import NegotiationResult from '../components/NegotiationResult';
 import './Deals.css';
 
 // Deal states
@@ -58,8 +59,8 @@ export default function Deals({ onBack, activeDeal }) {
     // Lists state
     const [suggestedDeals, setSuggestedDeals] = useState(aiSuggested);
     const [negotiatingDeals, setNegotiatingDeals] = useState(inNegotiation);
-
     const [negotiatingDeal, setNegotiatingDeal] = useState(null);
+    const [resultData, setResultData] = useState(null); // { status: 'success'|'failure', deal: ... }
 
     // Initial load animation
     useEffect(() => {
@@ -113,18 +114,31 @@ export default function Deals({ onBack, activeDeal }) {
     };
 
     const handleNegotiationComplete = (completedDeal) => {
-        // Move to confirmed
-        const newConfirmed = {
-            ...completedDeal,
-            confirmedAt: Date.now(),
-            timeLeft: 30 * 60,
-            status: 'confirmed_pending'
-        };
+        // Show success result
+        setResultData({ status: 'success', deal: { ...completedDeal, finalPrice: completedDeal.finalPrice || 725 } });
+        // We defer the move to confirmed until they close the result modal
+    };
 
-        setConfirmedDeals(prev => [...prev, newConfirmed]);
+    const handleResultClose = () => {
+        if (!resultData) return;
 
-        // Remove from negotiation list
-        setNegotiatingDeals(prev => prev.filter(d => d.id !== completedDeal.id));
+        if (resultData.status === 'success') {
+            // Move to confirmed
+            const newConfirmed = {
+                ...resultData.deal,
+                confirmedAt: Date.now(),
+                timeLeft: 30 * 60,
+                status: 'confirmed_pending'
+            };
+            setConfirmedDeals(prev => [...prev, newConfirmed]);
+            setNegotiatingDeals(prev => prev.filter(d => d.id !== resultData.deal.id));
+        } else {
+            // For failure, maybe just remove it or keep it as "rejected"?
+            // User just said "one being not accepted". Let's remove it from negotiation list for now.
+            setNegotiatingDeals(prev => prev.filter(d => d.id !== resultData.deal.id));
+        }
+
+        setResultData(null);
     };
 
     const handleCancelDeal = (dealId) => {
@@ -132,16 +146,17 @@ export default function Deals({ onBack, activeDeal }) {
     };
 
     const handleAccept = (dealId) => {
-        console.log("Accepted deal:", dealId);
-        // Placeholder for accept logic
+        const deal = negotiatingDeals.find(d => d.id === dealId);
+        if (deal) {
+            handleNegotiationComplete(deal);
+        }
     };
 
     const handleDecline = (dealId) => {
-        console.log("Declined deal:", dealId);
-        const card = document.getElementById(`deal-${dealId}`);
-        if (card) {
-            card.style.opacity = '0';
-            setTimeout(() => card.style.display = 'none', 300);
+        // Trigger failure/declined view
+        const deal = negotiatingDeals.find(d => d.id === dealId) || suggestedDeals.find(d => d.id === dealId);
+        if (deal) {
+            setResultData({ status: 'failure', deal: { ...deal, brandMax: 500, minAsk: 600 } });
         }
     };
 
@@ -202,18 +217,27 @@ export default function Deals({ onBack, activeDeal }) {
             )}
 
             {/* AI Suggested - with glow */}
-            {aiSuggested.length > 0 && (
+            {suggestedDeals.length > 0 && (
                 <section className={`deals-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '60ms' }}>
                     <div className="section-header">
                         <h2 className="section-title">AI Suggested</h2>
                         <StatusIndicator status="ai-working" size={16} />
                     </div>
                     <div className="deals-list">
-                        {aiSuggested.map((deal) => {
-                            const status = getDealStatus(deal);
-                            const isNegotiating = status === 'negotiating';
-
-                            if (confirmedDeals.find(d => d.id === deal.id)) return null; // Hide if confirmed
+                        {suggestedDeals.map((deal) => {
+                            // Logic: In "Suggested" list, they are just candidates.
+                            // Button is "Start Bidding" which opens local modal if configured OR triggers callback.
+                            // But here we want the local "Start Bidding" to actually behave like the Discovery one if clicked here too?
+                            // User said "Start Bidding appears only on Discovery cards" - Wait.
+                            // "Discovery -> Start Bidding -> Deals".
+                            // "Deals Page Behavior... If a campaign was already initiated from Discover: DO NOT show 'Start Bidding' again".
+                            // This implies items in "AI Suggested" on Deals page are *not* initiated yet.
+                            // If they are not initiated, they should have "Start Bidding"?
+                            // User Prompt: "What the Button Should Become ... REMOVE in Deals page: 'Start Bidding' ... REPLACE with status-based UI".
+                            // This implies even for suggested deals on this page?
+                            // "Once bidding is initiated ... system owns process".
+                            // If I click start here, it initiates.
+                            // Let's assume on Deals page, we can also start bidding.
 
                             return (
                                 <div key={deal.id} id={`deal-${deal.id}`} className="deal-card ai-suggested">
@@ -238,31 +262,19 @@ export default function Deals({ onBack, activeDeal }) {
                                         </div>
                                     </div>
                                     <div className="deal-actions">
-                                        {isNegotiating ? (
-                                            <button
-                                                className="btn btn-secondary btn-full interaction-press"
-                                                onClick={() => handleStartNegotiation({ ...deal, negotiationStatus: 'negotiating' })}
-                                            >
-                                                <span className="pulse-dot-sm"></span>
-                                                View Negotiation
-                                            </button>
-                                        ) : (
-                                            <>
-                                                <button
-                                                    className="btn btn-primary interaction-press"
-                                                    onClick={() => handleStartNegotiation({ ...deal, negotiationStatus: 'started' })}
-                                                >
-                                                    Start Bidding
-                                                </button>
-                                                <div style={{ flex: 1 }}></div>
-                                                <button
-                                                    className="btn-text"
-                                                    onClick={() => handleDecline(deal.id)}
-                                                >
-                                                    Decline
-                                                </button>
-                                            </>
-                                        )}
+                                        <button
+                                            className="btn btn-primary interaction-press"
+                                            onClick={() => handleStartNegotiation({ ...deal, negotiationStatus: 'started' })}
+                                        >
+                                            Start Bidding
+                                        </button>
+                                        <div style={{ flex: 1 }}></div>
+                                        <button
+                                            className="btn-text"
+                                            onClick={() => handleDecline(deal.id)}
+                                        >
+                                            Decline
+                                        </button>
                                     </div>
                                 </div>
                             )
@@ -272,11 +284,11 @@ export default function Deals({ onBack, activeDeal }) {
             )}
 
             {/* In Negotiation */}
-            {inNegotiation.length > 0 && (
+            {negotiatingDeals.length > 0 && (
                 <section className={`deals-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
                     <h2 className="section-title">In Negotiation</h2>
                     <div className="deals-list">
-                        {inNegotiation.map((deal, index) => (
+                        {negotiatingDeals.map((deal, index) => (
                             <div
                                 key={deal.id}
                                 id={`deal-${deal.id}`}
@@ -309,29 +321,37 @@ export default function Deals({ onBack, activeDeal }) {
                                     <span>{deal.agentInsight}</span>
                                 </div>
 
-                                {deal.status === 'counter' && (
-                                    <div className="deal-actions">
-                                        <button
-                                            className="btn btn-primary interaction-press"
-                                            onClick={() => handleAccept(deal.id)}
-                                        >
-                                            Accept
+                                <div className="deal-actions">
+                                    {/* Processing / Negotiating State */}
+                                    {deal.status === 'processing' || deal.status === 'pending' || deal.status === 'negotiating' ? (
+                                        <button className="btn btn-secondary btn-full disabled" disabled>
+                                            <span className="pulse-dot-sm"></span>
+                                            Negotiating...
                                         </button>
-                                        <button
-                                            className="btn btn-secondary interaction-press"
-                                            onClick={() => handleStartNegotiation(deal)}
-                                        >
-                                            Counter
-                                        </button>
-                                        <div style={{ flex: 1 }}></div>
-                                        <button
-                                            className="btn-text"
-                                            onClick={() => handleDecline(deal.id)}
-                                        >
-                                            Decline
-                                        </button>
-                                    </div>
-                                )}
+                                    ) : deal.status === 'counter' ? (
+                                        <>
+                                            <button
+                                                className="btn btn-primary interaction-press"
+                                                onClick={() => handleAccept(deal.id)}
+                                            >
+                                                Accept
+                                            </button>
+                                            <button
+                                                className="btn btn-secondary interaction-press"
+                                                onClick={() => handleStartNegotiation(deal)}
+                                            >
+                                                Counter
+                                            </button>
+                                            <div style={{ flex: 1 }}></div>
+                                            <button
+                                                className="btn-text"
+                                                onClick={() => handleDecline(deal.id)}
+                                            >
+                                                Decline
+                                            </button>
+                                        </>
+                                    ) : null}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -371,6 +391,14 @@ export default function Deals({ onBack, activeDeal }) {
                 onClose={() => setNegotiatingDeal(null)}
                 onComplete={handleNegotiationComplete}
             />
+
+            {resultData && (
+                <NegotiationResult
+                    result={resultData.status}
+                    deal={resultData.deal}
+                    onClose={handleResultClose}
+                />
+            )}
         </div>
     );
 }

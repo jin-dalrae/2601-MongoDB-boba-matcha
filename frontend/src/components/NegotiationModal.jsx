@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import MatchaLoader from './MatchaLoader';
+import GradientLoader from './GradientLoader';
 import './NegotiationModal.css';
 
 const CHAT_SEQUENCE = [

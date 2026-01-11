@@ -4,7 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const {
     Contract, AuditReport, X402Settlement, User, Wallet,
-    Campaign, AgentLog, AutoBid, ContentSubmission
+    Campaign, AgentLog, AutoBid, ContentSubmission, AgentConfig
 } = require('./models');
 
 const app = express();
@@ -54,6 +54,41 @@ const x402Service = {
 const getDemoAdvertiser = async () => {
     return await User.findOne({ role: 'Advertiser' });
 };
+
+// 0. Advertiser Signup
+app.post('/api/signup/advertiser', async (req, res) => {
+    try {
+        const { companyName, email, industry, budget } = req.body;
+
+        // Check if exists
+        let user = await User.findOne({ email });
+        if (user) return res.status(400).json({ error: 'User already exists' });
+
+        // Create User
+        user = await User.create({
+            role: 'Advertiser',
+            name: companyName,
+            email,
+            onboarding_status: 'Complete'
+        });
+
+        // Create Agent Config
+        await AgentConfig.create({
+            userId: user._id,
+            rules: {
+                auto_bid_max: Number(budget) / 10, // heuristic
+                preferences: { industry, monthly_budget: budget },
+                tone: 'Professional' // Default
+            }
+        });
+
+        res.status(201).json({ success: true, user });
+
+    } catch (err) {
+        console.error("Signup Error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // 1. Dashboard Data
 app.get('/api/dashboard', async (req, res) => {
@@ -130,6 +165,44 @@ app.get('/api/campaigns', async (req, res) => {
 
         res.json(result);
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 2b. Create Campaign
+app.post('/api/campaigns', async (req, res) => {
+    try {
+        const advertiser = await getDemoAdvertiser();
+        if (!advertiser) return res.status(404).json({ error: 'No advertiser found' });
+
+        const { name, description, budget, productName, shipProduct, keepProduct, deadline } = req.body;
+
+        const newCampaign = await Campaign.create({
+            advertiserId: advertiser._id,
+            title: name,
+            product_info: {
+                name: productName,
+                description,
+                shipProduct,
+                keepProduct,
+                deadline
+            },
+            budget_limit: Number(budget),
+            status: 'Active'
+        });
+
+        res.status(201).json({
+            success: true,
+            campaign: {
+                id: newCampaign._id,
+                name: newCampaign.title,
+                status: newCampaign.status,
+                budget: newCampaign.budget_limit
+            }
+        });
+
+    } catch (err) {
+        console.error("Create Campaign Error:", err);
         res.status(500).json({ error: err.message });
     }
 });

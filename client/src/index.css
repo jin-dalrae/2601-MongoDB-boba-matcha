@@ -6,20 +6,18 @@
 @tailwind utilities;
 
 :root {
-  /* Color System - Light Mode Default */
-  --color-bg-primary: #FFFFFF;
-  --color-bg-card: #F9FAFB;
-  --color-accent-primary: #4F46E5;
-  /* Indigo-600 */
-  /* Matcha Green - keep as accent */
+/* Dark Matcha palette */
+  --color-bg-primary: #0B0F0C;
+  --color-bg-card: #111513;
+  --color-accent-primary: #9FE870;
   --color-accent-brand: #9FE870;
 
-  --color-divider: #E5E7EB;
+  --color-divider: #1D221E;
 
-  --color-text-primary: #111827;
-  --color-text-secondary: #4B5563;
-  --color-text-muted: #9CA3AF;
-  --color-text-inverse: #FFFFFF;
+  --color-text-primary: #E6EDE8;
+  --color-text-secondary: #C2CAC5;
+  --color-text-muted: #7F8882;
+  --color-text-inverse: #0B0F0C;
 
   /* Spacing & Layout */
   --grid-unit: 8px;
@@ -214,11 +212,13 @@ body {
   border-radius: var(--border-radius-md);
   padding: calc(var(--grid-unit) * 2);
   margin-bottom: calc(var(--grid-unit) * 2);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
 }
 
 .btn {
   background-color: var(--color-accent-primary);
-  color: var(--color-text-inverse);
+  color: #0d120f;
   font-weight: 500;
   font-size: 14px;
   padding: 12px 24px;

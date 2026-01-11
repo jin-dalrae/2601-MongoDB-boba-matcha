@@ -33,7 +33,7 @@ const CreateCampaign = () => {
             });
 
             if (response.ok) {
-                navigate('/');
+                navigate('/advertiser/campaigns');
             } else {
                 console.error('Failed to create campaign');
             }
@@ -104,44 +104,44 @@ const CreateCampaign = () => {
                     </div>
                 </div>
 
-                    <div className="card space-y-4">
-                        <h2 className="text-section-header">Product Details</h2>
+                <div className="card space-y-4">
+                    <h2 className="text-section-header">Product Details</h2>
 
-                        <div className="form-grid">
-                            <div>
-                                <label className="text-label block mb-2">Product Name</label>
-                                <input
-                                    type="text"
-                                    name="productName"
-                                    value={formData.productName}
-                                    onChange={handleChange}
-                                    className="input-control"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between p-2 border border-[#232626] rounded">
-                            <span className="text-label">Ship Product to Creator?</span>
+                    <div className="form-grid">
+                        <div>
+                            <label className="text-label block mb-2">Product Name</label>
                             <input
-                                type="checkbox"
-                                name="shipProduct"
-                                checked={formData.shipProduct}
+                                type="text"
+                                name="productName"
+                                value={formData.productName}
                                 onChange={handleChange}
-                                className="accent-accent w-5 h-5"
-                            />
-                        </div>
-
-                        <div className="flex items-center justify-between p-2 border border-[#232626] rounded">
-                            <span className="text-label">Creator keeps product?</span>
-                            <input
-                                type="checkbox"
-                                name="keepProduct"
-                                checked={formData.keepProduct}
-                                onChange={handleChange}
-                                className="accent-accent w-5 h-5"
+                                className="input-control"
                             />
                         </div>
                     </div>
+
+                    <div className="flex items-center justify-between p-2 border border-[#232626] rounded">
+                        <span className="text-label">Ship Product to Creator?</span>
+                        <input
+                            type="checkbox"
+                            name="shipProduct"
+                            checked={formData.shipProduct}
+                            onChange={handleChange}
+                            className="accent-accent w-5 h-5"
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 border border-[#232626] rounded">
+                        <span className="text-label">Creator keeps product?</span>
+                        <input
+                            type="checkbox"
+                            name="keepProduct"
+                            checked={formData.keepProduct}
+                            onChange={handleChange}
+                            className="accent-accent w-5 h-5"
+                        />
+                    </div>
+                </div>
 
                 <div className="form-actions">
                     <button

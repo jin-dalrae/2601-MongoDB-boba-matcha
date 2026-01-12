@@ -798,12 +798,14 @@
         /* Center content in remaining space */
         align-items: flex-start;
         min-height: 100vh;
+        padding-right: 40px;
+        /* Add right padding to balance */
     }
 
     .adv-page {
-        max-width: 800px;
+        max-width: 720px;
         width: 100%;
-        padding: 40px 48px;
+        padding: 40px 32px;
         padding-bottom: 60px;
         /* Less bottom padding since no bottom nav */
     }

@@ -1,83 +1,231 @@
-import React from 'react';
-import { User } from 'lucide-react';
-import { mockData } from './mockData';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, Zap } from 'lucide-react';
+import './advertiser-theme.css';
+import { fetchJson } from '../../lib/api';
+import { resolveAdvertiserId } from '../../lib/advertiser';
 
-const Dashboard = () => {
-    const { advertiser, campaignStatus, agentActivity } = mockData;
+const AdvertiserDashboard = () => {
+    const navigate = useNavigate();
+    const [showSettings, setShowSettings] = useState(false);
+    const [budgetData, setBudgetData] = useState({ total: 0, spent: 0, remaining: 0 });
+    const [campaigns, setCampaigns] = useState([]);
+    const [agentActivity, setAgentActivity] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
+    const advertiserId = useMemo(() => resolveAdvertiserId(), []);
 
-    const pct = (mockData.advertiser.spent / mockData.advertiser.budget) * 100;
+    useEffect(() => {
+        const loadDashboard = async () => {
+            if (!advertiserId) {
+                setLoadError('Missing advertiser id. Add ?advertiserId=... to the URL or set VITE_ADVERTISER_ID.');
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                setIsLoading(true);
+                const [overview, campaignSummary] = await Promise.all([
+                    fetchJson(`/api/advertisers/${advertiserId}/overview`),
+                    fetchJson(`/api/advertisers/${advertiserId}/campaigns/summary?limit=4`)
+                ]);
+
+                setBudgetData(overview.budget || { total: 0, spent: 0, remaining: 0 });
+                setAgentActivity(overview.agentActivity || []);
+                setCampaigns(campaignSummary || []);
+                setLoadError('');
+            } catch (error) {
+                setLoadError('Failed to load advertiser dashboard data.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadDashboard();
+    }, [advertiserId]);
+
+    const formatRelativeTime = (timestamp) => {
+        if (!timestamp) return '—';
+        const diffMs = Date.now() - new Date(timestamp).getTime();
+        const diffMin = Math.max(Math.floor(diffMs / 60000), 0);
+        if (diffMin < 1) return 'Just now';
+        if (diffMin < 60) return `${diffMin} min ago`;
+        const diffHours = Math.floor(diffMin / 60);
+        if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+        const diffDays = Math.floor(diffHours / 24);
+        return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    };
+
+    const getStatusPill = (status) => {
+        const statusMap = {
+            'Live': 'adv-pill-live',
+            'Active': 'adv-pill-live',
+            'Matching': 'adv-pill-matching',
+            'Review': 'adv-pill-review',
+            'Completed': 'adv-pill-draft',
+            'Paused': 'adv-pill-draft',
+            'Draft': 'adv-pill-draft'
+        };
+        return statusMap[status] || 'adv-pill-draft';
+    };
+
+    const spentPercentage = (budgetData.spent / budgetData.total) * 100;
 
     return (
-        <div className="p-4">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-page-title text-accent">Dashboard</h1>
-                <div style={{ background: '#232626', padding: 8, borderRadius: '50%' }}>
-                    <User size={20} color="#9FE870" />
-                </div>
-            </div>
-
-            {/* Primary Card: Budget */}
-            <div className="card">
-                <div className="flex justify-between items-center mb-4">
-                    <span className="text-section-header">Total Budget</span>
-                    <span className="text-label">${mockData.advertiser.budget.toLocaleString()}</span>
+        <div className="advertiser-app">
+            <div className="adv-page">
+                {/* Header */}
+                <div className="adv-header">
+                    <h1 className="adv-page-title">Dashboard</h1>
+                    <button
+                        className="adv-header-action"
+                        onClick={() => setShowSettings(true)}
+                    >
+                        <User size={20} />
+                    </button>
                 </div>
 
-                <div className="flex justify-between items-end mb-2">
-                    <div>
-                        <div className="text-label" style={{ marginBottom: 4 }}>Spent</div>
-                        <div className="text-metric" style={{ fontSize: 24 }}>${mockData.advertiser.spent.toLocaleString()}</div>
+                {loadError && (
+                    <div className="adv-card">
+                        <div className="adv-text-secondary">{loadError}</div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                        <div className="text-label" style={{ marginBottom: 4 }}>Remaining</div>
-                        <div className="text-metric text-accent" style={{ fontSize: 24 }}>${mockData.advertiser.remaining.toLocaleString()}</div>
+                )}
+
+                {/* Budget Overview Card */}
+                <div className="adv-card adv-card-primary adv-animate-in">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <span className="adv-text-secondary" style={{ fontWeight: 600 }}>Total Budget</span>
+                        <span className="adv-text-muted" style={{ fontSize: '14px', fontWeight: 500 }}>
+                            ${budgetData.total.toLocaleString()}
+                        </span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
+                        <div>
+                            <div className="adv-text-muted" style={{ marginBottom: '4px' }}>Spent</div>
+                            <div className="adv-metric">${budgetData.spent.toLocaleString()}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div className="adv-text-muted" style={{ marginBottom: '4px' }}>Remaining</div>
+                            <div className="adv-metric adv-metric-accent">${budgetData.remaining.toLocaleString()}</div>
+                        </div>
+                    </div>
+
+                    <div className="adv-progress-bar">
+                        <div className="adv-progress-fill" style={{ width: `${spentPercentage}%` }}></div>
                     </div>
                 </div>
 
-                <div className="progress-bar-bg">
-                    <div className="progress-bar-fill" style={{ width: `${pct}%` }}></div>
-                </div>
-            </div>
+                {/* Campaign Status Section */}
+                <div style={{ marginBottom: '24px' }}>
+                    <h2 className="adv-section-header">Campaign Status</h2>
 
-            {/* Second Section: Campaign Status */}
-            <div className="mb-6">
-                <h2 className="text-section-header mb-4">Campaign Status</h2>
-                <div className="flex flex-col gap-2">
-                    {mockData.campaigns.map(c => (
-                        <div key={c.id} className="card p-2 flex justify-between items-center" style={{ marginBottom: 0 }}>
-                            <div>
-                                <div style={{ fontWeight: 600, marginBottom: 4 }}>{c.name}</div>
-                                <div className="text-label text-muted">{c.creators} creators involved</div>
+                    {campaigns.map((campaign, index) => (
+                        <div
+                            key={campaign.id}
+                            className="adv-campaign-card adv-animate-in"
+                            style={{ animationDelay: `${index * 0.05}s` }}
+                            onClick={() => navigate('/advertiser/campaigns')}
+                        >
+                            <div className="adv-campaign-header">
+                                <span className="adv-campaign-name">{campaign.name}</span>
+                                <span className={`adv-pill ${getStatusPill(campaign.status)}`}>
+                                    {campaign.status === 'Active' ? 'Live' : campaign.status}
+                                </span>
                             </div>
-                            <div className="flex flex-col items-end gap-2">
-                                <span className={`pill ${c.status === 'Matching' ? 'active' : ''}`}>{c.status}</span>
-                                <span className="text-label text-muted">${c.spent} spent</span>
+
+                            <div className="adv-campaign-meta">
+                                <div className="adv-campaign-meta-item">
+                                    <span className="adv-campaign-meta-label">Creators</span>
+                                    <span className="adv-campaign-meta-value">{campaign.creatorsActive}</span>
+                                </div>
+                                <div className="adv-campaign-meta-item">
+                                    <span className="adv-campaign-meta-label">Spent</span>
+                                    <span className="adv-campaign-meta-value">${campaign.totalSpend?.toLocaleString() || 0}</span>
+                                </div>
                             </div>
                         </div>
                     ))}
+
+                    {!isLoading && campaigns.length === 0 && (
+                        <div className="adv-card">
+                            <div className="adv-text-secondary">No campaigns found yet.</div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Agent Activity Section */}
+                <div>
+                    <h2 className="adv-section-header">
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Zap size={18} style={{ color: 'var(--adv-accent-primary)' }} />
+                            Agent Activity
+                        </span>
+                    </h2>
+
+                    <div className="adv-card">
+                        {agentActivity.map((log, index) => (
+                            <div
+                                key={log.id}
+                                className="adv-log-item"
+                                style={{ animationDelay: `${index * 0.05}s` }}
+                            >
+                                <span className="adv-log-text">{log.text}</span>
+                                <span className="adv-log-time">{formatRelativeTime(log.timestamp)}</span>
+                            </div>
+                        ))}
+
+                        {!isLoading && agentActivity.length === 0 && (
+                            <div className="adv-text-secondary">No agent activity yet.</div>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            {/* Third Section: Agent Activity */}
-            <div>
-                <h2 className="text-section-header mb-4">Agent Activity</h2>
-                <div className="card" style={{ padding: '8px 16px' }}>
-                    {mockData.agentActivity.map((log, idx) => (
-                        <div key={log.id}>
-                            <div className="flex justify-between items-center" style={{ padding: '12px 0' }}>
-                                <span className="text-body" style={{ color: '#AEB5B2' }}>{log.text}</span>
-                                <span className="text-label" style={{ color: '#7C8481', fontSize: 10 }}>{log.time}</span>
-                            </div>
-                            {idx < mockData.agentActivity.length - 1 && (
-                                <div style={{ height: 1, background: '#232626' }}></div>
-                            )}
+            {/* Settings Modal */}
+            {showSettings && (
+                <div className="adv-modal-overlay" onClick={() => setShowSettings(false)}>
+                    <div className="adv-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="adv-modal-header">
+                            <span className="adv-modal-title">Settings</span>
+                            <button
+                                className="adv-btn-ghost"
+                                onClick={() => setShowSettings(false)}
+                            >
+                                ×
+                            </button>
                         </div>
-                    ))}
+                        <div className="adv-modal-body">
+                            <div className="adv-list-item">
+                                <span className="adv-text-secondary">Advertiser Profile</span>
+                                <span className="adv-text-muted">→</span>
+                            </div>
+                            <div className="adv-list-item">
+                                <span className="adv-text-secondary">Brand Info</span>
+                                <span className="adv-text-muted">→</span>
+                            </div>
+                            <div className="adv-list-item">
+                                <span className="adv-text-secondary">Budget Limits</span>
+                                <span className="adv-text-muted">→</span>
+                            </div>
+                            <div className="adv-list-item">
+                                <span className="adv-text-secondary">Risk Tolerance</span>
+                                <span className="adv-text-muted">→</span>
+                            </div>
+                            <div className="adv-list-item">
+                                <span className="adv-text-secondary">Approval Thresholds</span>
+                                <span className="adv-text-muted">→</span>
+                            </div>
+                            <div className="adv-list-item">
+                                <span className="adv-text-secondary">Payment Method</span>
+                                <span className="adv-text-muted">→</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };
 
-export default Dashboard;
+export default AdvertiserDashboard;

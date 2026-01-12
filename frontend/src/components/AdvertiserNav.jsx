@@ -42,7 +42,12 @@ export default function AdvertiserNav() {
   };
 
   return (
-    <nav className={`advertiser-nav ${isPressed ? 'pressed' : ''}`}>
+    <nav className={`advertiser-nav light-theme ${isPressed ? 'pressed' : ''}`}>
+      {/* Logo for desktop sidebar */}
+      <div className="nav-logo">
+        <span className="nav-logo-text">Matcha</span>
+      </div>
+
       <div className="nav-bar">
         {navItems.map((item) => {
           const active = isActive(item);
@@ -54,7 +59,7 @@ export default function AdvertiserNav() {
               className={`nav-item ${active ? 'active' : ''}`}
               onClick={handleTabClick}
             >
-              <IconComponent size={24} />
+              <IconComponent size={20} />
               <span>{item.label}</span>
             </Link>
           );

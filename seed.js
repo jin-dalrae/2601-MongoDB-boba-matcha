@@ -80,6 +80,30 @@ const seedData = async () => {
             memory_state: 'initialized'
         });
 
+        const advSharedMem = await SharedMemory.create({
+            entityId: user._id,
+            performance_embedding: Array.from({ length: 5 }, () => Math.random()),
+            reliability_score: faker.number.float({ min: 0.6, max: 0.95 }),
+            visibility_rules: { publicProfit: false }
+        });
+
+        const advertiserLogMessages = [
+            'Auto-adjusted bids based on recent performance.',
+            'Shortlisted top creators for active campaign.',
+            'Negotiation completed with a creator.',
+            'Contract approved and sent for signature.',
+            'Budget threshold updated for campaign.'
+        ];
+
+        const logCount = faker.number.int({ min: 2, max: 5 });
+        for (let j = 0; j < logCount; j++) {
+            await AgentLog.create({
+                sharedMemoryId: advSharedMem._id,
+                action: 'ADVERTISER_AGENT_EVENT',
+                details: { message: faker.helpers.arrayElement(advertiserLogMessages) }
+            });
+        }
+
         advertisers.push(user);
     }
 
@@ -223,10 +247,25 @@ const seedData = async () => {
     console.log('--- E, F & G. Execution: Content, Audit, Payment ---');
 
     for (const contract of contracts) {
-        // Content Submission
+        // Content Submission with actual video URLs
+        const videoUrls = [
+            'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4'
+        ];
+
         const submission = await ContentSubmission.create({
             contractId: contract._id,
-            content_url: faker.internet.url(),
+            content_url: faker.helpers.arrayElement(videoUrls),
             submitted_at: new Date()
         });
 

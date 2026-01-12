@@ -33,11 +33,13 @@ const userRoutes = require('./routes/users');
 const campaignRoutes = require('./routes/campaigns');
 const dealRoutes = require('./routes/deals');
 const contractRoutes = require('./routes/contracts');
+const advertiserRoutes = require('./routes/advertisers');
 
 app.use('/api/users', userRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/deals', dealRoutes);
 app.use('/api/contracts', contractRoutes);
+app.use('/api/advertisers', advertiserRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -58,4 +60,3 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-

@@ -13,6 +13,7 @@ import { OnboardingFlow } from './pages/onboarding';
 import AdvertiserDashboard from './pages/advertiser/AdvertiserDashboard';
 import AdvertiserCampaigns from './pages/advertiser/AdvertiserCampaigns';
 import AdvertiserShortlist from './pages/advertiser/AdvertiserShortlist';
+import AdvertiserResults from './pages/advertiser/AdvertiserResults';
 import './index.css';
 
 // Legacy route redirect component
@@ -63,8 +64,11 @@ function AppContent() {
   const isAdvertiserRoute = location.pathname.startsWith('/advertiser');
   const isLandingPage = location.pathname === '/';
 
+  // Use full-width container for landing page and advertiser routes
+  const useFullWidth = isLandingPage || isAdvertiserRoute;
+
   return (
-    <div className="app">
+    <div className={`app${useFullWidth ? ' app-full' : ''}`}>
       <Routes>
         {/* Landing Page */}
         <Route path="/" element={<LandingPage />} />
@@ -81,6 +85,7 @@ function AppContent() {
         <Route path="/advertiser" element={<AdvertiserDashboard />} />
         <Route path="/advertiser/campaigns" element={<AdvertiserCampaigns />} />
         <Route path="/advertiser/shortlist" element={<AdvertiserShortlist />} />
+        <Route path="/advertiser/results" element={<AdvertiserResults />} />
 
         {/* Legacy routes - redirect to new structure */}
         <Route path="/campaigns" element={<Navigate to="/creator/campaigns" replace />} />

@@ -42,71 +42,77 @@ export default function LandingPage() {
                 </div>
 
                 <div className="hero-content">
-                    <h2 className="hero-headline fade-in-element">
-                        Ads don't fail because of creators.<br />
-                        <span className="highlight">They fail because contracts don't execute.</span>
-                    </h2>
+                    <div className="hero-layout">
+                        <div className="hero-copy">
+                            <h2 className="hero-headline fade-in-element">
+                                Ads don't fail because of creators.<br />
+                                <span className="highlight">They fail because contracts don't execute.</span>
+                            </h2>
 
-                    <p className="hero-subheadline fade-in-element">
-                        An agent-to-agent marketplace where advertisers and creators negotiate, verify, and settle campaigns automatically.
-                    </p>
+                            <p className="hero-subheadline fade-in-element">
+                                An agent-to-agent marketplace where advertisers and creators negotiate, verify, and settle campaigns automatically.
+                            </p>
 
-                    {/* Animated Flow Diagram */}
-                    <div className="flow-diagram fade-in-element">
-                        <div className="flow-node advertiser">
-                            <div className="node-icon">💼</div>
-                            <div className="node-label">Advertiser Agent</div>
-                        </div>
-                        <div className="flow-arrow">
-                            <div className="arrow-line pulsing"></div>
-                        </div>
-                        <div className="flow-node campaign">
-                            <div className="node-icon">📋</div>
-                            <div className="node-label">Campaign</div>
-                        </div>
-                        <div className="flow-arrow">
-                            <div className="arrow-line pulsing delay-1"></div>
-                        </div>
-                        <div className="flow-node creators">
-                            <div className="node-icon">👥</div>
-                            <div className="node-label">Creator Bids</div>
-                        </div>
-                        <div className="flow-arrow">
-                            <div className="arrow-line pulsing delay-2"></div>
-                        </div>
-                        <div className="flow-node audit">
-                            <div className="node-icon">✓</div>
-                            <div className="node-label">Verification</div>
-                        </div>
-                        <div className="flow-arrow">
-                            <div className="arrow-line pulsing delay-3"></div>
-                        </div>
-                        <div className="flow-node escrow">
-                            <div className="node-icon">💰</div>
-                            <div className="node-label">Payout</div>
-                        </div>
-                    </div>
+                            {/* CTA Buttons */}
+                            <div className="hero-cta fade-in-element">
+                                <button className="btn btn-primary btn-large" onClick={() => handleGetStarted('creator')}>
+                                    I'm a Creator
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </button>
+                                <button className="btn btn-primary btn-large" onClick={() => handleGetStarted('advertiser')}>
+                                    I'm an Advertiser
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </button>
+                            </div>
 
-                    {/* CTA Buttons */}
-                    <div className="hero-cta fade-in-element">
-                        <button className="btn btn-primary btn-large" onClick={() => handleGetStarted('creator')}>
-                            I'm a Creator
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </button>
-                        <button className="btn btn-primary btn-large" onClick={() => handleGetStarted('advertiser')}>
-                            I'm an Advertiser
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </button>
-                    </div>
+                            <div className="hero-secondary-cta fade-in-element">
+                                <a href="#how-it-works" className="link-secondary">See how it works</a>
+                                <span className="separator">·</span>
+                                <a href="#architecture" className="link-secondary">View system architecture</a>
+                            </div>
+                        </div>
 
-                    <div className="hero-secondary-cta fade-in-element">
-                        <a href="#how-it-works" className="link-secondary">See how it works</a>
-                        <span className="separator">·</span>
-                        <a href="#architecture" className="link-secondary">View system architecture</a>
+                        <div className="hero-visual fade-in-element">
+                            {/* Animated Flow Diagram */}
+                            <div className="flow-diagram">
+                                <div className="flow-node advertiser">
+                                    <div className="node-icon">💼</div>
+                                    <div className="node-label">Advertiser Agent</div>
+                                </div>
+                                <div className="flow-arrow">
+                                    <div className="arrow-line pulsing"></div>
+                                </div>
+                                <div className="flow-node campaign">
+                                    <div className="node-icon">📋</div>
+                                    <div className="node-label">Campaign</div>
+                                </div>
+                                <div className="flow-arrow">
+                                    <div className="arrow-line pulsing delay-1"></div>
+                                </div>
+                                <div className="flow-node creators">
+                                    <div className="node-icon">👥</div>
+                                    <div className="node-label">Creator Bids</div>
+                                </div>
+                                <div className="flow-arrow">
+                                    <div className="arrow-line pulsing delay-2"></div>
+                                </div>
+                                <div className="flow-node audit">
+                                    <div className="node-icon">✓</div>
+                                    <div className="node-label">Verification</div>
+                                </div>
+                                <div className="flow-arrow">
+                                    <div className="arrow-line pulsing delay-3"></div>
+                                </div>
+                                <div className="flow-node escrow">
+                                    <div className="node-icon">💰</div>
+                                    <div className="node-label">Payout</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

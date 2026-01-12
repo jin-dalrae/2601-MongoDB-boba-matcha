@@ -98,6 +98,23 @@
     z-index: 1;
 }
 
+.hero-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3xl);
+}
+
+.hero-copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    align-items: center;
+}
+
+.hero-visual {
+    width: 100%;
+}
+
 .hero-headline {
     font-size: 28px;
     font-weight: var(--weight-semibold);
@@ -128,9 +145,9 @@
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
-    margin: var(--spacing-3xl) 0;
+    margin: 0;
     padding: var(--spacing-xl);
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(26, 29, 28, 0.04);
     border: 1px solid var(--color-divider-subtle);
     border-radius: var(--radius-card);
     overflow-x: auto;
@@ -316,7 +333,7 @@
 .problem-section {
     background: linear-gradient(180deg,
             transparent 0%,
-            rgba(255, 255, 255, 0.01) 50%,
+            rgba(26, 29, 28, 0.03) 50%,
             transparent 100%);
 }
 
@@ -820,6 +837,110 @@
 
     .closing-statement {
         font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .landing-hero {
+        min-height: auto;
+        padding: var(--spacing-2xl) var(--page-padding);
+    }
+
+    .hero-headline {
+        font-size: 22px;
+    }
+
+    .hero-subheadline {
+        font-size: 15px;
+    }
+
+    .flow-diagram {
+        padding: var(--spacing-lg);
+    }
+
+    .step {
+        flex-direction: column;
+    }
+}
+
+@media (min-width: 1024px) {
+    .landing-hero {
+        min-height: 90vh;
+        padding: 96px var(--page-padding);
+        align-items: stretch;
+    }
+
+    .hero-content {
+        max-width: 1200px;
+        text-align: left;
+    }
+
+    .hero-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        align-items: center;
+        gap: 56px;
+    }
+
+    .hero-copy {
+        align-items: flex-start;
+    }
+
+    .hero-cta {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .hero-secondary-cta {
+        justify-content: flex-start;
+    }
+
+    .hero-visual {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .flow-diagram {
+        max-width: 520px;
+        margin-left: auto;
+    }
+
+    .hero-headline {
+        font-size: 36px;
+    }
+
+    .hero-subheadline {
+        font-size: 18px;
+    }
+
+    .section-title {
+        font-size: 28px;
+    }
+
+    .section-subtitle {
+        font-size: 18px;
+    }
+
+    .steps-container {
+        max-width: 920px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .landing-hero {
+        padding: 110px max(6vw, 48px);
+    }
+
+    .hero-headline {
+        font-size: 40px;
+    }
+
+    .hero-subheadline {
+        font-size: 19px;
+    }
+
+    .landing-section {
+        padding: 64px max(6vw, 48px);
     }
 }
 

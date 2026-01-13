@@ -72,3 +72,4 @@ export const contractAPI = {
 // Health check
 export const healthCheck = () => apiCall('/health');
 
+

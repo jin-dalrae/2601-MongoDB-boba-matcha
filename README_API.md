@@ -100,3 +100,4 @@ VITE_API_URL=http://localhost:3001/api
 - Use proper HTTP methods (GET, POST, PUT, DELETE)
 - Include `Content-Type: application/json` header for POST/PUT requests
 
+

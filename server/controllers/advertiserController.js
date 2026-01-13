@@ -9,6 +9,7 @@ const {
   AgentLog,
   SharedMemory,
   SNSAccount,
+  User,
 } = require('../../models');
 
 const formatDateLabel = (date) => {
@@ -382,6 +383,23 @@ exports.getAdvertiserShortlist = async (req, res) => {
         costPerResult: null,
         creatorDistribution: []
       }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getSampleAdvertiser = async (req, res) => {
+  try {
+    const advertiser = await User.findOne({ role: 'Advertiser' }).select('name email');
+    if (!advertiser) {
+      return res.status(404).json({ error: 'No advertiser found' });
+    }
+
+    res.json({
+      id: advertiser._id,
+      name: advertiser.name,
+      email: advertiser.email
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

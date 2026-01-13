@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronLeft, Check, Clock, DollarSign, Play, Eye } from 'lucide-react';
 import './advertiser-theme.css';
 import { fetchJson } from '../../lib/api';
-import { resolveAdvertiserId } from '../../lib/advertiser';
+import { ensureAdvertiserId } from '../../lib/advertiser';
 
 const AdvertiserCampaigns = () => {
     const [activeView, setActiveView] = useState('list'); // list, detail
@@ -11,19 +11,21 @@ const AdvertiserCampaigns = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState('');
     const [detailLoading, setDetailLoading] = useState(false);
-    const advertiserId = useMemo(() => resolveAdvertiserId(), []);
+    const [advertiserId, setAdvertiserId] = useState('');
 
     useEffect(() => {
         const loadCampaigns = async () => {
-            if (!advertiserId) {
-                setLoadError('Missing advertiser id. Add ?advertiserId=... to the URL or set VITE_ADVERTISER_ID.');
-                setIsLoading(false);
-                return;
-            }
-
             try {
                 setIsLoading(true);
-                const data = await fetchJson(`/api/advertisers/${advertiserId}/campaigns/summary`);
+                const resolvedId = await ensureAdvertiserId();
+                if (!resolvedId) {
+                    setLoadError('Missing advertiser id. Add ?advertiserId=... to the URL or set VITE_ADVERTISER_ID.');
+                    setIsLoading(false);
+                    return;
+                }
+
+                setAdvertiserId(resolvedId);
+                const data = await fetchJson(`/api/advertisers/${resolvedId}/campaigns/summary`);
                 setCampaigns(data || []);
                 setLoadError('');
             } catch (error) {
@@ -34,7 +36,7 @@ const AdvertiserCampaigns = () => {
         };
 
         loadCampaigns();
-    }, [advertiserId]);
+    }, []);
 
     const getStatusPill = (status) => {
         const statusMap = {

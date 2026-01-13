@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Filter, Instagram, Youtube, Zap, TrendingUp, AlertCircle, Check, X, ChevronLeft, DollarSign } from 'lucide-react';
 import './advertiser-theme.css';
 import { fetchJson } from '../../lib/api';
-import { resolveAdvertiserId } from '../../lib/advertiser';
+import { ensureAdvertiserId } from '../../lib/advertiser';
 
 const AdvertiserShortlist = () => {
     const [activeView, setActiveView] = useState('overview'); // overview, detail, negotiation, report
@@ -19,19 +19,21 @@ const AdvertiserShortlist = () => {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState('');
-    const advertiserId = useMemo(() => resolveAdvertiserId(), []);
+    const [advertiserId, setAdvertiserId] = useState('');
 
     useEffect(() => {
         const loadShortlist = async () => {
-            if (!advertiserId) {
-                setLoadError('Missing advertiser id. Add ?advertiserId=... to the URL or set VITE_ADVERTISER_ID.');
-                setIsLoading(false);
-                return;
-            }
-
             try {
                 setIsLoading(true);
-                const data = await fetchJson(`/api/advertisers/${advertiserId}/shortlist`);
+                const resolvedId = await ensureAdvertiserId();
+                if (!resolvedId) {
+                    setLoadError('Missing advertiser id. Add ?advertiserId=... to the URL or set VITE_ADVERTISER_ID.');
+                    setIsLoading(false);
+                    return;
+                }
+
+                setAdvertiserId(resolvedId);
+                const data = await fetchJson(`/api/advertisers/${resolvedId}/shortlist`);
                 setCampaignContext(data.campaign);
                 setCreators(data.creators || []);
                 setReportMetrics(data.reportMetrics || {
@@ -49,7 +51,7 @@ const AdvertiserShortlist = () => {
         };
 
         loadShortlist();
-    }, [advertiserId]);
+    }, []);
 
     useEffect(() => {
         const loadNegotiation = async () => {

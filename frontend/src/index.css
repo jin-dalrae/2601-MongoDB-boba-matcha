@@ -130,6 +130,24 @@ body {
   max-width: 100%;
 }
 
+/* Desktop layout for advertiser with left sidebar */
+@media screen and (min-width: 1024px) {
+  .app.app-full {
+    margin-left: 220px;
+    width: calc(100% - 220px);
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  .app.app-full {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
+}
+
+
 /* Page Container */
 .page {
   flex: 1;

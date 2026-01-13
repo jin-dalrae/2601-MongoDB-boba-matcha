@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Zap } from 'lucide-react';
 import './advertiser-theme.css';
 import { fetchJson } from '../../lib/api';
-import { resolveAdvertiserId } from '../../lib/advertiser';
+import { ensureAdvertiserId } from '../../lib/advertiser';
 
 const AdvertiserDashboard = () => {
     const navigate = useNavigate();
@@ -13,36 +13,46 @@ const AdvertiserDashboard = () => {
     const [agentActivity, setAgentActivity] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState('');
-    const advertiserId = useMemo(() => resolveAdvertiserId(), []);
 
     useEffect(() => {
+        let isActive = true;
         const loadDashboard = async () => {
-            if (!advertiserId) {
-                setLoadError('Missing advertiser id. Add ?advertiserId=... to the URL or set VITE_ADVERTISER_ID.');
-                setIsLoading(false);
-                return;
-            }
-
             try {
                 setIsLoading(true);
+                const resolvedId = await ensureAdvertiserId();
+                if (!resolvedId) {
+                    setLoadError('Missing advertiser id. Add ?advertiserId=... to the URL or set VITE_ADVERTISER_ID.');
+                    setIsLoading(false);
+                    return;
+                }
+
                 const [overview, campaignSummary] = await Promise.all([
-                    fetchJson(`/api/advertisers/${advertiserId}/overview`),
-                    fetchJson(`/api/advertisers/${advertiserId}/campaigns/summary?limit=4`)
+                    fetchJson(`/api/advertisers/${resolvedId}/overview`),
+                    fetchJson(`/api/advertisers/${resolvedId}/campaigns/summary?limit=4`)
                 ]);
 
+                if (!isActive) return;
                 setBudgetData(overview.budget || { total: 0, spent: 0, remaining: 0 });
                 setAgentActivity(overview.agentActivity || []);
                 setCampaigns(campaignSummary || []);
                 setLoadError('');
             } catch (error) {
-                setLoadError('Failed to load advertiser dashboard data.');
+                if (isActive) {
+                    setLoadError('Failed to load advertiser dashboard data.');
+                }
             } finally {
-                setIsLoading(false);
+                if (isActive) {
+                    setIsLoading(false);
+                }
             }
         };
 
         loadDashboard();
-    }, [advertiserId]);
+
+        return () => {
+            isActive = false;
+        };
+    }, []);
 
     const formatRelativeTime = (timestamp) => {
         if (!timestamp) return '—';

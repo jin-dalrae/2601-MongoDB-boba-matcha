@@ -5,6 +5,7 @@ const userController = require('../controllers/userController');
 router.get('/:id', userController.getUser);
 router.get('/role/:role', userController.getUsersByRole);
 router.get('/:id/profile', userController.getUserProfile);
+router.get('/:id/dashboard', userController.getCreatorDashboard);
 router.post('/', userController.createUser);
 router.put('/:id', userController.updateUser);
 

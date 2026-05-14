@@ -315,15 +315,17 @@ What's wired today vs what's WIP. Be honest with yourself.
 
 | Capability | State | Notes |
 |---|---|---|
-| Onboarding persists user | ✅ Wired | `OnboardingFlow` now `POST`s `/api/users` and stores `matcha_user_id` |
-| Creator dashboard (mock) | 🟡 Static | Earnings / pacts / activity are still placeholder data. `Submit Content` button routes to `/creator/contracts` where real contracts live. |
+| Onboarding persists user | ✅ Wired | `OnboardingFlow` `POST`s `/api/users` and stores `matcha_user_id`. Role-blind copy (asks for TikTok handle for advertisers too) — known gap. |
+| Creator dashboard | ✅ Wired | Earnings (real settlements), active pacts, agent activity, and reliability all driven by `GET /api/users/:id/dashboard`. |
+| Creator profile | ✅ Wired | Real user / wallet / SNS / agent config / reliability via `GET /api/users/:id/profile`. |
+| Creator deals | ✅ Wired | Real AutoBids via `dealAPI.getDealsByCreator()`, with contracts joined client-side so confirmed pacts surface a real `contractId`. Accept / Decline call `PUT /api/deals/:id`. |
 | Creator discovery | ✅ Wired | `Discovery` fetches `GET /api/campaigns/active` and renders real campaigns. |
 | Start bidding | ✅ Wired | `Start Bidding` creates a real `AutoBid` via `dealAPI.createDeal` and carries a `dealContext` into `Deals`. |
 | AI negotiation | ✅ Wired end-to-end | `NegotiationModal` auto-enters live mode when `dealContext` is set, calls `:8000/negotiate`, then flips the `AutoBid` to `Accepted` and creates a `Contract`. |
 | Active contracts | ✅ Wired | `ActiveCampaigns` fetches real contracts via `contractAPI.getContractsByCreator()`. |
-| Content submission + audit | ✅ Wired | `Submit Content` on a contract card opens `SubmitContentModal` with the real `contractId` → `POST /contracts/:id/submission` + `:8000/audit`. |
+| Content submission + audit | ✅ Wired | `Submit Content` opens `SubmitContentModal` with the real `contractId` → `POST /contracts/:id/submission` + `:8000/audit`. |
 | Advertiser dashboard | ✅ Wired | Overview / campaigns / shortlist / results all on real endpoints. |
-| x402 settlement | 🟡 Endpoint exists, no UI trigger | Real transfers when `X402_WALLET_ADDRESS` and `X402_PRIVATE_KEY` are set; no creator-facing button yet — call `POST :8000/settle` directly. |
+| x402 settlement | 🟡 Endpoint exists, no UI trigger | Real transfers when `X402_WALLET_ADDRESS` and `X402_PRIVATE_KEY` are set; no creator- or advertiser-facing button yet — call `POST :8000/settle` directly. |
 | Auth | ❌ Not implemented | Routes are open — anyone with an id can hit any endpoint. |
 
 ---

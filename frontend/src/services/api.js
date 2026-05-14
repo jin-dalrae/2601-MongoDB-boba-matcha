@@ -32,6 +32,7 @@ export const userAPI = {
   getUser: (id) => apiCall(`/users/${id}`),
   getUsersByRole: (role) => apiCall(`/users/role/${role}`),
   getUserProfile: (id) => apiCall(`/users/${id}/profile`),
+  getCreatorDashboard: (id) => apiCall(`/users/${id}/dashboard`),
   createUser: (data) => apiCall('/users', { method: 'POST', body: JSON.stringify(data) }),
   updateUser: (id, data) => apiCall(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 };

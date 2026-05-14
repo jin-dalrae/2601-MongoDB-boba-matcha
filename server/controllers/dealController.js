@@ -1,12 +1,17 @@
 const { AutoBid, Campaign, User, NegotiationLog } = require('../models');
 
+const populateCampaignWithAdvertiser = {
+  path: 'campaignId',
+  select: 'title product_info budget_limit advertiserId',
+  populate: { path: 'advertiserId', select: 'name email' },
+};
+
 // Get deals (AutoBids) for a creator
 exports.getDealsByCreator = async (req, res) => {
   try {
     const { creatorId } = req.params;
     const deals = await AutoBid.find({ creatorId })
-      .populate('campaignId', 'title product_info budget_limit')
-      .populate('campaignId.advertiserId', 'name')
+      .populate(populateCampaignWithAdvertiser)
       .sort({ createdAt: -1 });
     res.json(deals);
   } catch (error) {
@@ -19,8 +24,7 @@ exports.getDealsByCreatorAndStatus = async (req, res) => {
   try {
     const { creatorId, status } = req.params;
     const deals = await AutoBid.find({ creatorId, status })
-      .populate('campaignId', 'title product_info budget_limit')
-      .populate('campaignId.advertiserId', 'name')
+      .populate(populateCampaignWithAdvertiser)
       .sort({ createdAt: -1 });
     res.json(deals);
   } catch (error) {

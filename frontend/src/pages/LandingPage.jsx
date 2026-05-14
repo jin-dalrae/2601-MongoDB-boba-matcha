@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './LandingPage.css';
 
 export default function LandingPage() {
@@ -380,6 +380,10 @@ export default function LandingPage() {
             {/* Footer */}
             <footer className="landing-footer">
                 <p>Built for a future where agents negotiate on our behalf.</p>
+                <p style={{ marginTop: 12, fontSize: 13 }}>
+                    <Link to="/terms" style={{ color: 'inherit', marginRight: 16 }}>Terms</Link>
+                    <Link to="/privacy" style={{ color: 'inherit' }}>Privacy</Link>
+                </p>
             </footer>
         </div>
     );

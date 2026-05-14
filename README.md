@@ -325,7 +325,8 @@ What's wired today vs what's WIP. Be honest with yourself.
 | Active contracts | ✅ Wired | `ActiveCampaigns` fetches real contracts via `contractAPI.getContractsByCreator()`. |
 | Content submission + audit | ✅ Wired | `Submit Content` opens `SubmitContentModal` with the real `contractId` → `POST /contracts/:id/submission` + `:8000/audit`. |
 | Advertiser dashboard | ✅ Wired | Overview / campaigns / shortlist / results all on real endpoints. |
-| x402 settlement | 🟡 Endpoint exists, no UI trigger | Real transfers when `X402_WALLET_ADDRESS` and `X402_PRIVATE_KEY` are set; no creator- or advertiser-facing button yet — call `POST :8000/settle` directly. |
+| x402 settlement | ✅ Wired | Advertiser `Results` page now has a `Release Payment` button on cards with an audit but no settlement — it calls `:8000/settle` and refreshes. Real transfers when `X402_*` vars are set; simulated otherwise. Creator side shows audit score / receipt on the contract card. |
+| Terms / Privacy | ✅ Wired | `/terms` and `/privacy` routes; linked from the landing-page footer and the creator Profile page. |
 | Auth | ❌ Not implemented | Routes are open — anyone with an id can hit any endpoint. |
 
 ---

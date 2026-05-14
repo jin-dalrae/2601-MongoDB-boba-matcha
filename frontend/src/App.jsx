@@ -9,6 +9,8 @@ import ActiveCampaigns from './pages/ActiveCampaigns';
 import Profile from './pages/Profile';
 import Loading from './pages/Loading';
 import LandingPage from './pages/LandingPage';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import { OnboardingFlow } from './pages/onboarding';
 import AdvertiserDashboard from './pages/advertiser/AdvertiserDashboard';
 import AdvertiserCampaigns from './pages/advertiser/AdvertiserCampaigns';
@@ -34,7 +36,8 @@ function AppContent() {
     if (!onboardingComplete && location.pathname !== '/') {
       // Only show onboarding if they're trying to access app routes
       const isAppRoute = location.pathname.startsWith('/creator') || location.pathname.startsWith('/advertiser');
-      if (isAppRoute) {
+      const isLegalRoute = location.pathname === '/terms' || location.pathname === '/privacy';
+      if (isAppRoute && !isLegalRoute) {
         setShowOnboarding(true);
       }
     }
@@ -63,15 +66,20 @@ function AppContent() {
   // Determine if current route is advertiser or creator
   const isAdvertiserRoute = location.pathname.startsWith('/advertiser');
   const isLandingPage = location.pathname === '/';
+  const isLegalRoute = location.pathname === '/terms' || location.pathname === '/privacy';
 
-  // Use full-width container for landing page and advertiser routes
-  const useFullWidth = isLandingPage || isAdvertiserRoute;
+  // Use full-width container for landing, legal, and advertiser routes
+  const useFullWidth = isLandingPage || isAdvertiserRoute || isLegalRoute;
 
   return (
     <div className={`app${useFullWidth ? ' app-full' : ''}`}>
       <Routes>
         {/* Landing Page */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Legal */}
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
 
         {/* Creator Routes */}
         <Route path="/creator" element={<Dashboard />} />
@@ -94,7 +102,7 @@ function AppContent() {
         <Route path="/contracts" element={<Navigate to="/creator/contracts" replace />} />
         <Route path="/profile" element={<Navigate to="/creator/profile" replace />} />
       </Routes>
-      {!isLandingPage && (isAdvertiserRoute ? <AdvertiserNav /> : <BottomNav />)}
+      {!isLandingPage && !isLegalRoute && (isAdvertiserRoute ? <AdvertiserNav /> : <BottomNav />)}
     </div>
   );
 }

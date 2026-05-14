@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, CheckCircle, Clock, AlertCircle, TrendingUp, DollarSign } from 'lucide-react';
 import { contractAPI } from '../../services/api';
+import { agentsAPI } from '../../services/agents';
 import { ensureAdvertiserId } from '../../lib/advertiser';
 import './AdvertiserResults.css';
 
@@ -10,34 +11,65 @@ const AdvertiserResults = () => {
     const [selectedContract, setSelectedContract] = useState(null);
     const [filter, setFilter] = useState('all'); // all, submitted, audited, settled
     const [loadError, setLoadError] = useState('');
+    const [settlingId, setSettlingId] = useState(null);
+    const [advertiserId, setAdvertiserId] = useState('');
+
+    const loadContracts = async (id) => {
+        try {
+            const data = await contractAPI.getSubmissionsByAdvertiser(id);
+            setContracts(data || []);
+            setLoadError('');
+        } catch (error) {
+            setLoadError(error.message || 'Failed to load results.');
+        }
+    };
 
     useEffect(() => {
         let cancelled = false;
         const load = async () => {
             try {
-                const advertiserId = await ensureAdvertiserId();
-                if (!advertiserId) {
+                const id = await ensureAdvertiserId();
+                if (!id) {
                     if (!cancelled) {
                         setLoadError('Missing advertiser id. Add ?advertiserId=... to the URL or set VITE_ADVERTISER_ID.');
                         setLoading(false);
                     }
                     return;
                 }
-                const data = await contractAPI.getSubmissionsByAdvertiser(advertiserId);
-                if (!cancelled) {
-                    setContracts(data || []);
-                    setLoading(false);
-                }
-            } catch (error) {
-                if (!cancelled) {
-                    setLoadError(error.message || 'Failed to load results.');
-                    setLoading(false);
-                }
+                setAdvertiserId(id);
+                await loadContracts(id);
+            } finally {
+                if (!cancelled) setLoading(false);
             }
         };
         load();
         return () => { cancelled = true; };
     }, []);
+
+    const handleReleasePayment = async (e, contract) => {
+        e.stopPropagation();
+        if (settlingId) return;
+        setSettlingId(contract._id);
+        try {
+            await agentsAPI.settle({
+                contractId: contract._id,
+                contractTerms: {
+                    base_payout: contract.base_payout,
+                    conditional_tiers: contract.conditional_tiers,
+                    audit_criteria: contract.audit_criteria,
+                },
+                contentSubmission: {
+                    submission_id: contract.submission?._id,
+                    content_url: contract.submission?.content_url,
+                },
+            });
+            if (advertiserId) await loadContracts(advertiserId);
+        } catch (error) {
+            setLoadError(error.message || 'Failed to release payment.');
+        } finally {
+            setSettlingId(null);
+        }
+    };
 
     const getStatusInfo = (contract) => {
         if (contract.settlement) {
@@ -226,6 +258,18 @@ const AdvertiserResults = () => {
                                             <span className="text-muted">Base payout:</span>
                                             <span className="amount">${contract.base_payout?.toLocaleString() || '0'}</span>
                                         </div>
+                                    )}
+
+                                    {/* Release Payment — audit done, no settlement yet */}
+                                    {contract.auditReport && !contract.settlement && (
+                                        <button
+                                            className="adv-btn adv-btn-primary"
+                                            style={{ marginTop: 12, width: '100%' }}
+                                            disabled={settlingId === contract._id}
+                                            onClick={(e) => handleReleasePayment(e, contract)}
+                                        >
+                                            {settlingId === contract._id ? 'Releasing…' : 'Release Payment'}
+                                        </button>
                                     )}
                                 </div>
                             </div>

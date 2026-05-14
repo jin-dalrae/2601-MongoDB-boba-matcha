@@ -60,6 +60,7 @@ export const dealAPI = {
 // Contract API
 export const contractAPI = {
   getContractsByCreator: (creatorId) => apiCall(`/contracts/creator/${creatorId}`),
+  getContractsWithDetailsForCreator: (creatorId) => apiCall(`/contracts/creator/${creatorId}/full`),
   getContractsByAdvertiser: (advertiserId) => apiCall(`/contracts/advertiser/${advertiserId}`),
   getActiveContracts: (creatorId) => {
     const params = creatorId ? `?creatorId=${creatorId}` : '';

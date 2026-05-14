@@ -3,6 +3,7 @@ const router = express.Router();
 const contractController = require('../controllers/contractController');
 
 router.get('/creator/:creatorId', contractController.getContractsByCreator);
+router.get('/creator/:creatorId/full', contractController.getContractsWithDetailsForCreator);
 router.get('/advertiser/:advertiserId', contractController.getContractsByAdvertiser);
 router.get('/advertiser/:advertiserId/submissions', contractController.getContractsWithSubmissions);
 router.get('/active', contractController.getActiveContracts);

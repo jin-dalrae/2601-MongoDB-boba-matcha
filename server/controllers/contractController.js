@@ -142,6 +142,26 @@ exports.createSubmission = async (req, res) => {
   }
 };
 
+// Common helper: nest submission / audit / settlement under each contract.
+const decorateContracts = async (contracts) => {
+  return Promise.all(
+    contracts.map(async (contract) => {
+      const submission = await ContentSubmission.findOne({ contractId: contract._id });
+      const auditReport = submission
+        ? await AuditReport.findOne({ submissionId: submission._id })
+        : null;
+      const settlement = await X402Settlement.findOne({ contractId: contract._id });
+
+      return {
+        ...contract.toObject(),
+        submission,
+        auditReport,
+        settlement,
+      };
+    }),
+  );
+};
+
 // Get contracts with submissions for advertiser results page
 exports.getContractsWithSubmissions = async (req, res) => {
   try {
@@ -151,31 +171,31 @@ exports.getContractsWithSubmissions = async (req, res) => {
       .populate('creatorId', 'name email')
       .populate({
         path: 'autoBidId',
-        populate: {
-          path: 'campaignId',
-          select: 'title product_info'
-        }
+        populate: { path: 'campaignId', select: 'title product_info' },
       })
       .sort({ createdAt: -1 });
 
-    // Get submissions, audits, and settlements for each contract
-    const contractsWithDetails = await Promise.all(
-      contracts.map(async (contract) => {
-        const submission = await ContentSubmission.findOne({ contractId: contract._id });
-        const auditReport = submission
-          ? await AuditReport.findOne({ submissionId: submission._id })
-          : null;
-        const settlement = await X402Settlement.findOne({ contractId: contract._id });
+    const contractsWithDetails = await decorateContracts(contracts);
+    res.json(contractsWithDetails);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
-        return {
-          ...contract.toObject(),
-          submission,
-          auditReport,
-          settlement
-        };
+// Get contracts with submissions / audits / settlements for a creator
+exports.getContractsWithDetailsForCreator = async (req, res) => {
+  try {
+    const { creatorId } = req.params;
+
+    const contracts = await Contract.find({ creatorId })
+      .populate('advertiserId', 'name email')
+      .populate({
+        path: 'autoBidId',
+        populate: { path: 'campaignId', select: 'title product_info' },
       })
-    );
+      .sort({ createdAt: -1 });
 
+    const contractsWithDetails = await decorateContracts(contracts);
     res.json(contractsWithDetails);
   } catch (error) {
     res.status(500).json({ error: error.message });

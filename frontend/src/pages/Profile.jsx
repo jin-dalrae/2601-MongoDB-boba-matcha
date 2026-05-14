@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import StatusIndicator from '../components/StatusIndicator';
 import { userAPI } from '../services/api';
 import { ensureCreatorId } from '../lib/creator';
@@ -188,7 +189,25 @@ export default function Profile() {
                 )}
             </section>
 
-            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '300ms' }}>
+            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '280ms' }}>
+                <h3 className="section-title">Legal</h3>
+                <div className="accounts-list">
+                    <Link to="/terms" className="account-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <div className="account-info">
+                            <span className="account-platform">Terms of Service</span>
+                        </div>
+                        <span style={{ color: 'var(--color-secondary)' }}>→</span>
+                    </Link>
+                    <Link to="/privacy" className="account-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <div className="account-info">
+                            <span className="account-platform">Privacy Policy</span>
+                        </div>
+                        <span style={{ color: 'var(--color-secondary)' }}>→</span>
+                    </Link>
+                </div>
+            </section>
+
+            <section className={`profile-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '320ms' }}>
                 <button
                     className="btn-secondary btn-full mb-md"
                     onClick={() => {

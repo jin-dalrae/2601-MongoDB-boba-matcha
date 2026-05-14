@@ -83,7 +83,7 @@ export default function ActiveCampaigns() {
                 setLoading(false);
                 return;
             }
-            const data = await contractAPI.getContractsByCreator(creatorId);
+            const data = await contractAPI.getContractsWithDetailsForCreator(creatorId);
             setContracts(Array.isArray(data) ? data : []);
             setLoadError('');
         } catch (error) {
@@ -198,6 +198,12 @@ function ContractCard({ contract, index = 0, onSubmit }) {
     const postedDate = formatShortDate(contract.createdAt);
     const canSubmit = (contract.status === 'Active' || contract.status === 'Signed') && !!onSubmit;
 
+    const auditScore = contract.auditReport?.content_score;
+    const auditTier = contract.auditReport?.tier_achieved;
+    const settlement = contract.settlement;
+    const paidAmount = settlement?.total_paid;
+    const receiptHash = settlement?.receipt_hash;
+
     return (
         <div
             className={`campaign-card status-${meta.bucket}`}
@@ -226,18 +232,37 @@ function ContractCard({ contract, index = 0, onSubmit }) {
 
             <div className="campaign-payment">
                 <div className="payment-info">
-                    <span className="payment-label">Base Payout</span>
-                    <span className={`payment-value ${meta.bucket === 'completed' ? 'released' : ''}`}>
-                        {formatCurrency(contract.base_payout)}
+                    <span className="payment-label">{settlement ? 'Paid' : 'Base Payout'}</span>
+                    <span className={`payment-value ${settlement ? 'released' : ''}`}>
+                        {formatCurrency(paidAmount ?? contract.base_payout)}
                     </span>
                 </div>
-                <span className="payment-status">{meta.label}</span>
+                <span className="payment-status">
+                    {settlement ? settlement.status || 'Settled' : meta.label}
+                </span>
             </div>
 
-            {contract.audit_criteria && (
+            {auditScore !== undefined && auditScore !== null && (
+                <div className="agent-note">
+                    <StatusIndicator status="active" size={14} />
+                    <span>
+                        Audit: {Math.round(auditScore * 100)}% · Tier {auditTier ?? 0}
+                    </span>
+                </div>
+            )}
+
+            {!auditScore && contract.audit_criteria && (
                 <div className="agent-note">
                     <StatusIndicator status={meta.bucket === 'pending' ? 'pending' : 'ai-working'} size={14} />
                     <span>{contract.audit_criteria}</span>
+                </div>
+            )}
+
+            {receiptHash && (
+                <div className="agent-note">
+                    <span style={{ fontFamily: 'monospace', fontSize: 12 }}>
+                        Receipt: {String(receiptHash).slice(0, 12)}…
+                    </span>
                 </div>
             )}
 

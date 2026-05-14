@@ -2,111 +2,88 @@
 
 # 🍵 Matcha
 
-### Autonomous Advertising Contracts for Creator Economy
+### Autonomous Advertising Contracts for the Creator Economy
 
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=for-the-badge)](https://langchain-ai.github.io/langgraph/)
 
-**AI-powered agents that autonomously match creators with advertisers, negotiate deals, audit content, and settle payments via blockchain.**
+**AI agents that match creators with advertisers, negotiate deals end-to-end, audit submitted content, and settle payments on Base via the x402 protocol.**
 
-[Demo](#demo) • [Features](#features) • [Architecture](#architecture) • [Quick Start](#quick-start) • [API Reference](#api-reference)
-
----
-
-<img src="https://img.shields.io/badge/Status-Hackathon%20Project-brightgreen?style=flat-square" alt="Status" />
+[Architecture](#-architecture) • [Quick Start](#-quick-start) • [API Reference](#-api-reference) • [Data Model](#-data-model) • [Status](#-status)
 
 </div>
+
+---
 
 ## 🎯 The Problem
 
 The creator economy is broken:
-- **Creators** spend hours negotiating deals instead of creating content
-- **Advertisers** struggle to find authentic voices that match their brand
-- **Trust** is fractured — payment disputes, fake metrics, unclear deliverables
-- **Middlemen** take 30-50% cuts for simple matchmaking
+
+- **Creators** spend hours negotiating deals instead of creating content.
+- **Advertisers** struggle to find authentic voices that match their brand.
+- **Trust** is fractured — payment disputes, fake metrics, unclear deliverables.
+- **Middlemen** take 30–50% cuts for simple matchmaking.
 
 ## 💡 The Solution
 
-**Matcha** deploys autonomous AI agents that handle the entire advertising workflow:
+Matcha gives both parties an autonomous agent that talks to the other party's agent:
 
 ```
-Creator ←→ AI Agent ←→ Smart Contract ←→ AI Agent ←→ Advertiser
+Creator ⇄ Creator Agent ⇄ Smart Contract ⇄ Advertiser Agent ⇄ Advertiser
+                              │
+                              ▼
+                      x402 settlement on Base
 ```
 
-Each party gets their own AI agent that:
-- 🤝 **Negotiates** on their behalf using learned preferences
-- 📊 **Analyzes** content quality and brand safety automatically
-- ✅ **Verifies** deliverables against contract terms
-- 💰 **Settles** payments via x402 protocol on blockchain
+Each agent:
 
----
-
-## ✨ Features
-
-### For Creators
-| Feature | Description |
-|---------|-------------|
-| 🎨 **AI Profile Analysis** | Automatic extraction of content style, audience demographics, and niche |
-| 🤖 **Smart Matching** | Get matched with brands that fit your authentic voice |
-| 💬 **Autonomous Negotiation** | Your AI agent negotiates rates based on your market value |
-| ⚡ **Instant Payments** | Get paid automatically when content meets contract terms |
-
-### For Advertisers
-| Feature | Description |
-|---------|-------------|
-| 📋 **Campaign Dashboard** | Track budget, spend, and ROI in real-time |
-| 🔍 **Creator Discovery** | AI-curated shortlists ranked by brand fit score |
-| 🛡️ **Content Audit** | Automatic verification of brand safety and deliverables |
-| 📈 **Performance Tracking** | Tier-based payments tied to actual performance |
-
-### Technical Highlights
-- **x402 Protocol Integration** — HTTP-native micropayments for content settlements
-- **Shared Memory Architecture** — Agents remember past negotiations and learn preferences
-- **Performance Embeddings** — ML-based creator matching using engagement metrics
-- **Tiered Payouts** — Smart contracts that pay based on content quality scores
+- 🤝 **Negotiates** rates and terms based on learned preferences.
+- 📊 **Audits** submitted content for brand-safety and quality (LLM-based).
+- ✅ **Verifies** deliverables against the on-record contract terms.
+- 💰 **Settles** payments in USDC/EURC/cbBTC via x402 on Base.
 
 ---
 
 ## 🏗️ Architecture
 
+Three services, one MongoDB. The database name is pinned to `matcha` in both the Node and Python layers.
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         FRONTEND (React + Vite)                  │
-├─────────────────────────────────────────────────────────────────┤
-│  Creator App          │  Advertiser App         │  Landing Page  │
-│  • Dashboard          │  • Overview             │  • Value Prop  │
-│  • Deals              │  • Matches (Shortlist)  │  • How It Works│
-│  • Active Campaigns   │  • Campaigns            │  • Trust       │
-│  • Profile            │  • Settings Modal       │                │
+│                       FRONTEND  (Vite + React)                  │
+│                          http://localhost:5173                  │
+│   Creator flow:     Dashboard · Discovery · Deals · Contracts   │
+│   Advertiser flow:  Dashboard · Campaigns · Shortlist · Results │
+│   Onboarding:       Role → TikTok handle → Bank → Done          │
 └─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
+            │                                       │
+            │  REST  (services/api.js)              │  REST  (services/agents.js)
+            ▼                                       ▼
+┌─────────────────────────────┐    ┌──────────────────────────────────────┐
+│  NODE API   (Express +      │    │  AGENTS API   (FastAPI + LangGraph)  │
+│  Mongoose)                  │    │  http://localhost:8000               │
+│  http://localhost:3001/api  │    │                                      │
+│                             │    │  POST  /negotiate    LLM negotiation │
+│  /api/users                 │    │  POST  /audit        Content audit   │
+│  /api/campaigns             │    │  POST  /settle       Audit + x402    │
+│  /api/deals     (AutoBids)  │    │  GET   /negotiations/{contract_id}   │
+│  /api/contracts             │    │  GET   /settlement/{contract_id}     │
+│  /api/advertisers           │    │  GET   /agent-logs/{entity_id}       │
+└─────────────────────────────┘    └──────────────────────────────────────┘
+            │                                       │
+            └──────────────────┬────────────────────┘
+                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      BACKEND (Express + Node.js)                 │
-├─────────────────────────────────────────────────────────────────┤
-│  Routes                │  Controllers            │  Services      │
-│  • /api/users          │  • UserController       │  • AgentService│
-│  • /api/campaigns      │  • CampaignController   │  • x402Service │
-│  • /api/contracts      │  • ContractController   │  • AuditService│
-│  • /api/agent          │  • AgentController      │                │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       DATABASE (MongoDB Atlas)                   │
-├─────────────────────────────────────────────────────────────────┤
-│  Collections                                                     │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐             │
-│  │    Users     │ │  Campaigns   │ │  Contracts   │             │
-│  └──────────────┘ └──────────────┘ └──────────────┘             │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐             │
-│  │SharedMemory  │ │  AgentLogs   │ │ AuditReports │             │
-│  └──────────────┘ └──────────────┘ └──────────────┘             │
-│  ┌──────────────┐ ┌──────────────┐                               │
-│  │X402Settlement│ │ContentSubmit │                               │
-│  └──────────────┘ └──────────────┘                               │
+│                  MongoDB Atlas — database: `matcha`             │
+│                                                                 │
+│  users · sns_accounts · agent_configs · wallets                 │
+│  campaigns · auto_bids · negotiation_logs · contracts           │
+│  shipments · content_submissions · audit_reports                │
+│  x402_settlements · agent_logs · shared_memory                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -116,58 +93,64 @@ Each party gets their own AI agent that:
 
 ### Prerequisites
 
-- **Node.js** >= 18.x
+- **Node.js** ≥ 18.x
+- **Python** ≥ 3.10 (for the agents service)
 - **MongoDB Atlas** account (or local MongoDB)
-- **npm** or **yarn**
+- An **Anthropic** *or* **OpenAI** API key (for the negotiation + audit agents)
+- *(Optional)* Base wallet credentials for real on-chain settlement
 
-### 1. Clone & Install
+### 1. Install
 
 ```bash
 git clone https://github.com/your-org/matcha.git
 cd matcha
 
-# Install backend dependencies
+# Node API
 npm install
 
-# Install frontend dependencies
-cd frontend && npm install
+# Frontend
+cd frontend && npm install && cd ..
+
+# Python agents
+cd agents
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cd ..
 ```
 
-### 2. Environment Setup
+### 2. Configure
 
-Create a `.env` file in the root directory:
+Copy `.env.example` → `.env` in the repo root. The same file is read by **both** the Node server (`dotenv`) and the Python agents (`python-dotenv`). The frontend has its own file at `frontend/.env`.
 
-```env
-# MongoDB
-MONGODB_URI=mongodb+srv://your-connection-string
-
-# Server
-PORT=3001
-
-# x402 Protocol (optional)
-X402_WALLET_ADDRESS=your-wallet-address
-X402_PRIVATE_KEY=your-private-key
+```bash
+cp .env.example .env
+# then edit MONGODB_URI, ANTHROPIC_API_KEY (or OPENAI_API_KEY), etc.
 ```
 
-### 3. Seed the Database
+The MongoDB **database name is pinned to `matcha`** in code (via Mongoose's `dbName` option and PyMongo's `client.matcha`), so the connection URI does not need a path component.
+
+### 3. Seed
 
 ```bash
 npm run seed
 ```
 
-This populates the database with sample creators, advertisers, campaigns, and contracts.
+Populates `matcha` with 20 advertisers, 50 creators, ~30 campaigns, sample auto-bids, contracts, content submissions, audit reports, and settlements.
 
-### 4. Start Development
+### 4. Run (three terminals)
 
 ```bash
-# Terminal 1 - Backend
-npm start
+# Terminal 1 — Node API           (port 3001)
+npm run dev
 
-# Terminal 2 - Frontend
+# Terminal 2 — Frontend           (port 5173)
 cd frontend && npm run dev
+
+# Terminal 3 — Python agents      (port 8000)
+cd agents && source venv/bin/activate && python server.py
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open <http://localhost:5173>.
 
 ---
 
@@ -175,171 +158,188 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ```
 matcha/
-├── 📂 frontend/               # React + Vite frontend
-│   ├── 📂 src/
-│   │   ├── 📂 components/     # Shared components
-│   │   │   ├── BottomNav.jsx
-│   │   │   └── AdvertiserNav.jsx
-│   │   ├── 📂 pages/
-│   │   │   ├── 📂 advertiser/ # Advertiser dashboard
-│   │   │   │   ├── AdvertiserDashboard.jsx
-│   │   │   │   ├── AdvertiserShortlist.jsx
-│   │   │   │   ├── AdvertiserCampaigns.jsx
-│   │   │   │   └── advertiser-theme.css
-│   │   │   ├── Dashboard.jsx  # Creator dashboard
-│   │   │   ├── Deals.jsx
-│   │   │   └── LandingPage.jsx
-│   │   ├── App.jsx
-│   │   └── index.css          # Global design system
-│   └── package.json
+├── frontend/                       Vite + React (port 5173)
+│   ├── src/
+│   │   ├── components/             Shared UI + modals (Negotiation, SubmitContent, …)
+│   │   ├── pages/
+│   │   │   ├── advertiser/         Dashboard · Campaigns · Shortlist · Results
+│   │   │   ├── onboarding/         Role · Account · Bank · Completion
+│   │   │   ├── Dashboard.jsx       Creator home
+│   │   │   ├── Discovery.jsx       Browse campaigns
+│   │   │   ├── Deals.jsx           AutoBids and active negotiations
+│   │   │   ├── ActiveCampaigns.jsx Contracts in flight
+│   │   │   └── Profile.jsx
+│   │   ├── services/
+│   │   │   ├── api.js              Single client for the Node API
+│   │   │   └── agents.js           Client for the FastAPI agents
+│   │   └── lib/advertiser.js       Advertiser-id resolution helper
+│   └── .env                        VITE_API_BASE_URL, VITE_AGENTS_BASE_URL
 │
-├── 📂 server/                 # Express backend
-│   ├── 📂 controllers/
-│   ├── 📂 routes/
-│   └── 📂 services/
+├── server/                         Express + Mongoose (port 3001)
+│   ├── index.js                    Entry point — pins dbName to `matcha`
+│   ├── models.js                   All Mongoose schemas (one file)
+│   ├── seed.js                     Faker-based seeder (npm run seed)
+│   ├── controllers/
+│   │   ├── userController.js
+│   │   ├── campaignController.js
+│   │   ├── dealController.js
+│   │   ├── contractController.js
+│   │   └── advertiserController.js
+│   └── routes/                     One file per resource
 │
-├── models.js                  # Mongoose schemas
-├── seed.js                    # Database seeder
-├── server.js                  # Express entry point
-└── package.json
+├── agents/                         FastAPI + LangGraph (port 8000)
+│   ├── server.py                   FastAPI entry point
+│   ├── negotiation_agent.py        Multi-round LLM negotiation graph
+│   ├── payment_agent.py            Audit + x402 settlement on Base
+│   ├── state.py                    TypedDict graph state
+│   └── requirements.txt
+│
+├── .env.example                    Env vars for server + agents
+└── package.json                    npm run dev | seed
 ```
-
----
-
-## 🎨 Design System
-
-### Color Palette
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--adv-bg-primary` | `#F7F9F8` | Light theme background |
-| `--adv-bg-card` | `#FFFFFF` | Card backgrounds |
-| `--adv-accent-primary` | `#9FE870` | Matcha green accent |
-| `--adv-text-primary` | `#1A1D1C` | Primary text |
-| `--adv-text-secondary` | `#5C6662` | Secondary text |
-| `--adv-divider` | `#E2E8E5` | Borders and dividers |
-
-### Typography
-
-- **Brand**: `Gluten` (logo and headers)
-- **UI**: `Inter` (body text and interface)
-
-### Status Colors
-
-| Status | Color | Hex |
-|--------|-------|-----|
-| Live/Active | 🟢 Green | `#9FE870` |
-| Matching/Progress | 🟡 Yellow | `#F2E394` |
-| Review/Alert | 🔴 Rose | `#E5989B` |
-| Draft/Muted | ⚪ Gray | `#8A9491` |
 
 ---
 
 ## 🔌 API Reference
 
-### Users
+### Node API (`http://localhost:3001/api`)
 
+#### Users
 ```http
-GET    /api/users/:id           # Get user by ID
-POST   /api/users               # Create new user
-GET    /api/users/creators      # List all creators
-GET    /api/users/advertisers   # List all advertisers
+GET    /users/:id                      User by id
+GET    /users/:id/profile              User with wallet, SNS, agent config
+GET    /users/role/:role               Users by role (Creator | Advertiser)
+POST   /users                          Create user (used by onboarding)
+PUT    /users/:id                      Update user
 ```
 
-### Campaigns
-
+#### Campaigns
 ```http
-GET    /api/campaigns                    # List all campaigns
-GET    /api/campaigns/:id                # Get campaign details
-POST   /api/campaigns                    # Create campaign
-GET    /api/campaigns/advertiser/:id     # Get advertiser's campaigns
+GET    /campaigns/active               All active campaigns
+GET    /campaigns/:id                  Campaign details
+GET    /campaigns/:id/stats            Campaign stats
+GET    /campaigns/advertiser/:id       Campaigns for an advertiser
+POST   /campaigns                      Create campaign
+PUT    /campaigns/:id                  Update campaign
 ```
 
-### Contracts
-
+#### Deals (AutoBids)
 ```http
-GET    /api/contracts/:id                           # Get contract details
-GET    /api/contracts/creator/:creatorId            # Get creator's contracts
-GET    /api/contracts/advertiser/:advertiserId      # Get advertiser's contracts
-POST   /api/contracts                               # Create contract
-PATCH  /api/contracts/:id/status                    # Update contract status
+GET    /deals/:id                                  Deal with negotiation log
+GET    /deals/creator/:creatorId                   Deals for a creator
+GET    /deals/creator/:creatorId/status/:status    Filtered by status
+GET    /deals/campaign/:campaignId                 Deals for a campaign
+POST   /deals                                      Create AutoBid
+PUT    /deals/:id                                  Update AutoBid
 ```
 
-### Agent
+#### Contracts
+```http
+GET    /contracts/active                                Active contracts
+GET    /contracts/:id                                   Contract + submission + audit + settlement
+GET    /contracts/creator/:creatorId                    Contracts for a creator
+GET    /contracts/advertiser/:advertiserId              Contracts for an advertiser
+GET    /contracts/advertiser/:advertiserId/submissions  With submission/audit/settlement nested
+POST   /contracts                                       Create contract
+POST   /contracts/:id/submission                        Submit content URL for a contract
+PUT    /contracts/:id                                   Update contract
+```
+
+#### Advertiser dashboard
+```http
+GET    /advertisers/sample                                Pick any advertiser (dev helper)
+GET    /advertisers/:id/overview                          Budget + agent activity
+GET    /advertisers/:id/shortlist                         Ranked creator matches for active campaign
+GET    /advertisers/:id/campaigns/summary?limit=N         Campaign cards
+GET    /advertisers/:id/campaigns/:campaignId/detail      Timeline + creator performance
+```
+
+### Agents API (`http://localhost:8000`)
 
 ```http
-POST   /api/agent/match          # AI matching for campaign
-POST   /api/agent/negotiate      # Start negotiation
-POST   /api/agent/audit          # Audit submitted content
-POST   /api/agent/settle         # Settle payment via x402
+POST   /negotiate                Run the LangGraph negotiation between agents
+POST   /audit                    Audit submitted content (no payment)
+POST   /settle                   Audit + execute x402 transfer on Base
+GET    /negotiations/{cid}       Negotiation history for a contract
+GET    /settlement/{cid}         Settlement record for a contract
+GET    /agent-logs/{entityId}    Recent agent activity for an entity
 ```
 
 ---
 
-## 🧪 Data Models
+## 🧪 Data Model
 
-### User Schema
-```javascript
-{
-  email: String,
-  role: "creator" | "advertiser",
-  social_handle: String,
-  profile_data: {
-    niche: [String],
-    avg_engagement: Number,
-    follower_breakdown: Object
-  }
-}
+13 collections, all defined in `server/models.js`. Highlights:
+
+```
+User                role: Advertiser | Creator
+                    onboarding_status, name, email
+
+Campaign            advertiserId · title · product_info · budget_limit · status
+
+AutoBid             campaignId · creatorId · current_bid · status
+                    (status ∈ Negotiating | Accepted | Cancelled | Proposed)
+
+NegotiationLog      autoBidId · round_history[]  ← written by negotiation agent
+                    agent_logic_summary
+
+Contract            autoBidId · advertiserId · creatorId
+                    base_payout · conditional_tiers · audit_criteria
+                    status ∈ Draft | Signed | Active | Auditing | Settled | …
+
+ContentSubmission   contractId · content_url
+AuditReport        submissionId · content_score · tier_achieved · reasoning_log
+X402Settlement     contractId · auditReportId · status · total_paid · receipt_hash
+
+AgentLog · SharedMemory · SNSAccount · AgentConfig · Wallet · Shipment
 ```
 
-### Campaign Schema
-```javascript
-{
-  advertiserId: ObjectId,
-  name: String,
-  budget: Number,
-  status: "draft" | "matching" | "active" | "completed",
-  requirements: {
-    niche: [String],
-    min_followers: Number,
-    content_type: String
-  }
-}
-```
+End-to-end flow:
 
-### Contract Schema
-```javascript
-{
-  campaignId: ObjectId,
-  creatorId: ObjectId,
-  advertiserId: ObjectId,
-  terms: {
-    deliverables: String,
-    deadline: Date,
-    base_payment: Number,
-    bonus_tiers: [{
-      threshold: Number,
-      bonus: Number
-    }]
-  },
-  status: "proposed" | "negotiating" | "active" | "completed"
-}
+```
+onboarding   → POST /api/users
+discovery    → GET  /api/campaigns/active
+bid          → POST /api/deals
+negotiate    → POST :8000/negotiate          (writes NegotiationLog)
+contract     → POST /api/contracts
+submit       → POST /api/contracts/:id/submission   (creates ContentSubmission, contract.status = Auditing)
+audit        → POST :8000/audit                     (writes AuditReport)
+settle       → POST :8000/settle                    (writes X402Settlement, on-chain transfer if X402_* set)
 ```
 
 ---
 
-## 🛣️ Roadmap
+## 🧭 Status
 
-- [x] Creator & Advertiser Dashboards
-- [x] AI-based Creator Matching
-- [x] Contract Negotiation Flow
-- [x] Content Audit System
-- [x] x402 Payment Integration
-- [x] Responsive Desktop Layout
-- [ ] Real-time Notifications
-- [ ] Multi-platform Analytics
-- [ ] Mobile App (React Native)
-- [ ] Decentralized Reputation System
+What's wired today vs what's WIP. Be honest with yourself.
+
+| Capability | State | Notes |
+|---|---|---|
+| Onboarding persists user | ✅ Wired | `OnboardingFlow` now `POST`s `/api/users` and stores `matcha_user_id` |
+| Creator browses campaigns | ✅ Wired | Real fetch via `campaignAPI.getActiveCampaigns()` |
+| Place auto-bid | ✅ Wired | `dealAPI.createDeal` |
+| AI negotiation | 🟡 Available, opt-in | `NegotiationModal` accepts `dealContext` prop → calls `:8000/negotiate`. Call sites still demo-mode by default. |
+| Content submission | 🟡 Available, opt-in | `SubmitContentModal` accepts `contractId` prop → real `POST /contracts/:id/submission` + `:8000/audit`. Without the prop, scripted demo flow. |
+| Advertiser dashboard | ✅ Wired | Overview / campaigns / shortlist / results all on real endpoints |
+| x402 settlement | ✅ Endpoint exists | Real transfers when `X402_WALLET_ADDRESS` and `X402_PRIVATE_KEY` are set; otherwise simulated |
+| Auth | ❌ Not implemented | Routes are open — anyone with an id can hit any endpoint |
+
+---
+
+## 🎨 Design System
+
+Light, calm, matcha-green. Two fonts: **Gluten** for the wordmark, **Inter** for everything else.
+
+| Token | Value |
+|---|---|
+| `--adv-bg-primary` | `#F7F9F8` |
+| `--adv-bg-card` | `#FFFFFF` |
+| `--adv-accent-primary` | `#9FE870` |
+| `--adv-text-primary` | `#1A1D1C` |
+| `--adv-text-secondary` | `#5C6662` |
+| `--adv-divider` | `#E2E8E5` |
+
+Status palette: 🟢 Live `#9FE870` · 🟡 Matching `#F2E394` · 🔴 Review `#E5989B` · ⚪ Draft `#8A9491`
 
 ---
 
@@ -347,34 +347,18 @@ POST   /api/agent/settle         # Settle payment via x402
 
 <div align="center">
 
-**MongoDB Hackathon 2026**
-
-*Demonstrating the power of MongoDB for AI-driven agent workflows*
+**MongoDB Hackathon 2026** — *flexible schemas for an agent-driven workflow.*
 
 </div>
 
 ---
 
-## 👥 Team
-
-| Role | Contributor |
-|------|-------------|
-| 🎨 Design & Frontend | Team Matcha |
-| ⚙️ Backend & Database | Team Matcha |
-| 🤖 AI Agents | Team Matcha |
-
----
-
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
+MIT — see [LICENSE](LICENSE).
 
 <div align="center">
 
-**Made with 🍵 by Team Matcha**
-
-[⬆ Back to Top](#-matcha)
+Made with 🍵 by Team Matcha · [⬆ Back to Top](#-matcha)
 
 </div>

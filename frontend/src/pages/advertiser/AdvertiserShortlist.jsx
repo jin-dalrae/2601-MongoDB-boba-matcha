@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Filter, Instagram, Youtube, Zap, TrendingUp, AlertCircle, Check, X, ChevronLeft, DollarSign } from 'lucide-react';
 import './advertiser-theme.css';
-import { fetchJson } from '../../lib/api';
+import { advertiserAPI, dealAPI } from '../../services/api';
 import { ensureAdvertiserId } from '../../lib/advertiser';
 
 const AdvertiserShortlist = () => {
@@ -33,7 +33,7 @@ const AdvertiserShortlist = () => {
                 }
 
                 setAdvertiserId(resolvedId);
-                const data = await fetchJson(`/api/advertisers/${resolvedId}/shortlist`);
+                const data = await advertiserAPI.getShortlist(resolvedId);
                 setCampaignContext(data.campaign);
                 setCreators(data.creators || []);
                 setReportMetrics(data.reportMetrics || {
@@ -57,7 +57,7 @@ const AdvertiserShortlist = () => {
         const loadNegotiation = async () => {
             if (activeView !== 'negotiation' || !selectedCreator?.dealId) return;
             try {
-                const data = await fetchJson(`/api/deals/${selectedCreator.dealId}`);
+                const data = await dealAPI.getDeal(selectedCreator.dealId);
                 const rounds = data?.negotiationLog?.round_history || [];
                 const steps = rounds.map((round, index) => ({
                     id: `${selectedCreator.dealId}-${index}`,

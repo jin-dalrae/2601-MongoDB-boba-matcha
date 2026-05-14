@@ -1,4 +1,4 @@
-import { fetchJson } from './api';
+import { advertiserAPI } from '../services/api';
 
 export const resolveAdvertiserId = () => {
     const params = new URLSearchParams(window.location.search);
@@ -17,7 +17,7 @@ export const ensureAdvertiserId = async () => {
         return existing;
     }
 
-    const data = await fetchJson('/api/advertisers/sample');
+    const data = await advertiserAPI.getSample();
     if (data?.id) {
         localStorage.setItem('matcha_advertiser_id', data.id);
         return data.id;

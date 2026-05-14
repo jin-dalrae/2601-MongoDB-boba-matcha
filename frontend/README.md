@@ -1,16 +1,34 @@
-# React + Vite
+# Matcha — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Vite + React app for the Matcha creator/advertiser platform.
 
-Currently, two official plugins are available:
+## Running locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+The dev server listens on http://localhost:5173.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Environment
 
-## Expanding the ESLint configuration
+Copy `.env.example` (in the repo root) and create `frontend/.env` with:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+VITE_API_BASE_URL=http://localhost:3001/api
+VITE_AGENTS_BASE_URL=http://localhost:8000
+VITE_ADVERTISER_ID=
+```
+
+`VITE_ADVERTISER_ID` is optional. If unset, the advertiser id is resolved from
+`?advertiserId=...` in the URL, then `localStorage`, then a fallback call to
+`/api/advertisers/sample`.
+
+## Project layout
+
+- `src/services/api.js` — single source of truth for backend (`/api/...`) calls.
+  Use `userAPI`, `campaignAPI`, `dealAPI`, `contractAPI`, `advertiserAPI`.
+- `src/lib/advertiser.js` — advertiser id resolution helper.
+- `src/pages/` — route components (creator + advertiser flows + onboarding).
+- `src/components/` — shared UI primitives + modals.

@@ -1,36 +1,26 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import GradientLoader from './GradientLoader';
+import { agentsAPI } from '../services/agents';
 import './NegotiationModal.css';
 
-const CHAT_SEQUENCE = [
-    {
-        sender: 'creator',
-        text: 'Based on past performance and audience fit, we recommend increasing the bid.'
-    },
-    {
-        sender: 'brand',
-        text: 'Budget flexibility available. Can adjust by $200.'
-    },
-    {
-        sender: 'creator',
-        text: 'Countering at $475 for higher engagement guarantee.'
-    },
-    {
-        sender: 'system',
-        text: 'Analyzing acceptance likelihood...'
-    },
-    {
-        sender: 'system',
-        text: '82% chance of acceptance at $475.'
-    }
-];
-
-export default function NegotiationModal({ isOpen, onClose, campaign, onUpdate, onComplete }) {
+// When `dealContext` is provided with real ids + profile data, this modal
+// drives a real negotiation via the agents service. Without it, it falls
+// back to the scripted demo chat (used by mock/demo paths).
+export default function NegotiationModal({
+    isOpen,
+    onClose,
+    campaign,
+    onUpdate,
+    onComplete,
+    dealContext,
+}) {
     const [stage, setStage] = useState('started'); // started, negotiating, completed
     const [messages, setMessages] = useState([]);
     const [isThinking, setIsThinking] = useState(false);
     const [chatStep, setChatStep] = useState(0);
     const [startingBidding, setStartingBidding] = useState(false);
+    const [finalTerms, setFinalTerms] = useState(null);
+    const [negotiationError, setNegotiationError] = useState('');
 
     // Initial Start Modal
     useEffect(() => {
@@ -52,10 +42,38 @@ export default function NegotiationModal({ isOpen, onClose, campaign, onUpdate, 
         }
     }, [isOpen, campaign]);
 
-    // Chat Simulation Logic
+    // Real negotiation path — fires once when entering 'negotiating' with a real dealContext.
     useEffect(() => {
-        if (stage !== 'negotiating') return;
-        // ... existing logic ...
+        if (stage !== 'negotiating' || !dealContext?.contractId) return;
+        let cancelled = false;
+        setIsThinking(true);
+        setNegotiationError('');
+
+        agentsAPI
+            .negotiate(dealContext)
+            .then((result) => {
+                if (cancelled) return;
+                const turns = (result.messages || []).map((m, i) => ({
+                    type: i % 2 === 0 ? 'brand' : 'agent',
+                    text: typeof m === 'string' ? m : m.content || JSON.stringify(m),
+                }));
+                setMessages(turns.length ? turns : [{ type: 'agent', text: result.reasoning || 'Negotiation complete.' }]);
+                setFinalTerms(result.final_terms || null);
+                setIsThinking(false);
+                setStage('completed');
+            })
+            .catch((err) => {
+                if (cancelled) return;
+                setIsThinking(false);
+                setNegotiationError(err.message || 'Negotiation failed.');
+            });
+
+        return () => { cancelled = true; };
+    }, [stage, dealContext]);
+
+    // Scripted Chat Simulation — only when no real dealContext is wired.
+    useEffect(() => {
+        if (stage !== 'negotiating' || dealContext?.contractId) return;
 
         let timeoutId;
         const processNextStep = () => {
@@ -109,7 +127,7 @@ export default function NegotiationModal({ isOpen, onClose, campaign, onUpdate, 
 
         processNextStep();
         return () => clearTimeout(timeoutId);
-    }, [stage, chatStep]);
+    }, [stage, chatStep, dealContext]);
 
     if (!isOpen) return null;
 
@@ -220,18 +238,23 @@ export default function NegotiationModal({ isOpen, onClose, campaign, onUpdate, 
                             <div className="deal-summary">
                                 <div className="summary-row">
                                     <span className="label">Final Payout</span>
-                                    <span className="value highlight">$725</span>
+                                    <span className="value highlight">
+                                        ${finalTerms?.payout ?? finalTerms?.price ?? 725}
+                                    </span>
                                 </div>
                                 <div className="summary-row">
                                     <span className="label">Deliverable</span>
-                                    <span className="value">1 TikTok Video</span>
+                                    <span className="value">{finalTerms?.deliverable || '1 TikTok Video'}</span>
                                 </div>
                                 <div className="summary-row">
                                     <span className="label">Brand</span>
-                                    <span className="value">Nike</span>
+                                    <span className="value">{campaign?.brand || finalTerms?.brand || 'Nike'}</span>
                                 </div>
                             </div>
 
+                            {negotiationError && (
+                                <p className="auto-confirm-note" style={{ color: '#d93b3b' }}>{negotiationError}</p>
+                            )}
                             <p className="auto-confirm-note">
                                 Deal auto-confirmed. You have 30 mins to cancel.
                             </p>
@@ -239,7 +262,8 @@ export default function NegotiationModal({ isOpen, onClose, campaign, onUpdate, 
                             <button
                                 className="btn btn-primary btn-full interaction-press"
                                 onClick={() => {
-                                    onComplete({ ...campaign, status: 'confirmed', finalPrice: 725 });
+                                    const finalPrice = finalTerms?.payout ?? finalTerms?.price ?? 725;
+                                    onComplete({ ...campaign, status: 'confirmed', finalPrice, finalTerms });
                                     onClose();
                                 }}
                             >

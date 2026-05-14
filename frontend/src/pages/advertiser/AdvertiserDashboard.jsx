@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Zap } from 'lucide-react';
 import './advertiser-theme.css';
-import { fetchJson } from '../../lib/api';
+import { advertiserAPI } from '../../services/api';
 import { ensureAdvertiserId } from '../../lib/advertiser';
 
 const AdvertiserDashboard = () => {
@@ -27,8 +27,8 @@ const AdvertiserDashboard = () => {
                 }
 
                 const [overview, campaignSummary] = await Promise.all([
-                    fetchJson(`/api/advertisers/${resolvedId}/overview`),
-                    fetchJson(`/api/advertisers/${resolvedId}/campaigns/summary?limit=4`)
+                    advertiserAPI.getOverview(resolvedId),
+                    advertiserAPI.getCampaignSummary(resolvedId, 4)
                 ]);
 
                 if (!isActive) return;

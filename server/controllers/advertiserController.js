@@ -10,7 +10,7 @@ const {
   SharedMemory,
   SNSAccount,
   User,
-} = require('../../models');
+} = require('../models');
 
 const formatDateLabel = (date) => {
   if (!date) return null;

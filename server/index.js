@@ -19,9 +19,9 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI, { dbName: 'matcha' })
   .then(() => {
-    console.log('✅ MongoDB Connected');
+    console.log('✅ MongoDB Connected (db: matcha)');
   })
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err.message);

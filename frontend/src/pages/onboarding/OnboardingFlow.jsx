@@ -4,6 +4,7 @@ import AccountSetup from './AccountSetup';
 import DataLoading from './DataLoading';
 import ConnectBank from './ConnectBank';
 import Completion from './Completion';
+import { userAPI } from '../../services/api';
 
 const STEPS = {
     ROLE_SELECTION: 'role',
@@ -44,11 +45,31 @@ export default function OnboardingFlow({ onComplete }) {
         setCurrentStep(STEPS.COMPLETION);
     };
 
-    const handleOnboardingComplete = () => {
-        // Save onboarding state to localStorage
+    const handleOnboardingComplete = async () => {
+        const role = userData.role === 'advertiser' ? 'Advertiser' : 'Creator';
+        const name = userData.tiktokUsername || `${role} user`;
+
+        let savedUser = null;
+        try {
+            savedUser = await userAPI.createUser({
+                role,
+                name,
+                onboarding_status: 'Complete',
+            });
+            if (savedUser?._id) {
+                localStorage.setItem('matcha_user_id', savedUser._id);
+                if (role === 'Advertiser') {
+                    localStorage.setItem('matcha_advertiser_id', savedUser._id);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to persist user during onboarding:', error);
+        }
+
+        const finalUser = savedUser ? { ...userData, ...savedUser } : userData;
         localStorage.setItem('matcha_onboarding_complete', 'true');
-        localStorage.setItem('matcha_user', JSON.stringify(userData));
-        onComplete?.(userData);
+        localStorage.setItem('matcha_user', JSON.stringify(finalUser));
+        onComplete?.(finalUser);
     };
 
     const goBack = (toStep) => {

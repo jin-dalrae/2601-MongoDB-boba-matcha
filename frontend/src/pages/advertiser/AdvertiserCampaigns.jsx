@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, Check, Clock, DollarSign, Play, Eye } from 'lucide-react';
 import './advertiser-theme.css';
-import { fetchJson } from '../../lib/api';
+import { advertiserAPI } from '../../services/api';
 import { ensureAdvertiserId } from '../../lib/advertiser';
 
 const AdvertiserCampaigns = () => {
@@ -25,7 +25,7 @@ const AdvertiserCampaigns = () => {
                 }
 
                 setAdvertiserId(resolvedId);
-                const data = await fetchJson(`/api/advertisers/${resolvedId}/campaigns/summary`);
+                const data = await advertiserAPI.getCampaignSummary(resolvedId);
                 setCampaigns(data || []);
                 setLoadError('');
             } catch (error) {
@@ -65,7 +65,7 @@ const AdvertiserCampaigns = () => {
         if (!advertiserId) return;
         try {
             setDetailLoading(true);
-            const detail = await fetchJson(`/api/advertisers/${advertiserId}/campaigns/${campaign.id}/detail`);
+            const detail = await advertiserAPI.getCampaignDetail(advertiserId, campaign.id);
             setSelectedCampaign({
                 id: detail.campaign.id,
                 name: detail.campaign.name,

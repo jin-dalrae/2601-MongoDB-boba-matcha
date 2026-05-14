@@ -1,4 +1,4 @@
-const { Campaign, AutoBid } = require('../../models');
+const { Campaign, AutoBid } = require('../models');
 
 // Get all campaigns for an advertiser
 exports.getCampaignsByAdvertiser = async (req, res) => {

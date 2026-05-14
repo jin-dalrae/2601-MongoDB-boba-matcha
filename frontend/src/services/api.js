@@ -1,7 +1,7 @@
-// API Service - Base configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// API Service — single source of truth for backend calls.
+// Base URL includes the `/api` prefix (e.g. http://localhost:3001/api).
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
-// Helper function for API calls
 async function apiCall(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   const config = {
@@ -14,12 +14,12 @@ async function apiCall(endpoint, options = {}) {
 
   try {
     const response = await fetch(url, config);
-    
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ error: 'Request failed' }));
       throw new Error(error.error || error.message || `HTTP ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error(`API Error (${endpoint}):`, error);
@@ -67,10 +67,24 @@ export const contractAPI = {
   getContract: (id) => apiCall(`/contracts/${id}`),
   createContract: (data) => apiCall('/contracts', { method: 'POST', body: JSON.stringify(data) }),
   updateContract: (id, data) => apiCall(`/contracts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  createSubmission: (contractId, data) =>
+    apiCall(`/contracts/${contractId}/submission`, { method: 'POST', body: JSON.stringify(data) }),
+  getSubmissionsByAdvertiser: (advertiserId) =>
+    apiCall(`/contracts/advertiser/${advertiserId}/submissions`),
+};
+
+// Advertiser API (dashboard views)
+export const advertiserAPI = {
+  getSample: () => apiCall('/advertisers/sample'),
+  getOverview: (advertiserId) => apiCall(`/advertisers/${advertiserId}/overview`),
+  getCampaignSummary: (advertiserId, limit) => {
+    const q = limit ? `?limit=${limit}` : '';
+    return apiCall(`/advertisers/${advertiserId}/campaigns/summary${q}`);
+  },
+  getShortlist: (advertiserId) => apiCall(`/advertisers/${advertiserId}/shortlist`),
+  getCampaignDetail: (advertiserId, campaignId) =>
+    apiCall(`/advertisers/${advertiserId}/campaigns/${campaignId}/detail`),
 };
 
 // Health check
 export const healthCheck = () => apiCall('/health');
-
-
-

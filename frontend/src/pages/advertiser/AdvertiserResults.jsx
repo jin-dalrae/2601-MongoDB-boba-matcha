@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, CheckCircle, Clock, AlertCircle, TrendingUp, DollarSign } from 'lucide-react';
+import { contractAPI } from '../../services/api';
+import { ensureAdvertiserId } from '../../lib/advertiser';
 import './AdvertiserResults.css';
 
 const AdvertiserResults = () => {
@@ -7,24 +9,35 @@ const AdvertiserResults = () => {
     const [loading, setLoading] = useState(true);
     const [selectedContract, setSelectedContract] = useState(null);
     const [filter, setFilter] = useState('all'); // all, submitted, audited, settled
+    const [loadError, setLoadError] = useState('');
 
     useEffect(() => {
-        fetchContracts();
+        let cancelled = false;
+        const load = async () => {
+            try {
+                const advertiserId = await ensureAdvertiserId();
+                if (!advertiserId) {
+                    if (!cancelled) {
+                        setLoadError('Missing advertiser id. Add ?advertiserId=... to the URL or set VITE_ADVERTISER_ID.');
+                        setLoading(false);
+                    }
+                    return;
+                }
+                const data = await contractAPI.getSubmissionsByAdvertiser(advertiserId);
+                if (!cancelled) {
+                    setContracts(data || []);
+                    setLoading(false);
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    setLoadError(error.message || 'Failed to load results.');
+                    setLoading(false);
+                }
+            }
+        };
+        load();
+        return () => { cancelled = true; };
     }, []);
-
-    const fetchContracts = async () => {
-        try {
-            // TODO: Replace with actual logged-in advertiser ID
-            const advertiserId = localStorage.getItem('userId') || '60f7b3b3b3b3b3b3b3b3b3b3';
-            const response = await fetch(`http://localhost:3001/api/contracts/advertiser/${advertiserId}/submissions`);
-            const data = await response.json();
-            setContracts(data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching contracts:', error);
-            setLoading(false);
-        }
-    };
 
     const getStatusInfo = (contract) => {
         if (contract.settlement) {
@@ -86,6 +99,13 @@ const AdvertiserResults = () => {
                 <h1 className="text-page-title">Contract Results</h1>
                 <p className="text-secondary">Review submissions and performance</p>
             </div>
+
+            {loadError && (
+                <div className="empty-state" style={{ color: '#d93b3b' }}>
+                    <AlertCircle size={32} />
+                    <p>{loadError}</p>
+                </div>
+            )}
 
             {/* Filter Tabs */}
             <div className="filter-tabs">

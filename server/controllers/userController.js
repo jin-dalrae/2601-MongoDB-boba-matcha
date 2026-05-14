@@ -1,6 +1,6 @@
 const {
   User, SNSAccount, AgentConfig, Wallet, SharedMemory
-} = require('../../models');
+} = require('../models');
 
 // Get user by ID
 exports.getUser = async (req, res) => {

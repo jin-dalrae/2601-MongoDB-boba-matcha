@@ -8,6 +8,7 @@ router.get('/advertiser/:advertiserId/submissions', contractController.getContra
 router.get('/active', contractController.getActiveContracts);
 router.get('/:id', contractController.getContract);
 router.post('/', contractController.createContract);
+router.post('/:id/submission', contractController.createSubmission);
 router.put('/:id', contractController.updateContract);
 
 module.exports = router;

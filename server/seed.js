@@ -17,8 +17,8 @@ if (!MONGO_URI) {
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(MONGO_URI);
-        console.log('MongoDB Connected');
+        await mongoose.connect(MONGO_URI, { dbName: 'matcha' });
+        console.log('MongoDB Connected (db: matcha)');
     } catch (err) {
         console.error(err.message);
         process.exit(1);

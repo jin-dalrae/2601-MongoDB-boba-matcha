@@ -1,4 +1,4 @@
-const { AutoBid, Campaign, User, NegotiationLog } = require('../../models');
+const { AutoBid, Campaign, User, NegotiationLog } = require('../models');
 
 // Get deals (AutoBids) for a creator
 exports.getDealsByCreator = async (req, res) => {

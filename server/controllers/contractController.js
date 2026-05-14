@@ -1,7 +1,7 @@
 const {
   Contract, AutoBid, Campaign, User,
   ContentSubmission, AuditReport, X402Settlement
-} = require('../../models');
+} = require('../models');
 
 // Get contracts for a creator
 exports.getContractsByCreator = async (req, res) => {
@@ -108,6 +108,35 @@ exports.updateContract = async (req, res) => {
       return res.status(404).json({ error: 'Contract not found' });
     }
     res.json(contract);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Create a content submission for a contract
+exports.createSubmission = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content_url } = req.body;
+
+    if (!content_url) {
+      return res.status(400).json({ error: 'content_url is required' });
+    }
+
+    const contract = await Contract.findById(id);
+    if (!contract) {
+      return res.status(404).json({ error: 'Contract not found' });
+    }
+
+    const submission = await ContentSubmission.create({
+      contractId: contract._id,
+      content_url,
+    });
+
+    contract.status = 'Auditing';
+    await contract.save();
+
+    res.status(201).json(submission);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

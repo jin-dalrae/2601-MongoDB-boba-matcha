@@ -122,6 +122,11 @@ export default function Deals() {
                             setTimeout(() => {
                                 setNegotiatingDeals(prev => [newNegotiation, ...prev]);
                                 setSuggestedDeals(prev => prev.filter(d => d.id !== activeDeal.id));
+                                // If the incoming deal has a real dealContext, auto-open the
+                                // negotiation modal so the agents call fires immediately.
+                                if (newNegotiation.dealContext?.contractId) {
+                                    setNegotiatingDeal(newNegotiation);
+                                }
                             }, 0);
                             
                             return prevConfirmed;
@@ -465,6 +470,7 @@ export default function Deals() {
                 campaign={negotiatingDeal}
                 onClose={() => setNegotiatingDeal(null)}
                 onComplete={handleNegotiationComplete}
+                dealContext={negotiatingDeal?.dealContext}
             />
 
             {resultData && (
@@ -488,6 +494,8 @@ export default function Deals() {
             <SubmitContentModal
                 isOpen={!!submittingDeal}
                 onClose={() => setSubmittingDeal(null)}
+                contractId={submittingDeal?.contractId}
+                contractTerms={submittingDeal?.contractTerms}
             />
         </div>
     );

@@ -1,11 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import TopBar from '../components/TopBar';
 import StatusIndicator from '../components/StatusIndicator';
+import SubmitContentModal from '../components/SubmitContentModal';
+import { contractAPI } from '../services/api';
+import { ensureCreatorId } from '../lib/creator';
 import './ActiveCampaigns.css';
 
-// Status icon component
-const StatusIcon = ({ status }) => {
-    switch (status) {
+// Map a Contract status enum to the UI bucket + label.
+// Contract.status ∈ Draft | Signed | Active | Auditing | Settled | Completed | Terminated
+const STATUS_BUCKETS = {
+    Active:     { bucket: 'live',      label: 'Live',              icon: 'live' },
+    Signed:     { bucket: 'live',      label: 'Live',              icon: 'live' },
+    Auditing:   { bucket: 'pending',   label: 'Auditing',          icon: 'pending' },
+    Settled:    { bucket: 'completed', label: 'Settled',           icon: 'completed' },
+    Completed:  { bucket: 'completed', label: 'Completed',         icon: 'completed' },
+    Terminated: { bucket: 'completed', label: 'Terminated',        icon: 'completed' },
+    Draft:      { bucket: 'pending',   label: 'Draft',             icon: 'pending' },
+};
+
+const StatusIcon = ({ icon }) => {
+    switch (icon) {
         case 'live':
             return (
                 <div className="status-icon live">
@@ -30,221 +44,206 @@ const StatusIcon = ({ status }) => {
                     </svg>
                 </div>
             );
-        case 'action':
-            return (
-                <div className="status-icon action">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                </div>
-            );
         default:
             return null;
     }
 };
 
-// Active campaigns data
-const activeCampaigns = [
-    {
-        id: 1,
-        brand: 'Spotify',
-        campaign: 'Music streaming campaign',
-        status: 'live',
-        statusLabel: 'Live',
-        views: '5.8K',
-        postedDate: 'Mar 20',
-        payment: 250,
-        paymentStatus: 'Releases after approval',
-        agentNote: 'Monitoring engagement. No action needed.'
-    },
-    {
-        id: 2,
-        brand: 'Nike',
-        campaign: 'Spring Collection Promo',
-        status: 'pending',
-        statusLabel: 'Pending Approval',
-        views: null,
-        postedDate: 'Mar 22',
-        payment: 500,
-        paymentStatus: 'Pending approval',
-        agentNote: 'Awaiting brand review of content.'
-    },
-    {
-        id: 3,
-        brand: 'Adidas',
-        campaign: 'Summer Running Collection',
-        status: 'completed',
-        statusLabel: 'Completed',
-        views: '8.2K',
-        postedDate: 'Mar 15',
-        payment: 600,
-        paymentStatus: 'Payment released',
-        performance: 'Above average',
-        agentNote: null
-    },
-    {
-        id: 4,
-        brand: 'Sephora',
-        campaign: 'Glow Serum Launch',
-        status: 'action',
-        statusLabel: 'Action Needed',
-        views: null,
-        postedDate: null,
-        payment: 2500,
-        paymentStatus: 'on completion',
-        agentNote: 'Content revision requested by brand.',
-        actionRequired: true
+const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined) return '—';
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+    }).format(amount);
+};
+
+const formatShortDate = (date) => {
+    if (!date) return null;
+    try {
+        return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch (e) {
+        return null;
     }
-];
+};
 
 export default function ActiveCampaigns() {
+    const [contracts, setContracts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
+    const [submittingContract, setSubmittingContract] = useState(null);
     const [showContent, setShowContent] = useState(false);
 
-    useEffect(() => {
-        const timer = setTimeout(() => setShowContent(true), 100);
-        return () => clearTimeout(timer);
+    const loadContracts = useCallback(async () => {
+        try {
+            setLoading(true);
+            const creatorId = await ensureCreatorId();
+            if (!creatorId) {
+                setLoadError('No creator id available. Complete onboarding or set VITE_CREATOR_ID.');
+                setLoading(false);
+                return;
+            }
+            const data = await contractAPI.getContractsByCreator(creatorId);
+            setContracts(Array.isArray(data) ? data : []);
+            setLoadError('');
+        } catch (error) {
+            setLoadError(error.message || 'Failed to load contracts.');
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-        }).format(amount);
-    };
+    useEffect(() => {
+        loadContracts();
+        const timer = setTimeout(() => setShowContent(true), 100);
+        return () => clearTimeout(timer);
+    }, [loadContracts]);
 
-    // Group by status
-    const liveCampaigns = activeCampaigns.filter(c => c.status === 'live');
-    const pendingCampaigns = activeCampaigns.filter(c => c.status === 'pending');
-    const actionCampaigns = activeCampaigns.filter(c => c.status === 'action');
-    const completedCampaigns = activeCampaigns.filter(c => c.status === 'completed');
+    const grouped = useMemo(() => {
+        const buckets = { live: [], pending: [], completed: [] };
+        for (const contract of contracts) {
+            const bucket = STATUS_BUCKETS[contract.status]?.bucket || 'pending';
+            buckets[bucket].push(contract);
+        }
+        return buckets;
+    }, [contracts]);
+
+    const handleSubmissionDone = () => {
+        setSubmittingContract(null);
+        loadContracts();
+    };
 
     return (
         <div className="page active-campaigns">
             <TopBar title="Active" showBack={false} />
 
-            {/* Action Required */}
-            {actionCampaigns.length > 0 && (
-                <section className={`campaigns-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '0ms' }}>
-                    <div className="section-header">
-                        <h2 className="section-title">Action Required</h2>
-                        <span className="action-badge">{actionCampaigns.length}</span>
-                    </div>
-                    <div className="campaigns-list">
-                        {actionCampaigns.map((campaign) => (
-                            <CampaignCard key={campaign.id} campaign={campaign} formatCurrency={formatCurrency} />
-                        ))}
-                    </div>
-                </section>
+            {loadError && (
+                <div className="campaigns-section" style={{ color: '#d93b3b', padding: '12px 16px' }}>
+                    {loadError}
+                </div>
             )}
 
-            {/* Live */}
-            {liveCampaigns.length > 0 && (
-                <section className={`campaigns-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '60ms' }}>
+            {!loading && contracts.length === 0 && !loadError && (
+                <div className="campaigns-section" style={{ padding: '24px 16px', color: 'var(--color-secondary)' }}>
+                    No active contracts yet. They'll appear here once a deal is signed.
+                </div>
+            )}
+
+            {grouped.live.length > 0 && (
+                <section className={`campaigns-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '0ms' }}>
                     <h2 className="section-title">Live</h2>
                     <div className="campaigns-list">
-                        {liveCampaigns.map((campaign, index) => (
-                            <CampaignCard key={campaign.id} campaign={campaign} formatCurrency={formatCurrency} index={index} />
+                        {grouped.live.map((contract, index) => (
+                            <ContractCard
+                                key={contract._id}
+                                contract={contract}
+                                index={index}
+                                onSubmit={() => setSubmittingContract(contract)}
+                            />
                         ))}
                     </div>
                 </section>
             )}
 
-            {/* Pending */}
-            {pendingCampaigns.length > 0 && (
+            {grouped.pending.length > 0 && (
                 <section className={`campaigns-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
-                    <h2 className="section-title">Pending Approval</h2>
+                    <h2 className="section-title">In Review</h2>
                     <div className="campaigns-list">
-                        {pendingCampaigns.map((campaign, index) => (
-                            <CampaignCard key={campaign.id} campaign={campaign} formatCurrency={formatCurrency} index={index} />
+                        {grouped.pending.map((contract, index) => (
+                            <ContractCard
+                                key={contract._id}
+                                contract={contract}
+                                index={index}
+                            />
                         ))}
                     </div>
                 </section>
             )}
 
-            {/* Completed */}
-            {completedCampaigns.length > 0 && (
+            {grouped.completed.length > 0 && (
                 <section className={`campaigns-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '180ms' }}>
                     <h2 className="section-title">Completed</h2>
                     <div className="campaigns-list">
-                        {completedCampaigns.map((campaign, index) => (
-                            <CampaignCard key={campaign.id} campaign={campaign} formatCurrency={formatCurrency} index={index} />
+                        {grouped.completed.map((contract, index) => (
+                            <ContractCard
+                                key={contract._id}
+                                contract={contract}
+                                index={index}
+                            />
                         ))}
                     </div>
                 </section>
             )}
+
+            <SubmitContentModal
+                isOpen={!!submittingContract}
+                onClose={handleSubmissionDone}
+                contractId={submittingContract?._id}
+                contractTerms={submittingContract ? {
+                    base_payout: submittingContract.base_payout,
+                    conditional_tiers: submittingContract.conditional_tiers,
+                    audit_criteria: submittingContract.audit_criteria,
+                } : null}
+            />
         </div>
     );
 }
 
-function CampaignCard({ campaign, formatCurrency, index = 0 }) {
+function ContractCard({ contract, index = 0, onSubmit }) {
+    const meta = STATUS_BUCKETS[contract.status] || STATUS_BUCKETS.Draft;
+    const advertiserName = contract.advertiserId?.name || 'Brand';
+    const campaignTitle = contract.autoBidId?.campaignId?.title
+        || contract.autoBidId?.campaignId
+        || 'Campaign';
+    const postedDate = formatShortDate(contract.createdAt);
+    const canSubmit = (contract.status === 'Active' || contract.status === 'Signed') && !!onSubmit;
+
     return (
         <div
-            className={`campaign-card status-${campaign.status}`}
+            className={`campaign-card status-${meta.bucket}`}
             style={{ '--stagger': `${index * 40}ms` }}
         >
             <div className="campaign-header">
                 <div className="campaign-info">
-                    <h3 className="campaign-brand">{campaign.brand}</h3>
-                    <p className="campaign-name">{campaign.campaign}</p>
+                    <h3 className="campaign-brand">{advertiserName}</h3>
+                    <p className="campaign-name">{typeof campaignTitle === 'string' ? campaignTitle : 'Campaign'}</p>
                 </div>
-                <StatusIcon status={campaign.status} />
+                <StatusIcon icon={meta.icon} />
             </div>
 
-            {/* Metrics row */}
-            {(campaign.views || campaign.postedDate) && (
+            {postedDate && (
                 <div className="campaign-metrics">
-                    {campaign.views && (
-                        <div className="metric">
-                            <span className="metric-label">Views</span>
-                            <span className="metric-value">{campaign.views}</span>
-                        </div>
-                    )}
-                    {campaign.postedDate && (
-                        <div className="metric">
-                            <span className="metric-label">Posted</span>
-                            <span className="metric-value">{campaign.postedDate}</span>
-                        </div>
-                    )}
+                    <div className="metric">
+                        <span className="metric-label">Created</span>
+                        <span className="metric-value">{postedDate}</span>
+                    </div>
                     <div className="metric">
                         <span className="metric-label">Status</span>
-                        <span className={`metric-value status-label ${campaign.status}`}>{campaign.statusLabel}</span>
+                        <span className={`metric-value status-label ${meta.bucket}`}>{meta.label}</span>
                     </div>
                 </div>
             )}
 
-            {/* Payment */}
             <div className="campaign-payment">
                 <div className="payment-info">
-                    <span className="payment-label">Payment</span>
-                    <span className={`payment-value ${campaign.status === 'completed' ? 'released' : ''}`}>
-                        {formatCurrency(campaign.payment)}
+                    <span className="payment-label">Base Payout</span>
+                    <span className={`payment-value ${meta.bucket === 'completed' ? 'released' : ''}`}>
+                        {formatCurrency(contract.base_payout)}
                     </span>
                 </div>
-                <span className="payment-status">{campaign.paymentStatus}</span>
+                <span className="payment-status">{meta.label}</span>
             </div>
 
-            {/* Agent Note */}
-            {campaign.agentNote && (
+            {contract.audit_criteria && (
                 <div className="agent-note">
-                    <StatusIndicator status={campaign.status === 'action' ? 'pending' : 'ai-working'} size={14} />
-                    <span>{campaign.agentNote}</span>
+                    <StatusIndicator status={meta.bucket === 'pending' ? 'pending' : 'ai-working'} size={14} />
+                    <span>{contract.audit_criteria}</span>
                 </div>
             )}
 
-            {/* Performance badge for completed */}
-            {campaign.performance && (
-                <div className="performance-badge">
-                    <span>Performance: {campaign.performance}</span>
-                </div>
-            )}
-
-            {/* Action button */}
-            {campaign.actionRequired && (
-                <button className="btn btn-primary btn-full campaign-action">
-                    Review Content
+            {canSubmit && (
+                <button className="btn btn-primary btn-full campaign-action" onClick={onSubmit}>
+                    Submit Content
                 </button>
             )}
         </div>

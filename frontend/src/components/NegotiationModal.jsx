@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import GradientLoader from './GradientLoader';
 import { agentsAPI } from '../services/agents';
+import { dealAPI, contractAPI } from '../services/api';
 import './NegotiationModal.css';
 
 // When `dealContext` is provided with real ids + profile data, this modal
@@ -20,18 +21,23 @@ export default function NegotiationModal({
     const [chatStep, setChatStep] = useState(0);
     const [startingBidding, setStartingBidding] = useState(false);
     const [finalTerms, setFinalTerms] = useState(null);
+    const [persistedContractId, setPersistedContractId] = useState(null);
     const [negotiationError, setNegotiationError] = useState('');
 
     // Initial Start Modal
     useEffect(() => {
         if (isOpen && campaign) {
             // Restore stage from campaign status or default to started
-            const initialStage = campaign.negotiationStatus || 'started';
+            // When a real dealContext is supplied, skip the demo intro and
+            // go straight to the live negotiation stage.
+            const initialStage = dealContext?.contractId
+                ? 'negotiating'
+                : campaign.negotiationStatus || 'started';
             setStage(initialStage);
+            setFinalTerms(null);
+            setPersistedContractId(null);
+            setNegotiationError('');
 
-            // If returning to negotiation, restore chat history? 
-            // For now, if 'negotiating', we restart the chat sim or jump to a later state.
-            // Let's simpler: if 'negotiating', start chat.
             if (initialStage === 'negotiating') {
                 setMessages([{ type: 'agent', text: 'Resuming negotiation with Brand Agent...' }]);
                 setChatStep(1); // Skip initial delay
@@ -40,7 +46,7 @@ export default function NegotiationModal({
                 setChatStep(0);
             }
         }
-    }, [isOpen, campaign]);
+    }, [isOpen, campaign, dealContext]);
 
     // Real negotiation path — fires once when entering 'negotiating' with a real dealContext.
     useEffect(() => {
@@ -49,24 +55,57 @@ export default function NegotiationModal({
         setIsThinking(true);
         setNegotiationError('');
 
-        agentsAPI
-            .negotiate(dealContext)
-            .then((result) => {
+        const run = async () => {
+            try {
+                const result = await agentsAPI.negotiate(dealContext);
                 if (cancelled) return;
                 const turns = (result.messages || []).map((m, i) => ({
                     type: i % 2 === 0 ? 'brand' : 'agent',
                     text: typeof m === 'string' ? m : m.content || JSON.stringify(m),
                 }));
                 setMessages(turns.length ? turns : [{ type: 'agent', text: result.reasoning || 'Negotiation complete.' }]);
-                setFinalTerms(result.final_terms || null);
-                setIsThinking(false);
-                setStage('completed');
-            })
-            .catch((err) => {
+                const terms = result.final_terms || null;
+                setFinalTerms(terms);
+
+                // If the agent accepted, persist: AutoBid → Accepted and create a Contract
+                // so the creator has something to submit content against.
+                if (result.status === 'accepted' || terms) {
+                    try {
+                        if (dealContext.contractId) {
+                            await dealAPI.updateDeal(dealContext.contractId, { status: 'Accepted' });
+                        }
+                        const payout = terms?.payout ?? terms?.price ?? dealContext.initialOffer?.price;
+                        const contract = await contractAPI.createContract({
+                            autoBidId: dealContext.contractId,
+                            advertiserId: dealContext.advertiserId,
+                            creatorId: dealContext.creatorId,
+                            base_payout: payout,
+                            conditional_tiers: terms?.conditional_tiers || {
+                                tier_1: { views: 1000, bonus: Math.round((payout || 500) * 0.1) },
+                                tier_2: { views: 10000, bonus: Math.round((payout || 500) * 0.3) },
+                            },
+                            audit_criteria: terms?.audit_criteria || 'Must feature product clearly',
+                            status: 'Active',
+                        });
+                        if (!cancelled && contract?._id) {
+                            setPersistedContractId(contract._id);
+                        }
+                    } catch (persistErr) {
+                        console.error('Failed to persist contract after negotiation:', persistErr);
+                    }
+                }
+
+                if (!cancelled) {
+                    setIsThinking(false);
+                    setStage('completed');
+                }
+            } catch (err) {
                 if (cancelled) return;
                 setIsThinking(false);
                 setNegotiationError(err.message || 'Negotiation failed.');
-            });
+            }
+        };
+        run();
 
         return () => { cancelled = true; };
     }, [stage, dealContext]);
@@ -263,7 +302,14 @@ export default function NegotiationModal({
                                 className="btn btn-primary btn-full interaction-press"
                                 onClick={() => {
                                     const finalPrice = finalTerms?.payout ?? finalTerms?.price ?? 725;
-                                    onComplete({ ...campaign, status: 'confirmed', finalPrice, finalTerms });
+                                    onComplete({
+                                        ...campaign,
+                                        status: 'confirmed',
+                                        finalPrice,
+                                        finalTerms,
+                                        contractId: persistedContractId,
+                                        contractTerms: finalTerms,
+                                    });
                                     onClose();
                                 }}
                             >

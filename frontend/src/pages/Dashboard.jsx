@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import MatchaLogo from '../components/MatchaLogo';
+import { useNavigate } from 'react-router-dom';
 import StatusIndicator from '../components/StatusIndicator';
 import TopBar from '../components/TopBar';
-import SubmitContentModal from '../components/SubmitContentModal';
 import './Dashboard.css';
 
 // Earnings data
@@ -92,9 +91,9 @@ function useAnimatedCounter(target, duration = 1000) {
 }
 
 export default function Dashboard() {
+    const navigate = useNavigate();
     const animatedTotal = useAnimatedCounter(earningsData.totalEarned, 1200);
     const [showContent, setShowContent] = useState(false);
-    const [showSubmitModal, setShowSubmitModal] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => setShowContent(true), 100);
@@ -242,20 +241,15 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            {/* Primary Action */}
+            {/* Primary Action — submission lives on the contracts page where a real contract is selectable. */}
             <section className={`dashboard-section action-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '280ms' }}>
                 <button
                     className="btn btn-primary btn-full interaction-press"
-                    onClick={() => setShowSubmitModal(true)}
+                    onClick={() => navigate('/creator/contracts')}
                 >
                     Submit Content
                 </button>
             </section>
-
-            <SubmitContentModal
-                isOpen={showSubmitModal}
-                onClose={() => setShowSubmitModal(false)}
-            />
         </div>
     );
 }

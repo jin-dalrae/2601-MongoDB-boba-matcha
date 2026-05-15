@@ -68,11 +68,14 @@ function AppContent() {
   const isLandingPage = location.pathname === '/';
   const isLegalRoute = location.pathname === '/terms' || location.pathname === '/privacy';
 
-  // Use full-width container for landing, legal, and advertiser routes
+  // Full-width container for landing, legal, and advertiser routes.
+  // Only advertiser routes render the left sidebar, so only they get the
+  // sidebar offset.
   const useFullWidth = isLandingPage || isAdvertiserRoute || isLegalRoute;
+  const useSidebarOffset = isAdvertiserRoute;
 
   return (
-    <div className={`app${useFullWidth ? ' app-full' : ''}`}>
+    <div className={`app${useFullWidth ? ' app-full' : ''}${useSidebarOffset ? ' app-sidebar' : ''}`}>
       <Routes>
         {/* Landing Page */}
         <Route path="/" element={<LandingPage />} />

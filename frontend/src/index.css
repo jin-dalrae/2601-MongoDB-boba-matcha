@@ -130,9 +130,10 @@ body {
   max-width: 100%;
 }
 
-/* Desktop layout for advertiser with left sidebar */
+/* Desktop layout for advertiser with left sidebar.
+   Only applies to .app-sidebar (advertiser routes), NOT landing/legal. */
 @media screen and (min-width: 1024px) {
-  .app.app-full {
+  .app.app-sidebar {
     margin-left: 220px;
     width: calc(100% - 220px);
     display: flex;
@@ -141,7 +142,7 @@ body {
 }
 
 @media screen and (min-width: 1280px) {
-  .app.app-full {
+  .app.app-sidebar {
     margin-left: 260px;
     width: calc(100% - 260px);
   }

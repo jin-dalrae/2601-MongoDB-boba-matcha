@@ -2,357 +2,257 @@
 
 # 🍵 Matcha
 
-### Autonomous Advertising Contracts for the Creator Economy
+### Robot agents that do influencer ad deals for you — start to finish
 
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=for-the-badge)](https://langchain-ai.github.io/langgraph/)
-
-**AI agents that match creators with advertisers, negotiate deals end-to-end, audit submitted content, and settle payments on Base via the x402 protocol.**
-
-[Architecture](#-architecture) • [Quick Start](#-quick-start) • [API Reference](#-api-reference) • [Data Model](#-data-model) • [Status](#-status)
 
 </div>
 
 ---
 
-## 🎯 The Problem
+## 👋 Read this first (the 30-second version)
 
-The creator economy is broken:
+Imagine you're a YouTuber or TikToker. A company wants to pay you to make a video about their product. Normally you'd have to:
 
-- **Creators** spend hours negotiating deals instead of creating content.
-- **Advertisers** struggle to find authentic voices that match their brand.
-- **Trust** is fractured — payment disputes, fake metrics, unclear deliverables.
-- **Middlemen** take 30–50% cuts for simple matchmaking.
+1. Find the company.
+2. Argue back and forth about how much they'll pay you.
+3. Make the video.
+4. Hope they actually pay you.
 
-## 💡 The Solution
+That's slow, stressful, and a manager usually takes a big chunk of your money for doing it.
 
-Matcha gives both parties an autonomous agent that talks to the other party's agent:
+**Matcha replaces the manager with a robot.** Every creator gets a robot helper. Every company gets a robot helper. The two robots talk to each other, agree on a price, check that the video is good, and send the money automatically. Humans just say "yes, go" and watch.
 
-```
-Creator ⇄ Creator Agent ⇄ Smart Contract ⇄ Advertiser Agent ⇄ Advertiser
-                              │
-                              ▼
-                      x402 settlement on Base
-```
-
-Each agent:
-
-- 🤝 **Negotiates** rates and terms based on learned preferences.
-- 📊 **Audits** submitted content for brand-safety and quality (LLM-based).
-- ✅ **Verifies** deliverables against the on-record contract terms.
-- 💰 **Settles** payments in USDC/EURC/cbBTC via x402 on Base.
+> Think of it like having a super-fast personal assistant that never sleeps and doesn't take a cut of your money.
 
 ---
 
-## 🏗️ Architecture
+## 🧩 The words you need to know
 
-Three services, one MongoDB. The database name is pinned to `matcha` in both the Node and Python layers.
+You'll see these words everywhere. Here's what they mean in plain English:
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                       FRONTEND  (Vite + React)                  │
-│                          http://localhost:5173                  │
-│   Creator flow:     Dashboard · Discovery · Deals · Contracts   │
-│   Advertiser flow:  Dashboard · Campaigns · Shortlist · Results │
-│   Onboarding:       Role → TikTok handle → Bank → Done          │
-└─────────────────────────────────────────────────────────────────┘
-            │                                       │
-            │  REST  (services/api.js)              │  REST  (services/agents.js)
-            ▼                                       ▼
-┌─────────────────────────────┐    ┌──────────────────────────────────────┐
-│  NODE API   (Express +      │    │  AGENTS API   (FastAPI + LangGraph)  │
-│  Mongoose)                  │    │  http://localhost:8000               │
-│  http://localhost:3001/api  │    │                                      │
-│                             │    │  POST  /negotiate    LLM negotiation │
-│  /api/users                 │    │  POST  /audit        Content audit   │
-│  /api/campaigns             │    │  POST  /settle       Audit + x402    │
-│  /api/deals     (AutoBids)  │    │  GET   /negotiations/{contract_id}   │
-│  /api/contracts             │    │  GET   /settlement/{contract_id}     │
-│  /api/advertisers           │    │  GET   /agent-logs/{entity_id}       │
-└─────────────────────────────┘    └──────────────────────────────────────┘
-            │                                       │
-            └──────────────────┬────────────────────┘
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  MongoDB Atlas — database: `matcha`             │
-│                                                                 │
-│  users · sns_accounts · agent_configs · wallets                 │
-│  campaigns · auto_bids · negotiation_logs · contracts           │
-│  shipments · content_submissions · audit_reports                │
-│  x402_settlements · agent_logs · shared_memory                  │
-└─────────────────────────────────────────────────────────────────┘
-```
+| Word | What it really means |
+|---|---|
+| **Creator** | A person who makes videos/posts online (YouTuber, TikToker, etc.) |
+| **Advertiser** | A company that wants to pay a creator to promote its product |
+| **Agent** | A robot (powered by AI) that does a job for a human automatically |
+| **Negotiation** | The back-and-forth of "I want $800" / "I'll give $500" until both agree |
+| **Contract** | The written promise: "Make this video, get paid this much" |
+| **Audit** | Checking the finished video to make sure it's good and follows the rules |
+| **Settlement** | Actually sending the money |
+| **x402 / Base** | The internet money system Matcha uses to pay people (digital dollars) |
+| **MongoDB** | The giant notebook where the app writes down everything that happens |
 
 ---
 
-## 🚀 Quick Start
+## 🎬 The whole process, told as a story
 
-### Prerequisites
+Here is the entire journey, step by step. This is **the process** the title of this README is about.
 
-- **Node.js** ≥ 18.x
-- **Python** ≥ 3.10 (for the agents service)
-- **MongoDB Atlas** account (or local MongoDB)
-- An **Anthropic** *or* **OpenAI** API key (for the negotiation + audit agents)
-- *(Optional)* Base wallet credentials for real on-chain settlement
+```
+1. SIGN UP        →  2. DISCOVER     →  3. BID          →  4. NEGOTIATE
+   "I'm a creator"    "Here are jobs"    "I want this one"   robots argue price
 
-### 1. Install
+                                                                  │
+                                                                  ▼
+
+8. GET PAID       ←  7. AUDIT        ←  6. SUBMIT       ←  5. CONTRACT
+   money is sent      robot grades it    "here's my video"   deal is signed
+```
+
+**Step 1 — Sign up.**
+You open the website and answer a few questions: Are you a creator or a company? What's your account handle? Where should money go? Matcha saves you in its notebook (the database).
+
+**Step 2 — Discover.**
+A creator sees a list of real ad jobs ("campaigns") that companies have posted. Like a job board, but for videos.
+
+**Step 3 — Bid.**
+The creator picks a job they like and says "I'm interested." This is called an *AutoBid* — it's the creator's robot raising its hand.
+
+**Step 4 — Negotiate (the cool part).**
+The creator's robot and the company's robot start talking to each other. They go back and forth — "How about $800?" "We can do $600." — for a few rounds, just like real people haggling, until they agree or call it off. A human never has to type a single message.
+
+**Step 5 — Contract.**
+Once both robots agree, Matcha writes a contract: how much money, what video to make, the deadline, and bonus rules (e.g. "extra $100 if the video gets 10,000 views").
+
+**Step 6 — Submit.**
+The creator makes the video and pastes the link into Matcha.
+
+**Step 7 — Audit.**
+A robot watches/reads the submission and grades it: Is it good quality? Is it safe for the brand? Did it follow the contract? It gives a score and decides which bonus tier was earned.
+
+**Step 8 — Get paid.**
+Based on the score, Matcha calculates the final payment (base pay + bonuses) and sends digital money to the creator automatically. Done — no chasing anyone for a check.
+
+---
+
+## 🏠 The app has 4 parts (think of a restaurant)
+
+To make all of that work, Matcha is built from four pieces. Here's a restaurant analogy so it's easy to picture:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  1. FRONTEND  — the dining room you sit in (the website)       │
+│     React + Vite  ·  http://localhost:5173                     │
+└──────────────────────────────────────────────────────────────┘
+                 │                              │
+                 ▼                              ▼
+┌────────────────────────────┐   ┌────────────────────────────────┐
+│ 2. NODE API — the waiter    │   │ 3. AGENTS — the smart chefs     │
+│    carries messages around  │   │    the AI robots that think     │
+│ Express ·  port 3001        │   │ FastAPI ·  port 8000            │
+└────────────────────────────┘   └────────────────────────────────┘
+                 │                              │
+                 └──────────────┬───────────────┘
+                                ▼
+┌──────────────────────────────────────────────────────────────┐
+│  4. MONGODB — the notebook that remembers everything           │
+│     users · campaigns · contracts · payments · …               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+| Part | Restaurant role | What it actually does |
+|---|---|---|
+| **Frontend** | The dining room | The website you click around in. Pretty buttons and screens. |
+| **Node API** | The waiter | Takes your requests and carries them to the kitchen and notebook. |
+| **Agents** | The smart chefs | The AI robots that negotiate, grade videos, and send money. |
+| **MongoDB** | The notebook | Writes down every user, deal, and payment so nothing is forgotten. |
+
+All four need to be running at the same time for the app to work — just like a restaurant needs the dining room, waiter, chef, *and* order notebook all at once.
+
+---
+
+## 🚀 How to run it on your own computer
+
+Follow these like a recipe. Don't skip steps.
+
+### What you need installed first
+
+- **Node.js** version 18 or newer — [download here](https://nodejs.org/)
+- **Python** version 3.10 or newer — [download here](https://www.python.org/) (only needed for the AI robots)
+- A **MongoDB Atlas** account — a free online database ([sign up here](https://www.mongodb.com/atlas))
+- One **AI key**: an Anthropic *or* OpenAI API key (this is what powers the robots' brains)
+
+### Step 1 — Download the code and install the parts
 
 ```bash
 git clone https://github.com/your-org/matcha.git
 cd matcha
 
-# Node API
+# install the waiter (Node API)
 npm install
 
-# Frontend
+# install the dining room (frontend)
 cd frontend && npm install && cd ..
 
-# Python agents
+# install the chefs (Python AI robots)
 cd agents
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 cd ..
 ```
 
-### 2. Configure
+> 💡 `npm install` and `pip install` just download all the helper code the app needs. It's normal for this to take a minute and print a lot of text.
 
-Copy `.env.example` → `.env` in the repo root. The same file is read by **both** the Node server (`dotenv`) and the Python agents (`python-dotenv`). The frontend has its own file at `frontend/.env`.
+### Step 2 — Add your secret keys
+
+There's a file called `.env.example`. Make a copy of it called `.env`:
 
 ```bash
 cp .env.example .env
-# then edit MONGODB_URI, ANTHROPIC_API_KEY (or OPENAI_API_KEY), etc.
 ```
 
-The MongoDB **database name is pinned to `matcha`** in code (via Mongoose's `dbName` option and PyMongo's `client.matcha`), so the connection URI does not need a path component.
+Now open `.env` in a text editor and fill in two things:
 
-### 3. Seed
+- `MONGODB_URI` — the address of your MongoDB notebook (you get this from your MongoDB Atlas account).
+- `ANTHROPIC_API_KEY` *or* `OPENAI_API_KEY` — the key that lets the robots think.
+
+> 🔒 The `.env` file holds passwords. **Never** post it online or share it.
+
+### Step 3 — Fill the notebook with example data
 
 ```bash
 npm run seed
 ```
 
-Populates `matcha` with 20 advertisers, 50 creators, ~30 campaigns, sample auto-bids, contracts, content submissions, audit reports, and settlements.
+This creates pretend users so the app isn't empty: 20 companies, 50 creators, ~30 ad jobs, plus sample deals and payments. It's like loading a video game with practice characters so you can try things out.
 
-### 4. Run (three terminals)
+### Step 4 — Start everything (you need 3 terminal windows open)
+
+Open three separate terminal windows and run one command in each:
 
 ```bash
-# Terminal 1 — Node API           (port 3001)
+# Terminal 1 — the waiter (Node API)
 npm run dev
+```
 
-# Terminal 2 — Frontend           (port 5173)
+```bash
+# Terminal 2 — the dining room (frontend website)
 cd frontend && npm run dev
+```
 
-# Terminal 3 — Python agents      (port 8000)
+```bash
+# Terminal 3 — the smart chefs (Python AI robots)
 cd agents && source venv/bin/activate && python server.py
 ```
 
-Open <http://localhost:5173>.
+> 😅 No AI key or don't want to run Python? You can run pretend robots instead with `npm run agents:mock` — it fakes the AI so you can still click through everything.
+
+### Step 5 — Open the app
+
+Go to **<http://localhost:5173>** in your web browser. You're in! 🎉
 
 ---
 
-## 📁 Project Structure
+## ✅ What works right now (honest list)
 
-```
-matcha/
-├── frontend/                       Vite + React (port 5173)
-│   ├── src/
-│   │   ├── components/             Shared UI + modals (Negotiation, SubmitContent, …)
-│   │   ├── pages/
-│   │   │   ├── advertiser/         Dashboard · Campaigns · Shortlist · Results
-│   │   │   ├── onboarding/         Role · Account · Bank · Completion
-│   │   │   ├── Dashboard.jsx       Creator home
-│   │   │   ├── Discovery.jsx       Browse campaigns
-│   │   │   ├── Deals.jsx           AutoBids and active negotiations
-│   │   │   ├── ActiveCampaigns.jsx Contracts in flight
-│   │   │   └── Profile.jsx
-│   │   ├── services/
-│   │   │   ├── api.js              Single client for the Node API
-│   │   │   └── agents.js           Client for the FastAPI agents
-│   │   └── lib/advertiser.js       Advertiser-id resolution helper
-│   └── .env                        VITE_API_BASE_URL, VITE_AGENTS_BASE_URL
-│
-├── server/                         Express + Mongoose (port 3001)
-│   ├── index.js                    Entry point — pins dbName to `matcha`
-│   ├── models.js                   All Mongoose schemas (one file)
-│   ├── seed.js                     Faker-based seeder (npm run seed)
-│   ├── controllers/
-│   │   ├── userController.js
-│   │   ├── campaignController.js
-│   │   ├── dealController.js
-│   │   ├── contractController.js
-│   │   └── advertiserController.js
-│   └── routes/                     One file per resource
-│
-├── agents/                         FastAPI + LangGraph (port 8000)
-│   ├── server.py                   FastAPI entry point
-│   ├── negotiation_agent.py        Multi-round LLM negotiation graph
-│   ├── payment_agent.py            Audit + x402 settlement on Base
-│   ├── state.py                    TypedDict graph state
-│   └── requirements.txt
-│
-├── .env.example                    Env vars for server + agents
-└── package.json                    npm run dev | seed
-```
+This is a hackathon project, so some things are real and one thing is missing on purpose.
 
----
-
-## 🔌 API Reference
-
-### Node API (`http://localhost:3001/api`)
-
-#### Users
-```http
-GET    /users/:id                      User by id
-GET    /users/:id/profile              User with wallet, SNS, agent config
-GET    /users/role/:role               Users by role (Creator | Advertiser)
-POST   /users                          Create user (used by onboarding)
-PUT    /users/:id                      Update user
-```
-
-#### Campaigns
-```http
-GET    /campaigns/active               All active campaigns
-GET    /campaigns/:id                  Campaign details
-GET    /campaigns/:id/stats            Campaign stats
-GET    /campaigns/advertiser/:id       Campaigns for an advertiser
-POST   /campaigns                      Create campaign
-PUT    /campaigns/:id                  Update campaign
-```
-
-#### Deals (AutoBids)
-```http
-GET    /deals/:id                                  Deal with negotiation log
-GET    /deals/creator/:creatorId                   Deals for a creator
-GET    /deals/creator/:creatorId/status/:status    Filtered by status
-GET    /deals/campaign/:campaignId                 Deals for a campaign
-POST   /deals                                      Create AutoBid
-PUT    /deals/:id                                  Update AutoBid
-```
-
-#### Contracts
-```http
-GET    /contracts/active                                Active contracts
-GET    /contracts/:id                                   Contract + submission + audit + settlement
-GET    /contracts/creator/:creatorId                    Contracts for a creator
-GET    /contracts/advertiser/:advertiserId              Contracts for an advertiser
-GET    /contracts/advertiser/:advertiserId/submissions  With submission/audit/settlement nested
-POST   /contracts                                       Create contract
-POST   /contracts/:id/submission                        Submit content URL for a contract
-PUT    /contracts/:id                                   Update contract
-```
-
-#### Advertiser dashboard
-```http
-GET    /advertisers/sample                                Pick any advertiser (dev helper)
-GET    /advertisers/:id/overview                          Budget + agent activity
-GET    /advertisers/:id/shortlist                         Ranked creator matches for active campaign
-GET    /advertisers/:id/campaigns/summary?limit=N         Campaign cards
-GET    /advertisers/:id/campaigns/:campaignId/detail      Timeline + creator performance
-```
-
-### Agents API (`http://localhost:8000`)
-
-```http
-POST   /negotiate                Run the LangGraph negotiation between agents
-POST   /audit                    Audit submitted content (no payment)
-POST   /settle                   Audit + execute x402 transfer on Base
-GET    /negotiations/{cid}       Negotiation history for a contract
-GET    /settlement/{cid}         Settlement record for a contract
-GET    /agent-logs/{entityId}    Recent agent activity for an entity
-```
-
----
-
-## 🧪 Data Model
-
-13 collections, all defined in `server/models.js`. Highlights:
-
-```
-User                role: Advertiser | Creator
-                    onboarding_status, name, email
-
-Campaign            advertiserId · title · product_info · budget_limit · status
-
-AutoBid             campaignId · creatorId · current_bid · status
-                    (status ∈ Negotiating | Accepted | Cancelled | Proposed)
-
-NegotiationLog      autoBidId · round_history[]  ← written by negotiation agent
-                    agent_logic_summary
-
-Contract            autoBidId · advertiserId · creatorId
-                    base_payout · conditional_tiers · audit_criteria
-                    status ∈ Draft | Signed | Active | Auditing | Settled | …
-
-ContentSubmission   contractId · content_url
-AuditReport        submissionId · content_score · tier_achieved · reasoning_log
-X402Settlement     contractId · auditReportId · status · total_paid · receipt_hash
-
-AgentLog · SharedMemory · SNSAccount · AgentConfig · Wallet · Shipment
-```
-
-End-to-end flow:
-
-```
-onboarding   → POST /api/users
-discovery    → GET  /api/campaigns/active
-bid          → POST /api/deals
-negotiate    → POST :8000/negotiate          (writes NegotiationLog)
-contract     → POST /api/contracts
-submit       → POST /api/contracts/:id/submission   (creates ContentSubmission, contract.status = Auditing)
-audit        → POST :8000/audit                     (writes AuditReport)
-settle       → POST :8000/settle                    (writes X402Settlement, on-chain transfer if X402_* set)
-```
-
----
-
-## 🧭 Status
-
-What's wired today vs what's WIP. Be honest with yourself.
-
-| Capability | State | Notes |
+| Feature | Works? | Note |
 |---|---|---|
-| Onboarding persists user | ✅ Wired | `OnboardingFlow` `POST`s `/api/users` and stores `matcha_user_id`. Role-blind copy (asks for TikTok handle for advertisers too) — known gap. |
-| Creator dashboard | ✅ Wired | Earnings (real settlements), active pacts, agent activity, and reliability all driven by `GET /api/users/:id/dashboard`. |
-| Creator profile | ✅ Wired | Real user / wallet / SNS / agent config / reliability via `GET /api/users/:id/profile`. |
-| Creator deals | ✅ Wired | Real AutoBids via `dealAPI.getDealsByCreator()`, with contracts joined client-side so confirmed pacts surface a real `contractId`. Accept / Decline call `PUT /api/deals/:id`. |
-| Creator discovery | ✅ Wired | `Discovery` fetches `GET /api/campaigns/active` and renders real campaigns. |
-| Start bidding | ✅ Wired | `Start Bidding` creates a real `AutoBid` via `dealAPI.createDeal` and carries a `dealContext` into `Deals`. |
-| AI negotiation | ✅ Wired end-to-end | `NegotiationModal` auto-enters live mode when `dealContext` is set, calls `:8000/negotiate`, then flips the `AutoBid` to `Accepted` and creates a `Contract`. |
-| Active contracts | ✅ Wired | `ActiveCampaigns` fetches real contracts via `contractAPI.getContractsByCreator()`. |
-| Content submission + audit | ✅ Wired | `Submit Content` opens `SubmitContentModal` with the real `contractId` → `POST /contracts/:id/submission` + `:8000/audit`. |
-| Advertiser dashboard | ✅ Wired | Overview / campaigns / shortlist / results all on real endpoints. |
-| x402 settlement | ✅ Wired | Advertiser `Results` page now has a `Release Payment` button on cards with an audit but no settlement — it calls `:8000/settle` and refreshes. Real transfers when `X402_*` vars are set; simulated otherwise. Creator side shows audit score / receipt on the contract card. |
-| Terms / Privacy | ✅ Wired | `/terms` and `/privacy` routes; linked from the landing-page footer and the creator Profile page. |
-| Auth | ❌ Not implemented | Routes are open — anyone with an id can hit any endpoint. |
+| Signing up | ✅ Yes | Saves you to the database |
+| Creator home page | ✅ Yes | Shows real earnings and deals |
+| Browsing ad jobs | ✅ Yes | Real campaigns from the database |
+| Placing a bid | ✅ Yes | Creates a real AutoBid |
+| Robots negotiating | ✅ Yes | Full back-and-forth, end to end |
+| Signing the contract | ✅ Yes | Made automatically after agreement |
+| Submitting a video + grading it | ✅ Yes | Robot scores the submission |
+| Sending the money | ✅ Yes | Real digital payment if set up, fake/simulated if not |
+| Company dashboard | ✅ Yes | Budgets, campaigns, results |
+| Login / passwords | ❌ Not built | There are no accounts or passwords yet — anyone can open any page. This is a known gap for the demo. |
 
 ---
 
-## 🎨 Design System
+## 🧪 Where things are saved (the notebook's chapters)
 
-Light, calm, matcha-green. Two fonts: **Gluten** for the wordmark, **Inter** for everything else.
+MongoDB stores everything in labeled lists called **collections**. The main ones:
 
-| Token | Value |
-|---|---|
-| `--adv-bg-primary` | `#F7F9F8` |
-| `--adv-bg-card` | `#FFFFFF` |
-| `--adv-accent-primary` | `#9FE870` |
-| `--adv-text-primary` | `#1A1D1C` |
-| `--adv-text-secondary` | `#5C6662` |
-| `--adv-divider` | `#E2E8E5` |
+```
+users               every person (creator or advertiser)
+campaigns           the ad jobs companies post
+auto_bids           a creator saying "I want this job"
+negotiation_logs    the full robot-vs-robot conversation
+contracts           the signed deal (price, deliverables, bonuses)
+content_submissions the video link a creator turns in
+audit_reports       the robot's grade of that video
+x402_settlements    the record of money that was sent
+agent_logs          a diary of everything the robots did
+```
 
-Status palette: 🟢 Live `#9FE870` · 🟡 Matching `#F2E394` · 🔴 Review `#E5989B` · ⚪ Draft `#8A9491`
+Every step in the story above writes a new entry into one of these — so you can always look back and see exactly what happened and why.
 
 ---
 
-## 🏆 Built For
+## 🏆 Built for
 
 <div align="center">
 
-**MongoDB Hackathon 2026** — *flexible schemas for an agent-driven workflow.*
+**MongoDB Hackathon 2026** — *flexible databases for an AI-agent workflow.*
+
+Made with 🍵 by Team Matcha · [⬆ Back to top](#-matcha)
 
 </div>
 
@@ -360,10 +260,4 @@ Status palette: 🟢 Live `#9FE870` · 🟡 Matching `#F2E394` · 🔴 Review `#
 
 ## 📄 License
 
-MIT — see [LICENSE](LICENSE).
-
-<div align="center">
-
-Made with 🍵 by Team Matcha · [⬆ Back to Top](#-matcha)
-
-</div>
+MIT — free to use and learn from. See [LICENSE](LICENSE).

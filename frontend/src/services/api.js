@@ -88,5 +88,19 @@ export const advertiserAPI = {
     apiCall(`/advertisers/${advertiserId}/campaigns/${campaignId}/detail`),
 };
 
+// Payment API (x402 settlement — Node/keyless path).
+// The Python agents service (agentsAPI.settle) does the real on-chain
+// transfer; this is the keyless Node fallback that persists settlements
+// through the same data layer the contract views read.
+export const paymentAPI = {
+  getPayments: () => apiCall('/payments'),
+  getSettlement: (contractId) => apiCall(`/payments/${contractId}`),
+  executePayment: (contractId, auditId) =>
+    apiCall('/payments/execute', {
+      method: 'POST',
+      body: JSON.stringify({ contractId, auditId }),
+    }),
+};
+
 // Health check
 export const healthCheck = () => apiCall('/health');

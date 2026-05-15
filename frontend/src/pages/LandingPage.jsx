@@ -1,390 +1,313 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import MatchaLogo from '../components/MatchaLogo';
 import './LandingPage.css';
 
 export default function LandingPage() {
     const navigate = useNavigate();
-    const [activeFlow, setActiveFlow] = useState(null);
 
     useEffect(() => {
-        // Fade in hero elements
-        const elements = document.querySelectorAll('.fade-in-element');
-        elements.forEach((el, index) => {
-            setTimeout(() => {
-                el.classList.add('visible');
-            }, index * 100);
+        document.querySelectorAll('.fade-in').forEach((el, i) => {
+            setTimeout(() => el.classList.add('visible'), i * 80);
         });
     }, []);
 
-    const handleGetStarted = (userType) => {
-        setActiveFlow(userType);
-        // Navigate to onboarding with user type
-        localStorage.setItem('matcha_user_type', userType);
-        localStorage.removeItem('matcha_onboarding_complete'); // Reset onboarding
-        window.location.href = userType === 'creator' ? '/creator' : '/advertiser';
+    const goTo = (role) => {
+        // Persist intent, don't blow away existing onboarding state.
+        localStorage.setItem('matcha_user_type', role);
+        navigate(role === 'creator' ? '/creator' : '/advertiser');
     };
 
     return (
-        <div className="landing-page">
-            {/* Hero Section */}
+        <div className="landing">
+            {/* ----- Top nav ----- */}
+            <header className="landing-nav">
+                <Link to="/" className="landing-mark" aria-label="Matcha home">
+                    <MatchaLogo size={22} />
+                    <span>Matcha</span>
+                </Link>
+                <nav className="landing-nav-links">
+                    <a href="#how">How it works</a>
+                    <a href="#stack">Architecture</a>
+                    <Link to="/terms">Legal</Link>
+                </nav>
+            </header>
+
+            {/* ----- Hero ----- */}
             <section className="landing-hero">
-                <div className="brand-header fade-in-element">
-                    <div className="brand-logo">
-                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                            <circle cx="16" cy="16" r="14" stroke="#9FE870" strokeWidth="2" />
-                            <circle cx="16" cy="16" r="8" fill="#9FE870" />
-                            <circle cx="16" cy="10" r="2" fill="#0E0F0F" />
-                            <circle cx="11" cy="20" r="2" fill="#0E0F0F" />
-                            <circle cx="21" cy="20" r="2" fill="#0E0F0F" />
-                        </svg>
+                <div className="hero-text fade-in">
+                    <p className="eyebrow">Agent-to-agent advertising</p>
+                    <h1 className="hero-headline">
+                        Contracts that negotiate, audit,<br />
+                        and <em>pay themselves</em>.
+                    </h1>
+                    <p className="hero-lede">
+                        Matcha is the marketplace between creators and brands where the
+                        negotiations happen between their AI agents, content is audited
+                        against the agreed terms, and payment settles on Base the moment
+                        the audit clears.
+                    </p>
+                    <div className="cta-row">
+                        <button className="btn-primary" onClick={() => goTo('creator')}>
+                            Open creator demo
+                            <ArrowIcon />
+                        </button>
+                        <button className="btn-ghost" onClick={() => goTo('advertiser')}>
+                            Advertiser dashboard
+                        </button>
                     </div>
-                    <h1 className="brand-name">Matcha</h1>
                 </div>
+                <aside className="hero-preview fade-in">
+                    <NegotiationPreview />
+                </aside>
+            </section>
 
-                <div className="hero-content">
-                    <div className="hero-layout">
-                        <div className="hero-copy">
-                            <h2 className="hero-headline fade-in-element">
-                                Ads don't fail because of creators.<br />
-                                <span className="highlight">They fail because contracts don't execute.</span>
-                            </h2>
+            {/* ----- How it actually works ----- */}
+            <section className="landing-how" id="how">
+                <p className="eyebrow">How it actually works</p>
+                <h2 className="section-headline">Four moments. No middlemen.</h2>
 
-                            <p className="hero-subheadline fade-in-element">
-                                An agent-to-agent marketplace where advertisers and creators negotiate, verify, and settle campaigns automatically.
+                <ol className="how-steps">
+                    <li className="how-step">
+                        <div className="how-step-text">
+                            <span className="step-num">01</span>
+                            <h3>A creator bids on a campaign.</h3>
+                            <p>
+                                One <code>POST&nbsp;/api/deals</code>. The bid carries the
+                                creator's profile and the advertiser's requirements into the
+                                negotiating agent.
                             </p>
-
-                            {/* CTA Buttons */}
-                            <div className="hero-cta fade-in-element">
-                                <button className="btn btn-primary btn-large" onClick={() => handleGetStarted('creator')}>
-                                    I'm a Creator
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                        <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </button>
-                                <button className="btn btn-primary btn-large" onClick={() => handleGetStarted('advertiser')}>
-                                    I'm an Advertiser
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                        <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <div className="hero-secondary-cta fade-in-element">
-                                <a href="#how-it-works" className="link-secondary">See how it works</a>
-                                <span className="separator">·</span>
-                                <a href="#architecture" className="link-secondary">View system architecture</a>
-                            </div>
                         </div>
+                        <BidPreview />
+                    </li>
 
-                        <div className="hero-visual fade-in-element">
-                            {/* Animated Flow Diagram */}
-                            <div className="flow-diagram">
-                                <div className="flow-node advertiser">
-                                    <div className="node-icon">💼</div>
-                                    <div className="node-label">Advertiser Agent</div>
-                                </div>
-                                <div className="flow-arrow">
-                                    <div className="arrow-line pulsing"></div>
-                                </div>
-                                <div className="flow-node campaign">
-                                    <div className="node-icon">📋</div>
-                                    <div className="node-label">Campaign</div>
-                                </div>
-                                <div className="flow-arrow">
-                                    <div className="arrow-line pulsing delay-1"></div>
-                                </div>
-                                <div className="flow-node creators">
-                                    <div className="node-icon">👥</div>
-                                    <div className="node-label">Creator Bids</div>
-                                </div>
-                                <div className="flow-arrow">
-                                    <div className="arrow-line pulsing delay-2"></div>
-                                </div>
-                                <div className="flow-node audit">
-                                    <div className="node-icon">✓</div>
-                                    <div className="node-label">Verification</div>
-                                </div>
-                                <div className="flow-arrow">
-                                    <div className="arrow-line pulsing delay-3"></div>
-                                </div>
-                                <div className="flow-node escrow">
-                                    <div className="node-icon">💰</div>
-                                    <div className="node-label">Payout</div>
-                                </div>
-                            </div>
+                    <li className="how-step">
+                        <div className="how-step-text">
+                            <span className="step-num">02</span>
+                            <h3>Two agents negotiate the terms.</h3>
+                            <p>
+                                LangGraph orchestrates a multi-round dialogue between the
+                                creator's and advertiser's agents. The transcript is persisted
+                                in MongoDB; the final terms become a <code>Contract</code>.
+                            </p>
                         </div>
-                    </div>
+                        <NegotiationPreview compact />
+                    </li>
+
+                    <li className="how-step">
+                        <div className="how-step-text">
+                            <span className="step-num">03</span>
+                            <h3>The creator submits content. The audit agent scores it.</h3>
+                            <p>
+                                The submitted URL is checked against the contract's
+                                <code> audit_criteria</code>. The agent returns a
+                                <code> content_score</code> and a <code>tier_achieved</code>.
+                            </p>
+                        </div>
+                        <AuditPreview />
+                    </li>
+
+                    <li className="how-step">
+                        <div className="how-step-text">
+                            <span className="step-num">04</span>
+                            <h3>Settlement runs on Base. The creator gets paid.</h3>
+                            <p>
+                                An <code>x402</code> transfer fires for the base payout plus any
+                                tier bonus. The receipt hash and settlement record land in
+                                MongoDB the same second.
+                            </p>
+                        </div>
+                        <SettlePreview />
+                    </li>
+                </ol>
+            </section>
+
+            {/* ----- Architecture ----- */}
+            <section className="landing-stack" id="stack">
+                <p className="eyebrow">Architecture</p>
+                <h2 className="section-headline">Three services, one ledger.</h2>
+
+                <div className="stack-grid">
+                    <article>
+                        <h4>Node API</h4>
+                        <p>
+                            Express + Mongoose. Owns users, campaigns, AutoBids, contracts,
+                            audits, settlements.
+                        </p>
+                        <code>http://localhost:3001/api</code>
+                    </article>
+                    <article>
+                        <h4>Agents</h4>
+                        <p>
+                            FastAPI + LangGraph. Runs the negotiation and audit graphs,
+                            executes the x402 transfer on Base.
+                        </p>
+                        <code>http://localhost:8000</code>
+                    </article>
+                    <article>
+                        <h4>Frontend</h4>
+                        <p>
+                            Vite + React. Creator and advertiser apps share components and
+                            call the API and agents directly.
+                        </p>
+                        <code>http://localhost:5173</code>
+                    </article>
                 </div>
             </section>
 
-            {/* Problem Section */}
-            <section className="landing-section problem-section" id="problem">
-                <h3 className="section-title">Why Influencer Ads Are Broken</h3>
-
-                <div className="problem-grid">
-                    <div className="problem-card">
-                        <div className="problem-icon">💬</div>
-                        <h4>Negotiation happens in DMs</h4>
-                        <p>Scattered across platforms, no single source of truth, endless back-and-forth.</p>
-                    </div>
-
-                    <div className="problem-card">
-                        <div className="problem-icon">📊</div>
-                        <h4>Trust lives in spreadsheets</h4>
-                        <p>Manual tracking, version conflicts, no enforcement mechanism.</p>
-                    </div>
-
-                    <div className="problem-card">
-                        <div className="problem-icon">📝</div>
-                        <h4>Compliance is manual</h4>
-                        <p>Human review, subjective judgment, delayed verification.</p>
-                    </div>
-
-                    <div className="problem-card">
-                        <div className="problem-icon">⏳</div>
-                        <h4>Payment is delayed or disputed</h4>
-                        <p>Net-60 terms, unclear deliverables, trust-based releases.</p>
-                    </div>
-                </div>
-
-                <p className="problem-conclusion">
-                    Negotiation, trust, compliance, and payment live in different places. <span className="highlight">That's the bug.</span>
-                </p>
-            </section>
-
-            {/* Solution Section */}
-            <section className="landing-section solution-section">
-                <h3 className="section-title">Agentic Contracts</h3>
-                <p className="section-subtitle">Contracts that execute themselves.</p>
-
-                <p className="solution-description">
-                    We built an agent-to-agent marketplace where creators and advertisers negotiate terms,
-                    an audit agent verifies delivery against contract clauses, and payouts happen conditionally — not manually.
-                </p>
-            </section>
-
-            {/* How It Works */}
-            <section className="landing-section how-it-works-section" id="how-it-works">
-                <h3 className="section-title">How It Works</h3>
-
-                <div className="steps-container">
-                    <div className="step">
-                        <div className="step-number">1</div>
-                        <div className="step-content">
-                            <h4>Advertiser Agent Starts a Campaign</h4>
-                            <ul>
-                                <li>Budget range</li>
-                                <li>Platform (IG / Xiaohongshu / TikTok)</li>
-                                <li>Deliverables, deadlines, usage rights</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="step">
-                        <div className="step-number">2</div>
-                        <div className="step-content">
-                            <h4>Creator Agents Auto-Bid</h4>
-                            <ul>
-                                <li>Price</li>
-                                <li>Availability</li>
-                                <li>Style fit</li>
-                                <li>Past performance (from shared memory)</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="step">
-                        <div className="step-number">3</div>
-                        <div className="step-content">
-                            <h4>Shared Memory (MongoDB)</h4>
-                            <ul>
-                                <li>Contract history</li>
-                                <li>Payment records</li>
-                                <li>Privacy-aware access control</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="step">
-                        <div className="step-number">4</div>
-                        <div className="step-content">
-                            <h4>Auto-Contracting</h4>
-                            <ul>
-                                <li>Advertiser agent shortlists and executes contracts</li>
-                                <li>No back-and-forth DMs</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="step">
-                        <div className="step-number">5</div>
-                        <div className="step-content">
-                            <h4>Audit Agent</h4>
-                            <ul>
-                                <li>Verifies content vs contract clauses</li>
-                                <li>Calculates tiered rewards or penalties</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="step">
-                        <div className="step-number">6</div>
-                        <div className="step-content">
-                            <h4>Conditional Payout</h4>
-                            <ul>
-                                <li>Escrow enforced</li>
-                                <li>Payment released automatically based on audit result</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* What Makes This Different */}
-            <section className="landing-section different-section">
-                <h3 className="section-title">What Makes This Different</h3>
-                <p className="section-subtitle">No existing platform offers all four:</p>
-
-                <div className="features-grid">
-                    <div className="feature-card">
-                        <div className="feature-check">✓</div>
-                        <h4>Open bidding</h4>
-                        <p>Transparent marketplace for all participants</p>
-                    </div>
-
-                    <div className="feature-card">
-                        <div className="feature-check">✓</div>
-                        <h4>Enforced price floors</h4>
-                        <p>Protecting creator value at every tier</p>
-                    </div>
-
-                    <div className="feature-card">
-                        <div className="feature-check">✓</div>
-                        <h4>Escrow + contract execution</h4>
-                        <p>Automated, trustless payment release</p>
-                    </div>
-
-                    <div className="feature-card">
-                        <div className="feature-check">✓</div>
-                        <h4>Cross-border workflows</h4>
-                        <p>KR–CN–US seamless collaboration</p>
-                    </div>
-                </div>
-
-                <div className="result-callout">
-                    <div className="result-items">
-                        <div className="result-item">No secret rates</div>
-                        <div className="result-item">No 30–40% agency skim</div>
-                        <div className="result-item">No blind pricing by creators</div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Anti-Race-to-Bottom */}
-            <section className="landing-section anti-race-section">
-                <h3 className="section-title">This is not free-for-all bidding.</h3>
-
-                <div className="enforcement-grid">
-                    <div className="enforcement-column">
-                        <h4 className="column-header advertiser-color">Advertiser Defines</h4>
-                        <ul>
-                            <li>Budget range</li>
-                            <li>Deliverables</li>
-                            <li>Deadline</li>
-                            <li>Usage rights</li>
-                        </ul>
-                    </div>
-
-                    <div className="enforcement-column">
-                        <h4 className="column-header creator-color">Creator Submits</h4>
-                        <ul>
-                            <li>Bid price</li>
-                            <li>Delivery promise</li>
-                            <li>Optional upsells</li>
-                        </ul>
-                    </div>
-
-                    <div className="enforcement-column">
-                        <h4 className="column-header platform-color">Platform Enforces</h4>
-                        <ul>
-                            <li>Minimum floor prices by tier</li>
-                            <li>Clear scope definitions</li>
-                            <li>Automatic escrow</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <p className="enforcement-conclusion">
-                    Markets only work when incentives are enforced.
-                </p>
-            </section>
-
-            {/* Trust & Infrastructure */}
-            <section className="landing-section trust-section">
-                <h3 className="section-title">Accountability is built-in.</h3>
-
-                <div className="trust-grid">
-                    <div className="trust-item">
-                        <div className="trust-icon">🗄️</div>
-                        <p>Shared memory as a single source of truth</p>
-                    </div>
-
-                    <div className="trust-item">
-                        <div className="trust-icon">📋</div>
-                        <p>Audit trails for every contract</p>
-                    </div>
-
-                    <div className="trust-item">
-                        <div className="trust-icon">🔒</div>
-                        <p>Privacy-aware data visibility</p>
-                    </div>
-
-                    <div className="trust-item">
-                        <div className="trust-icon">🌍</div>
-                        <p>Scales from solo creators to global campaigns</p>
-                    </div>
-                </div>
-
-                <div className="infrastructure-callout">
-                    <p>Powered by a shared database and agent orchestration layer designed for adversarial incentives.</p>
-                </div>
-            </section>
-
-            {/* Closing Section */}
-            <section className="landing-section closing-section" id="architecture">
-                <h2 className="closing-statement">
-                    This isn't a marketplace for posts.<br />
-                    <span className="highlight">It's infrastructure for executing advertising contracts.</span>
+            {/* ----- Closing ----- */}
+            <section className="landing-closing">
+                <h2 className="closing-headline">
+                    Stop chasing invoices.<br />
+                    <em>Let the agents handle it.</em>
                 </h2>
-
-                <div className="closing-cta">
-                    <button className="btn btn-primary btn-large" onClick={() => handleGetStarted('creator')}>
-                        Join as Creator
-                    </button>
-                    <button className="btn btn-primary btn-large" onClick={() => handleGetStarted('advertiser')}>
-                        Join as Advertiser
-                    </button>
-                </div>
-
-                <div className="closing-links">
-                    <a href="#docs" className="link-secondary">Documentation</a>
-                    <span className="separator">·</span>
-                    <a href="#architecture" className="link-secondary">Architecture</a>
-                    <span className="separator">·</span>
-                    <a href="#demo" className="link-secondary">Request Demo</a>
-                    <span className="separator">·</span>
-                    <a href="#contact" className="link-secondary">Contact</a>
-                </div>
+                <button className="btn-primary btn-large" onClick={() => goTo('creator')}>
+                    Try the demo
+                    <ArrowIcon />
+                </button>
             </section>
 
-            {/* Footer */}
+            {/* ----- Footer ----- */}
             <footer className="landing-footer">
-                <p>Built for a future where agents negotiate on our behalf.</p>
-                <p style={{ marginTop: 12, fontSize: 13 }}>
-                    <Link to="/terms" style={{ color: 'inherit', marginRight: 16 }}>Terms</Link>
-                    <Link to="/privacy" style={{ color: 'inherit' }}>Privacy</Link>
-                </p>
+                <div className="footer-mark">
+                    <MatchaLogo size={18} />
+                    <span>Matcha</span>
+                </div>
+                <div className="footer-links">
+                    <Link to="/terms">Terms</Link>
+                    <Link to="/privacy">Privacy</Link>
+                    <a href="https://github.com/jin-dalrae/2601-MongoDB-boba-matcha" target="_blank" rel="noopener noreferrer">
+                        GitHub
+                    </a>
+                </div>
+                <p className="footer-meta">Built for the MongoDB Hackathon 2026.</p>
             </footer>
+        </div>
+    );
+}
+
+// ----- inline preview components --------------------------------------------
+
+function ArrowIcon() {
+    return (
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8H13M13 8L8 3M13 8L8 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
+function NegotiationPreview({ compact = false }) {
+    return (
+        <div className={`preview-card preview-negotiation ${compact ? 'is-compact' : ''}`}>
+            <div className="preview-header">
+                <span className="preview-eyebrow">Negotiation transcript</span>
+                <span className="preview-pill">Round 3 of 5</span>
+            </div>
+            <div className="preview-chat">
+                <ChatLine role="brand" name="Brand agent">
+                    We can start at <strong>$750</strong> for 1 TikTok video.
+                </ChatLine>
+                <ChatLine role="creator" name="Creator agent">
+                    Counter at <strong>$1,000</strong> — engagement data supports it.
+                </ChatLine>
+                <ChatLine role="brand" name="Brand agent">
+                    Compromise at <strong>$920</strong>, with a tier-1 bonus on views.
+                </ChatLine>
+                <ChatLine role="creator" name="Creator agent">
+                    Accepted — drafting contract.
+                </ChatLine>
+            </div>
+            <div className="preview-result">
+                <div className="result-row">
+                    <span>Final payout</span>
+                    <strong>$920</strong>
+                </div>
+                <div className="result-row">
+                    <span>Tier-1 bonus (1k views)</span>
+                    <strong>+$92</strong>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ChatLine({ role, name, children }) {
+    return (
+        <div className={`chat-line chat-line--${role}`}>
+            <span className="chat-name">{name}</span>
+            <p className="chat-bubble">{children}</p>
+        </div>
+    );
+}
+
+function BidPreview() {
+    return (
+        <div className="preview-card preview-bid">
+            <div className="preview-header">
+                <span className="preview-eyebrow">AutoBid created</span>
+                <span className="preview-pill preview-pill-mono">deals/672a3…</span>
+            </div>
+            <div className="bid-row">
+                <span>Campaign</span>
+                <strong>Glow Serum Launch</strong>
+            </div>
+            <div className="bid-row">
+                <span>Creator</span>
+                <strong>@avery.k</strong>
+            </div>
+            <div className="bid-row">
+                <span>Current bid</span>
+                <strong>$1,000</strong>
+            </div>
+            <div className="bid-row">
+                <span>Status</span>
+                <span className="bid-status">Negotiating</span>
+            </div>
+        </div>
+    );
+}
+
+function AuditPreview() {
+    return (
+        <div className="preview-card preview-audit">
+            <div className="preview-header">
+                <span className="preview-eyebrow">AuditReport</span>
+                <span className="preview-pill preview-pill-mono">audit/8f21c…</span>
+            </div>
+            <div className="audit-score">
+                <div className="score-circle">
+                    <span className="score-value">87</span>
+                    <span className="score-unit">%</span>
+                </div>
+                <div className="audit-meta">
+                    <span className="audit-tier">Tier 1 reached</span>
+                    <p className="audit-reason">
+                        Product featured clearly in first 8 seconds; brand mentioned twice.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SettlePreview() {
+    return (
+        <div className="preview-card preview-settle">
+            <div className="preview-header">
+                <span className="preview-eyebrow">X402 settlement</span>
+                <span className="preview-pill preview-pill-success">Settled</span>
+            </div>
+            <div className="settle-amount">
+                $1,012<span className="settle-unit">USDC</span>
+            </div>
+            <div className="settle-row">
+                <span>Network</span>
+                <strong>Base</strong>
+            </div>
+            <div className="settle-row">
+                <span>Receipt</span>
+                <code>0x9a4f…c21d</code>
+            </div>
         </div>
     );
 }

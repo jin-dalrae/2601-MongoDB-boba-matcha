@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "node server/index.js",
     "dev": "node server/index.js",
-    "seed": "node server/seed.js"
+    "seed": "node server/seed.js",
+    "agents:mock": "node agents/mock-server.js"
   },
   "keywords": [],
   "author": "",

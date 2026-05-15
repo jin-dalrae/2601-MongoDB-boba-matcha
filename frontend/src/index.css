@@ -2,7 +2,7 @@
 /* Enhanced with visual depth, expanded colors, and polished feel */
 
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Gluten:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gluten:wght@700&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
 
 /* Design Tokens */
 :root {
@@ -107,7 +107,8 @@ body {
   font-weight: var(--weight-regular);
   line-height: 1.25;
   color: var(--color-text-primary);
-  background-color: var(--color-bg-app);
+  /* Warm backdrop ties the centered mobile column to the editorial landing. */
+  background-color: #F1ECE1;
 }
 
 #root {
@@ -128,6 +129,17 @@ body {
 
 .app.app-full {
   max-width: 100%;
+}
+
+/* On wider screens, frame the centered mobile column as a deliberate
+   app surface on the warm backdrop instead of a stranded strip. */
+@media screen and (min-width: 600px) {
+  .app:not(.app-full) {
+    background: var(--color-bg-app);
+    box-shadow:
+      0 0 0 1px rgba(28, 24, 16, 0.06),
+      0 40px 90px -60px rgba(28, 24, 16, 0.45);
+  }
 }
 
 /* Desktop layout for advertiser with left sidebar.

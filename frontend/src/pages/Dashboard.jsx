@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StatusIndicator from '../components/StatusIndicator';
-import TopBar from '../components/TopBar';
 import { userAPI } from '../services/api';
 import { ensureCreatorId } from '../lib/creator';
 import './Dashboard.css';
@@ -30,227 +28,235 @@ function useAnimatedCounter(target, duration = 1000) {
 }
 
 const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 0,
-    }).format(amount || 0);
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 })
+        .format(amount || 0);
 
 const formatRelative = (timestamp) => {
     if (!timestamp) return '—';
-    const diffMs = Date.now() - new Date(timestamp).getTime();
-    const diffMin = Math.max(Math.floor(diffMs / 60000), 0);
-    if (diffMin < 1) return 'Just now';
+    const diffMin = Math.max(Math.floor((Date.now() - new Date(timestamp).getTime()) / 60000), 0);
+    if (diffMin < 1) return 'just now';
     if (diffMin < 60) return `${diffMin}m ago`;
-    const diffHours = Math.floor(diffMin / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays}d ago`;
-};
-
-const formatShortDate = (date) => {
-    if (!date) return null;
-    try {
-        return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    } catch (_) {
-        return null;
-    }
+    const h = Math.floor(diffMin / 60);
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
 };
 
 const reliabilityBadge = (score) => {
-    if (score === undefined || score === null) return 'New Creator';
-    if (score >= 0.9) return 'High Reliability';
+    if (score === undefined || score === null) return 'New creator';
+    if (score >= 0.9) return 'High reliability';
     if (score >= 0.75) return 'Trusted';
-    if (score >= 0.5) return 'Building Track Record';
-    return 'Getting Started';
+    if (score >= 0.5) return 'Building track record';
+    return 'Getting started';
 };
+
+const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 18) return 'Good afternoon';
+    return 'Good evening';
+};
+
+function Arrow() {
+    return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const [data, setData] = useState(null);
     const [loadError, setLoadError] = useState('');
-    const [showContent, setShowContent] = useState(false);
+    const [ready, setReady] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
-        const load = async () => {
+        (async () => {
             try {
                 const creatorId = await ensureCreatorId();
                 if (!creatorId) {
                     if (!cancelled) setLoadError('No creator id. Complete onboarding first.');
                     return;
                 }
-                const dashboard = await userAPI.getCreatorDashboard(creatorId);
-                if (!cancelled) setData(dashboard);
+                const dash = await userAPI.getCreatorDashboard(creatorId);
+                if (!cancelled) setData(dash);
             } catch (error) {
                 if (!cancelled) setLoadError(error.message || 'Failed to load dashboard.');
+            } finally {
+                if (!cancelled) setTimeout(() => setReady(true), 60);
             }
-        };
-        load();
-        const timer = setTimeout(() => setShowContent(true), 100);
-        return () => {
-            cancelled = true;
-            clearTimeout(timer);
-        };
+        })();
+        return () => { cancelled = true; };
     }, []);
 
     const totalEarned = data?.earnings?.totalEarned || 0;
-    const animatedTotal = useAnimatedCounter(totalEarned, 1200);
+    const animatedTotal = useAnimatedCounter(totalEarned, 1100);
     const pending = data?.earnings?.pendingPayouts || 0;
     const bonuses = data?.earnings?.bonusesEarned || 0;
+    const completed = data?.earnings?.contractsCompleted || 0;
     const activePacts = data?.activePacts || [];
     const agentActivity = data?.agentActivity || [];
     const negotiatingCount = data?.negotiatingCount || 0;
     const reliability = data?.reputation?.reliability_score;
-    const reliabilityPct = reliability ? Math.round(reliability * 100) : null;
+    const reliabilityPct = reliability != null ? Math.round(reliability * 100) : null;
 
-    const agentStatusText = negotiatingCount > 0
-        ? `Actively negotiating ${negotiatingCount} deal${negotiatingCount === 1 ? '' : 's'}`
-        : activePacts.length > 0
-            ? 'Monitoring active contracts'
-            : 'Idle — no open negotiations';
+    const isFresh =
+        !loadError && data && totalEarned === 0 && activePacts.length === 0 && negotiatingCount === 0;
+
+    const primary = activePacts.length > 0
+        ? { label: 'Submit content', to: '/creator/contracts' }
+        : { label: 'Discover campaigns', to: '/creator/campaigns' };
 
     return (
-        <div className="page dashboard">
-            <TopBar showAvatar={true} showNotification={true} />
-
-            <div className={`agent-status-bar ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '40ms' }}>
-                <StatusIndicator status={negotiatingCount > 0 ? 'ai-working' : 'active'} size={16} />
-                <div className="agent-status-content">
-                    <span className="agent-status-text">{agentStatusText}</span>
-                    <span className="agent-status-time">
-                        {agentActivity[0]?.timestamp ? `Last update: ${formatRelative(agentActivity[0].timestamp)}` : 'No recent activity'}
-                    </span>
+        <div className={`page dash ${ready ? 'is-ready' : ''}`}>
+            {/* Header */}
+            <header className="dash-top">
+                <div>
+                    <span className="dash-eyebrow">Matcha</span>
+                    <h1 className="dash-greeting">{greeting()}.</h1>
                 </div>
-            </div>
+                <span className="dash-rep" title="Reliability">
+                    <span className="dash-rep-dot" />
+                    {reliabilityBadge(reliability)}
+                </span>
+            </header>
 
-            {loadError && (
-                <section className="dashboard-section">
-                    <div className="earnings-card" style={{ color: '#d93b3b' }}>{loadError}</div>
-                </section>
+            {loadError && <div className="dash-error">{loadError}</div>}
+
+            {!data && !loadError && (
+                <div className="dash-skeleton">
+                    <div className="sk sk-hero" />
+                    <div className="sk sk-row" />
+                    <div className="sk sk-row" />
+                </div>
             )}
 
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
-                <h2 className="section-title">Earnings</h2>
-                <div className="earnings-card">
-                    <div className="earnings-main">
-                        <span className="earnings-label">Total Earned</span>
-                        <span className="earnings-amount">{formatCurrency(animatedTotal)}</span>
-                    </div>
-                    <div className="earnings-grid">
-                        <div className="earnings-stat">
-                            <span className="stat-label">Pending</span>
-                            <span className="stat-value pending">{formatCurrency(pending)}</span>
-                        </div>
-                        <div className="earnings-stat">
-                            <span className="stat-label">Bonuses</span>
-                            <span className="stat-value bonus">{formatCurrency(bonuses)}</span>
-                        </div>
-                        <div className="earnings-stat">
-                            <span className="stat-label">Completed</span>
-                            <span className="stat-value">{data?.earnings?.contractsCompleted || 0}</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {isFresh && (
+                <>
+                    <section className="dash-welcome">
+                        <h2 className="dash-welcome-title">Your agent is live.</h2>
+                        <p className="dash-welcome-sub">
+                            It will bid, negotiate, and settle on your behalf. Start by
+                            picking a campaign — the rest happens automatically.
+                        </p>
+                    </section>
 
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '160ms' }}>
-                <h2 className="section-title">Active Pacts</h2>
-                {activePacts.length === 0 ? (
-                    <div className="pacts-list">
-                        <div className="pact-card" style={{ textAlign: 'center', color: 'var(--color-secondary)' }}>
-                            No active contracts. Browse Discover to start bidding.
+                    <ol className="dash-steps">
+                        <li><span>1</span> Discover a campaign and let your agent bid.</li>
+                        <li><span>2</span> Two agents negotiate the terms for you.</li>
+                        <li><span>3</span> Submit content — audit and payout run themselves.</li>
+                    </ol>
+                </>
+            )}
+
+            {data && !isFresh && (
+                <>
+                    {/* Earnings hero */}
+                    <section className="dash-hero">
+                        <span className="dash-eyebrow">Total earned</span>
+                        <div className="dash-amount">{formatCurrency(animatedTotal)}</div>
+                        <div className="dash-substats">
+                            <div>
+                                <span className="dash-sub-val">{formatCurrency(pending)}</span>
+                                <span className="dash-sub-lbl">Pending</span>
+                            </div>
+                            <div>
+                                <span className="dash-sub-val">{formatCurrency(bonuses)}</span>
+                                <span className="dash-sub-lbl">Bonuses</span>
+                            </div>
+                            <div>
+                                <span className="dash-sub-val">{completed}</span>
+                                <span className="dash-sub-lbl">Completed</span>
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="pacts-list">
-                        {activePacts.map((pact, index) => (
-                            <div
-                                key={pact._id}
-                                className={`pact-card status-${pact.status === 'Active' ? 'active' : 'pending'}`}
-                                style={{ '--stagger': `${index * 40}ms`, cursor: 'pointer' }}
-                                onClick={() => navigate('/creator/contracts')}
-                            >
-                                <div className="pact-header">
-                                    <div className="pact-info">
-                                        <h3 className="pact-brand">{pact.brand}</h3>
-                                        <p className="pact-campaign">{pact.campaign}</p>
-                                    </div>
-                                    <StatusIndicator status={pact.status === 'Active' ? 'active' : 'pending'} size={20} />
-                                </div>
-                                <div className="pact-details">
-                                    <div className="pact-meta">
-                                        <span className="meta-item">{pact.status}</span>
-                                    </div>
-                                    <div className="pact-footer">
-                                        <div className="pact-payout">
-                                            <span className="payout-amount">{formatCurrency(pact.base_payout)}</span>
+                    </section>
+
+                    {/* Negotiation callout */}
+                    {negotiatingCount > 0 && (
+                        <button className="dash-callout" onClick={() => navigate('/creator/deals')}>
+                            <span className="dash-callout-pulse" />
+                            <div className="dash-callout-text">
+                                <strong>
+                                    {negotiatingCount} negotiation{negotiatingCount === 1 ? '' : 's'} in progress
+                                </strong>
+                                <span>Your agent is at the table — tap to watch</span>
+                            </div>
+                            <Arrow />
+                        </button>
+                    )}
+
+                    {/* Active pacts */}
+                    <section className="dash-block">
+                        <div className="dash-block-head">
+                            <span className="dash-eyebrow">Active pacts</span>
+                            <button className="dash-link" onClick={() => navigate('/creator/contracts')}>
+                                View all
+                            </button>
+                        </div>
+                        {activePacts.length === 0 ? (
+                            <div className="dash-empty">
+                                No active contracts yet.
+                                <button className="dash-link" onClick={() => navigate('/creator/campaigns')}>
+                                    Discover campaigns
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="dash-pacts">
+                                {activePacts.map((pact) => (
+                                    <button
+                                        key={pact._id}
+                                        className="dash-pact"
+                                        onClick={() => navigate('/creator/contracts')}
+                                    >
+                                        <div className="dash-pact-main">
+                                            <span className="dash-pact-brand">{pact.brand}</span>
+                                            <span className="dash-pact-campaign">{pact.campaign}</span>
                                         </div>
-                                        <span className="pact-due">{formatShortDate(pact.createdAt)}</span>
-                                    </div>
-                                </div>
+                                        <div className="dash-pact-side">
+                                            <span className="dash-pact-amount">{formatCurrency(pact.base_payout)}</span>
+                                            <span className={`dash-pact-status ${pact.status === 'Active' ? 'is-active' : 'is-pending'}`}>
+                                                {pact.status}
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                )}
-            </section>
+                        )}
+                    </section>
 
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '200ms' }}>
-                <h2 className="section-title">Agent Activity</h2>
-                {agentActivity.length === 0 ? (
-                    <div className="activity-feed">
-                        <div className="activity-item" style={{ color: 'var(--color-secondary)' }}>
-                            <div className="activity-content">
-                                <p className="activity-message">No agent activity yet.</p>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="activity-feed">
-                        {agentActivity.map((activity, index) => (
-                            <div
-                                key={activity.id}
-                                className="activity-item"
-                                style={{ '--stagger': `${index * 30}ms` }}
-                            >
-                                <div className="activity-dot" />
-                                <div className="activity-content">
-                                    <p className="activity-message">{activity.message}</p>
-                                    <span className="activity-time">{formatRelative(activity.timestamp)}</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </section>
+                    {/* Agent activity */}
+                    {agentActivity.length > 0 && (
+                        <section className="dash-block">
+                            <span className="dash-eyebrow">Agent activity</span>
+                            <ul className="dash-activity">
+                                {agentActivity.slice(0, 5).map((a) => (
+                                    <li key={a.id}>
+                                        <span className="dash-activity-dot" />
+                                        <span className="dash-activity-msg">{a.message}</span>
+                                        <span className="dash-activity-time">{formatRelative(a.timestamp)}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
+                </>
+            )}
 
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '240ms' }}>
-                <h2 className="section-title">Your Reputation</h2>
-                <div className="reputation-card">
-                    <div className="reputation-badge">
-                        <StatusIndicator status="active" size={14} />
-                        <span>{reliabilityBadge(reliability)}</span>
-                    </div>
-                    <div className="reputation-stats">
-                        <div className="rep-stat">
-                            <span className="rep-label">Reliability</span>
-                            <div className="rep-bar-container">
-                                <div className="rep-bar" style={{ '--width': `${reliabilityPct ?? 0}%` }} />
-                            </div>
-                            <span className="rep-value">{reliabilityPct !== null ? `${reliabilityPct}%` : '—'}</span>
-                        </div>
-                    </div>
+            {/* Contextual primary action */}
+            {data && (
+                <div className="dash-cta">
+                    <button className="dash-btn" onClick={() => navigate(primary.to)}>
+                        {primary.label}
+                        <Arrow />
+                    </button>
+                    {reliabilityPct !== null && (
+                        <p className="dash-cta-meta">
+                            Reliability {reliabilityPct}% · {completed} contract{completed === 1 ? '' : 's'} settled
+                        </p>
+                    )}
                 </div>
-            </section>
-
-            <section className={`dashboard-section action-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '280ms' }}>
-                <button
-                    className="btn btn-primary btn-full interaction-press"
-                    onClick={() => navigate('/creator/contracts')}
-                >
-                    Submit Content
-                </button>
-            </section>
+            )}
         </div>
     );
 }

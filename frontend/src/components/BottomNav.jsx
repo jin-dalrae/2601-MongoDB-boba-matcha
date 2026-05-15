@@ -1,9 +1,12 @@
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import './BottomNav.css';
 
 const navItems = [
   {
     id: 'home',
+    path: '/creator',
+    label: 'Home',
     icon: (active) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={active ? "0" : "1.8"} strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -13,6 +16,7 @@ const navItems = [
   },
   {
     id: 'campaigns',
+    path: '/creator/campaigns',
     icon: (active) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8" fill={active ? "currentColor" : "none"} />
@@ -22,6 +26,7 @@ const navItems = [
   },
   {
     id: 'bidding',
+    path: '/creator/deals',
     icon: (active) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         {active ? (
@@ -36,6 +41,7 @@ const navItems = [
   },
   {
     id: 'profile',
+    path: '/creator/profile',
     icon: (active) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="8" r="4" fill={active ? "currentColor" : "none"} />
@@ -45,30 +51,42 @@ const navItems = [
   },
 ];
 
-export default function BottomNav({ activeTab, onTabChange }) {
+export default function BottomNav() {
   const [isPressed, setIsPressed] = useState(false);
+  const location = useLocation();
 
-  const handleTabClick = (id) => {
+  const handleTabClick = () => {
     setIsPressed(true);
-    onTabChange(id);
     setTimeout(() => setIsPressed(false), 150);
+  };
+
+  const isActive = (item) => {
+    const path = location.pathname;
+    if (item.id === 'home') {
+      return path === '/creator';
+    }
+    return path.startsWith(item.path);
   };
 
   return (
     <nav className={`floating-nav ${isPressed ? 'pressed' : ''}`}>
       <div className="nav-pill">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
-            onClick={() => handleTabClick(item.id)}
-          >
-            <span className="nav-icon">
-              {item.icon(activeTab === item.id)}
-              {activeTab === item.id && <span className="icon-glow" />}
-            </span>
-          </button>
-        ))}
+        {navItems.map((item) => {
+          const active = isActive(item);
+          return (
+            <Link
+              key={item.id}
+              to={item.path}
+              className={`nav-item ${active ? 'active' : ''}`}
+              onClick={handleTabClick}
+            >
+              <span className="nav-icon">
+                {item.icon(active)}
+                {active && <span className="icon-glow" />}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

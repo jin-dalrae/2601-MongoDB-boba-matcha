@@ -1,79 +1,16 @@
-import { useState, useEffect } from 'react';
-import MatchaLogo from '../components/MatchaLogo';
-import StatusIndicator from '../components/StatusIndicator';
-import TopBar from '../components/TopBar';
-import SubmitContentModal from '../components/SubmitContentModal';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { userAPI } from '../services/api';
+import { ensureCreatorId } from '../lib/creator';
 import './Dashboard.css';
 
-// Earnings data
-const earningsData = {
-    totalEarned: 6480,
-    pendingPayouts: 2100,
-    bonusesEarned: 980,
-    avgPayoutTime: 2.4
-};
-
-// Agent Status
-const agentStatus = {
-    status: 'Actively negotiating 2 deals',
-    lastUpdate: '12 min ago'
-};
-
-// Notifications
-const notifications = [
-    { id: 1, message: 'Nike countered your bid', type: 'negotiation', time: '5m ago', unread: true },
-    { id: 2, message: 'Spotify campaign approved', type: 'success', time: '2h ago', unread: true },
-    { id: 3, message: 'Payment released for Adidas', type: 'payment', time: '1d ago', unread: false }
-];
-
-// Active Pacts data
-const activePacts = [
-    {
-        id: 1,
-        brand: 'Sephora',
-        campaign: 'Glow Serum Launch',
-        platform: 'TikTok',
-        deliverable: '1 tutorial video',
-        payout: 2500,
-        bonus: 400,
-        status: 'active',
-        statusLabel: 'Audit Passed',
-        dueDate: 'Mar 18'
-    },
-    {
-        id: 2,
-        brand: 'Gymshark',
-        campaign: 'Spring Training Drop',
-        platform: 'Instagram Reel',
-        deliverable: '1 workout reel',
-        payout: 1800,
-        bonus: null,
-        status: 'pending',
-        statusLabel: 'In Review',
-        dueDate: 'Mar 22'
-    }
-];
-
-// Agent Activity feed
-const agentActivity = [
-    { id: 1, message: 'Your agent bid on 3 campaigns today', time: '2h ago', type: 'bid' },
-    { id: 2, message: 'You were selected by Sephora', time: '5h ago', type: 'selected' },
-    { id: 3, message: 'Audit passed · bonus unlocked', time: '1d ago', type: 'success' },
-    { id: 4, message: 'Payment of $2,900 confirmed', time: '2d ago', type: 'payment' }
-];
-
-// Reputation data
-const reputationData = {
-    deliveryReliability: 96,
-    auditPassRate: 94,
-    badge: 'High Reliability'
-};
-
-// Animated counter hook
 function useAnimatedCounter(target, duration = 1000) {
     const [count, setCount] = useState(0);
-
     useEffect(() => {
+        if (!target) {
+            setCount(0);
+            return;
+        }
         let start = 0;
         const increment = target / (duration / 16);
         const timer = setInterval(() => {
@@ -87,175 +24,239 @@ function useAnimatedCounter(target, duration = 1000) {
         }, 16);
         return () => clearInterval(timer);
     }, [target, duration]);
-
     return count;
 }
 
+const formatCurrency = (amount) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 })
+        .format(amount || 0);
+
+const formatRelative = (timestamp) => {
+    if (!timestamp) return '—';
+    const diffMin = Math.max(Math.floor((Date.now() - new Date(timestamp).getTime()) / 60000), 0);
+    if (diffMin < 1) return 'just now';
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const h = Math.floor(diffMin / 60);
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
+};
+
+const reliabilityBadge = (score) => {
+    if (score === undefined || score === null) return 'New creator';
+    if (score >= 0.9) return 'High reliability';
+    if (score >= 0.75) return 'Trusted';
+    if (score >= 0.5) return 'Building track record';
+    return 'Getting started';
+};
+
+const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 18) return 'Good afternoon';
+    return 'Good evening';
+};
+
+function Arrow() {
+    return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
 export default function Dashboard() {
-    const animatedTotal = useAnimatedCounter(earningsData.totalEarned, 1200);
-    const [showContent, setShowContent] = useState(false);
-    const [showSubmitModal, setShowSubmitModal] = useState(false);
+    const navigate = useNavigate();
+    const [data, setData] = useState(null);
+    const [loadError, setLoadError] = useState('');
+    const [ready, setReady] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => setShowContent(true), 100);
-        return () => clearTimeout(timer);
+        let cancelled = false;
+        (async () => {
+            try {
+                const creatorId = await ensureCreatorId();
+                if (!creatorId) {
+                    if (!cancelled) setLoadError('No creator id. Complete onboarding first.');
+                    return;
+                }
+                const dash = await userAPI.getCreatorDashboard(creatorId);
+                if (!cancelled) setData(dash);
+            } catch (error) {
+                if (!cancelled) setLoadError(error.message || 'Failed to load dashboard.');
+            } finally {
+                if (!cancelled) setTimeout(() => setReady(true), 60);
+            }
+        })();
+        return () => { cancelled = true; };
     }, []);
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-        }).format(amount);
-    };
+    const totalEarned = data?.earnings?.totalEarned || 0;
+    const animatedTotal = useAnimatedCounter(totalEarned, 1100);
+    const pending = data?.earnings?.pendingPayouts || 0;
+    const bonuses = data?.earnings?.bonusesEarned || 0;
+    const completed = data?.earnings?.contractsCompleted || 0;
+    const activePacts = data?.activePacts || [];
+    const agentActivity = data?.agentActivity || [];
+    const negotiatingCount = data?.negotiatingCount || 0;
+    const reliability = data?.reputation?.reliability_score;
+    const reliabilityPct = reliability != null ? Math.round(reliability * 100) : null;
+
+    const isFresh =
+        !loadError && data && totalEarned === 0 && activePacts.length === 0 && negotiatingCount === 0;
+
+    const primary = activePacts.length > 0
+        ? { label: 'Submit content', to: '/creator/contracts' }
+        : { label: 'Discover campaigns', to: '/creator/campaigns' };
 
     return (
-        <div className="page dashboard">
-            {/* Header with Logo */}
-            <TopBar showAvatar={true} showNotification={true} />
-
-            {/* Agent Status Bar */}
-            <div className={`agent-status-bar ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '40ms' }}>
-                <StatusIndicator status="ai-working" size={16} />
-                <div className="agent-status-content">
-                    <span className="agent-status-text">{agentStatus.status}</span>
-                    <span className="agent-status-time">Last update: {agentStatus.lastUpdate}</span>
+        <div className={`page dash ${ready ? 'is-ready' : ''}`}>
+            {/* Header */}
+            <header className="dash-top">
+                <div>
+                    <span className="dash-eyebrow">Matcha</span>
+                    <h1 className="dash-greeting">{greeting()}.</h1>
                 </div>
-            </div>
+                <span className="dash-rep" title="Reliability">
+                    <span className="dash-rep-dot" />
+                    {reliabilityBadge(reliability)}
+                </span>
+            </header>
 
-            {/* Notifications */}
-            <section className={`dashboard-section notifications-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '80ms' }}>
-                <div className="notifications-scroll">
-                    {notifications.map((notif) => (
-                        <div key={notif.id} className={`notification-chip ${notif.type} ${notif.unread ? 'unread' : ''}`}>
-                            <span className="notif-dot" />
-                            <span className="notif-message">{notif.message}</span>
-                        </div>
-                    ))}
+            {loadError && <div className="dash-error">{loadError}</div>}
+
+            {!data && !loadError && (
+                <div className="dash-skeleton">
+                    <div className="sk sk-hero" />
+                    <div className="sk sk-row" />
+                    <div className="sk sk-row" />
                 </div>
-            </section>
+            )}
 
-            {/* Earnings Overview - with glow border */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '120ms' }}>
-                <h2 className="section-title">Earnings</h2>
-                <div className="earnings-card">
-                    <div className="earnings-main">
-                        <span className="earnings-label">Total Earned (30 days)</span>
-                        <span className="earnings-amount">{formatCurrency(animatedTotal)}</span>
-                    </div>
-                    <div className="earnings-grid">
-                        <div className="earnings-stat">
-                            <span className="stat-label">Pending</span>
-                            <span className="stat-value pending">{formatCurrency(earningsData.pendingPayouts)}</span>
-                        </div>
-                        <div className="earnings-stat">
-                            <span className="stat-label">Bonuses</span>
-                            <span className="stat-value bonus">{formatCurrency(earningsData.bonusesEarned)}</span>
-                        </div>
-                        <div className="earnings-stat">
-                            <span className="stat-label">Avg. Payout</span>
-                            <span className="stat-value">{earningsData.avgPayoutTime}d</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {isFresh && (
+                <>
+                    <section className="dash-welcome">
+                        <h2 className="dash-welcome-title">Your agent is live.</h2>
+                        <p className="dash-welcome-sub">
+                            It will bid, negotiate, and settle on your behalf. Start by
+                            picking a campaign — the rest happens automatically.
+                        </p>
+                    </section>
 
-            {/* Active Pacts - with status glow */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '160ms' }}>
-                <h2 className="section-title">Active Pacts</h2>
-                <div className="pacts-list">
-                    {activePacts.map((pact, index) => (
-                        <div
-                            key={pact.id}
-                            className={`pact-card status-${pact.status}`}
-                            style={{ '--stagger': `${index * 40}ms` }}
-                        >
-                            <div className="pact-header">
-                                <div className="pact-info">
-                                    <h3 className="pact-brand">{pact.brand}</h3>
-                                    <p className="pact-campaign">{pact.campaign}</p>
-                                </div>
-                                <StatusIndicator status={pact.status} size={20} />
+                    <ol className="dash-steps">
+                        <li><span>1</span> Discover a campaign and let your agent bid.</li>
+                        <li><span>2</span> Two agents negotiate the terms for you.</li>
+                        <li><span>3</span> Submit content — audit and payout run themselves.</li>
+                    </ol>
+                </>
+            )}
+
+            {data && !isFresh && (
+                <>
+                    {/* Earnings hero */}
+                    <section className="dash-hero">
+                        <span className="dash-eyebrow">Total earned</span>
+                        <div className="dash-amount">{formatCurrency(animatedTotal)}</div>
+                        <div className="dash-substats">
+                            <div>
+                                <span className="dash-sub-val">{formatCurrency(pending)}</span>
+                                <span className="dash-sub-lbl">Pending</span>
                             </div>
-                            <div className="pact-details">
-                                <div className="pact-meta">
-                                    <span className="meta-item">{pact.platform}</span>
-                                    <span className="meta-item">{pact.deliverable}</span>
-                                </div>
-                                <div className="pact-footer">
-                                    <div className="pact-payout">
-                                        <span className="payout-amount">{formatCurrency(pact.payout)}</span>
-                                        {pact.bonus && <span className="payout-bonus">+ {formatCurrency(pact.bonus)}</span>}
-                                    </div>
-                                    <span className="pact-due">Due {pact.dueDate}</span>
-                                </div>
+                            <div>
+                                <span className="dash-sub-val">{formatCurrency(bonuses)}</span>
+                                <span className="dash-sub-lbl">Bonuses</span>
+                            </div>
+                            <div>
+                                <span className="dash-sub-val">{completed}</span>
+                                <span className="dash-sub-lbl">Completed</span>
                             </div>
                         </div>
-                    ))}
-                </div>
-            </section>
+                    </section>
 
-            {/* Agent Activity Feed */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '200ms' }}>
-                <h2 className="section-title">Agent Activity</h2>
-                <div className="activity-feed">
-                    {agentActivity.map((activity, index) => (
-                        <div
-                            key={activity.id}
-                            className={`activity-item activity-${activity.type}`}
-                            style={{ '--stagger': `${index * 30}ms` }}
-                        >
-                            <div className="activity-dot" />
-                            <div className="activity-content">
-                                <p className="activity-message">{activity.message}</p>
-                                <span className="activity-time">{activity.time}</span>
+                    {/* Negotiation callout */}
+                    {negotiatingCount > 0 && (
+                        <button className="dash-callout" onClick={() => navigate('/creator/deals')}>
+                            <span className="dash-callout-pulse" />
+                            <div className="dash-callout-text">
+                                <strong>
+                                    {negotiatingCount} negotiation{negotiatingCount === 1 ? '' : 's'} in progress
+                                </strong>
+                                <span>Your agent is at the table — tap to watch</span>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
+                            <Arrow />
+                        </button>
+                    )}
 
-            {/* Reputation - with glow badge */}
-            <section className={`dashboard-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '240ms' }}>
-                <h2 className="section-title">Your Reputation</h2>
-                <div className="reputation-card">
-                    <div className="reputation-badge">
-                        <StatusIndicator status="active" size={14} />
-                        <span>{reputationData.badge}</span>
-                    </div>
-                    <div className="reputation-stats">
-                        <div className="rep-stat">
-                            <span className="rep-label">Delivery</span>
-                            <div className="rep-bar-container">
-                                <div className="rep-bar" style={{ '--width': `${reputationData.deliveryReliability}%` }} />
+                    {/* Active pacts */}
+                    <section className="dash-block">
+                        <div className="dash-block-head">
+                            <span className="dash-eyebrow">Active pacts</span>
+                            <button className="dash-link" onClick={() => navigate('/creator/contracts')}>
+                                View all
+                            </button>
+                        </div>
+                        {activePacts.length === 0 ? (
+                            <div className="dash-empty">
+                                No active contracts yet.
+                                <button className="dash-link" onClick={() => navigate('/creator/campaigns')}>
+                                    Discover campaigns
+                                </button>
                             </div>
-                            <span className="rep-value">{reputationData.deliveryReliability}%</span>
-                        </div>
-                        <div className="rep-stat">
-                            <span className="rep-label">Audit Rate</span>
-                            <div className="rep-bar-container">
-                                <div className="rep-bar" style={{ '--width': `${reputationData.auditPassRate}%` }} />
+                        ) : (
+                            <div className="dash-pacts">
+                                {activePacts.map((pact) => (
+                                    <button
+                                        key={pact._id}
+                                        className="dash-pact"
+                                        onClick={() => navigate('/creator/contracts')}
+                                    >
+                                        <div className="dash-pact-main">
+                                            <span className="dash-pact-brand">{pact.brand}</span>
+                                            <span className="dash-pact-campaign">{pact.campaign}</span>
+                                        </div>
+                                        <div className="dash-pact-side">
+                                            <span className="dash-pact-amount">{formatCurrency(pact.base_payout)}</span>
+                                            <span className={`dash-pact-status ${pact.status === 'Active' ? 'is-active' : 'is-pending'}`}>
+                                                {pact.status}
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
-                            <span className="rep-value">{reputationData.auditPassRate}%</span>
-                        </div>
-                    </div>
+                        )}
+                    </section>
+
+                    {/* Agent activity */}
+                    {agentActivity.length > 0 && (
+                        <section className="dash-block">
+                            <span className="dash-eyebrow">Agent activity</span>
+                            <ul className="dash-activity">
+                                {agentActivity.slice(0, 5).map((a) => (
+                                    <li key={a.id}>
+                                        <span className="dash-activity-dot" />
+                                        <span className="dash-activity-msg">{a.message}</span>
+                                        <span className="dash-activity-time">{formatRelative(a.timestamp)}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
+                </>
+            )}
+
+            {/* Contextual primary action */}
+            {data && (
+                <div className="dash-cta">
+                    <button className="dash-btn" onClick={() => navigate(primary.to)}>
+                        {primary.label}
+                        <Arrow />
+                    </button>
+                    {reliabilityPct !== null && (
+                        <p className="dash-cta-meta">
+                            Reliability {reliabilityPct}% · {completed} contract{completed === 1 ? '' : 's'} settled
+                        </p>
+                    )}
                 </div>
-            </section>
-
-            {/* Primary Action */}
-            <section className={`dashboard-section action-section ${showContent ? 'animate-in' : ''}`} style={{ '--delay': '280ms' }}>
-                <button
-                    className="btn btn-primary btn-full interaction-press"
-                    onClick={() => setShowSubmitModal(true)}
-                >
-                    Submit Content
-                </button>
-            </section>
-
-            <SubmitContentModal
-                isOpen={showSubmitModal}
-                onClose={() => setShowSubmitModal(false)}
-            />
+            )}
         </div>
     );
 }

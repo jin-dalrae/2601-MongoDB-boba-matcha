@@ -1,28 +1,31 @@
 import { useState, useEffect } from 'react';
 import GradientLoader from './GradientLoader';
+import { contractAPI } from '../services/api';
+import { agentsAPI } from '../services/agents';
 import './SubmitContentModal.css';
 
-export default function SubmitContentModal({ isOpen, onClose }) {
+// When `contractId` is provided, the modal persists the submission to the
+// backend and asks the agents service to audit it. Without `contractId` it
+// falls back to a scripted progress animation (used by the Dashboard's
+// generic "Submit Content" button).
+export default function SubmitContentModal({ isOpen, onClose, contractId, contractTerms }) {
     const [url, setUrl] = useState('');
     const [status, setStatus] = useState('input'); // input, assessing, complete
     const [progress, setProgress] = useState(0);
+    const [auditResult, setAuditResult] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         if (!isOpen) {
-            // Reset state when closed
             setUrl('');
             setStatus('input');
             setProgress(0);
+            setAuditResult(null);
+            setErrorMessage('');
         }
     }, [isOpen]);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!url) return;
-
-        setStatus('assessing');
-
-        // Simulate AI checking the video
+    const runScriptedProgress = () => {
         let p = 0;
         const interval = setInterval(() => {
             p += Math.random() * 5 + 2;
@@ -33,6 +36,43 @@ export default function SubmitContentModal({ isOpen, onClose }) {
             }
             setProgress(p);
         }, 150);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!url) return;
+
+        setStatus('assessing');
+        setErrorMessage('');
+
+        if (!contractId) {
+            runScriptedProgress();
+            return;
+        }
+
+        try {
+            setProgress(20);
+            const submission = await contractAPI.createSubmission(contractId, {
+                content_url: url,
+            });
+            setProgress(55);
+
+            const result = await agentsAPI.audit({
+                contractId,
+                contractTerms: contractTerms || {},
+                contentSubmission: {
+                    submission_id: submission._id,
+                    content_url: url,
+                },
+            });
+            setProgress(100);
+            setAuditResult(result);
+            setStatus('complete');
+        } catch (error) {
+            setErrorMessage(error.message || 'Submission failed.');
+            setStatus('input');
+            setProgress(0);
+        }
     };
 
     if (!isOpen) return null;
@@ -52,6 +92,9 @@ export default function SubmitContentModal({ isOpen, onClose }) {
                         <h2 className="submit-title">Upload Content</h2>
                         <p className="submit-desc">Paste the content URL below for AI verification.</p>
 
+                        {errorMessage && (
+                            <p className="submit-subtext" style={{ color: '#d93b3b' }}>{errorMessage}</p>
+                        )}
                         <form onSubmit={handleSubmit} className="url-form">
                             <div className="input-group">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="link-icon">
@@ -102,13 +145,26 @@ export default function SubmitContentModal({ isOpen, onClose }) {
                             </svg>
                         </div>
                         <h2 className="submit-title">Content Submitted</h2>
-                        <p className="submit-desc">
-                            The brand’s AI is reviewing your content. <br />
-                            This process usually takes up to 24 hours.
-                        </p>
-                        <p className="submit-subtext">
-                            You’ll be notified once the audit is complete.
-                        </p>
+                        {auditResult ? (
+                            <>
+                                <p className="submit-desc">
+                                    Audit complete · Tier {auditResult.payment_breakdown?.tier_achieved ?? '—'}
+                                </p>
+                                <p className="submit-subtext">
+                                    Recommended payment: ${auditResult.recommended_payment ?? '—'}
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <p className="submit-desc">
+                                    The brand’s AI is reviewing your content. <br />
+                                    This process usually takes up to 24 hours.
+                                </p>
+                                <p className="submit-subtext">
+                                    You’ll be notified once the audit is complete.
+                                </p>
+                            </>
+                        )}
 
                         <button className="btn btn-primary btn-full btn-large interaction-press" onClick={onClose}>
                             Done

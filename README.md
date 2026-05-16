@@ -220,9 +220,21 @@ This is a hackathon project, so some things are real and one thing is missing on
 | Robots negotiating | ✅ Yes | Full back-and-forth, end to end |
 | Signing the contract | ✅ Yes | Made automatically after agreement |
 | Submitting a video + grading it | ✅ Yes | Robot scores the submission |
-| Sending the money | ✅ Yes | Real digital payment if set up, fake/simulated if not |
+| Sending the money | ✅ Yes | Real on-chain payment via the AI agent when keys are set; a keyless simulated path (`POST /api/payments/execute`) otherwise |
 | Company dashboard | ✅ Yes | Budgets, campaigns, results |
 | Login / passwords | ❌ Not built | There are no accounts or passwords yet — anyone can open any page. This is a known gap for the demo. |
+
+### 🔧 Known issues we're fixing
+
+Two pre-existing bugs were found while consolidating the codebase. They're
+written up with exact fixes in **[PLAN.md](PLAN.md)**:
+
+1. **Some contract lists can error.** A few database links use the wrong
+   internal name, so screens that load contracts can fail. One-line fix.
+2. **Agent-sent payments don't always show up.** The Python payment robot
+   saves money records in a slightly different spot than the website reads
+   from, so a real agent payment can succeed but not appear in the UI. The
+   keyless Node payment path above is not affected.
 
 ---
 
